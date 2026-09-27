@@ -1,0 +1,17 @@
+{
+  "name": "lapia-multiplayer-relay",
+  "version": "1.0.0",
+  "description": "Socket.io relay for Lapia Studio multiplayer games",
+  "scripts": {
+    "dev": "bun --hot index.ts"
+  },
+  "dependencies": {
+    "socket.io": "^4.7.2",
+    "cors": "^2.8.5"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/socket.io": "^3.0.2",
+    "bun-types": "^1.3.4"
+  }
+}

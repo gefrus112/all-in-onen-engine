@@ -14,6 +14,8 @@ import {
   PanelRight,
   PanelBottom,
   Grid3x3,
+  Boxes,
+  Image as ImageIcon,
   RotateCcw,
   Github,
   ChevronDown,
@@ -55,10 +57,14 @@ export function TopBar() {
     showProperties,
     showConsole,
     showDebug,
+    showAssetPicker,
+    showToolbox,
     toggleExplorer,
     toggleProperties,
     toggleConsole,
     toggleDebug,
+    toggleAssetPicker,
+    toggleToolbox,
     toggleGrid,
     showGrid,
     addConsole,
@@ -210,6 +216,20 @@ export function TopBar() {
           title="Toggle Explorer"
         >
           <PanelLeft className="w-3.5 h-3.5" />
+        </button>
+        <button
+          className={`tool-btn ${showToolbox ? "active" : ""}`}
+          onClick={toggleToolbox}
+          title="Toggle Toolbox (Assets + Templates)"
+        >
+          <Boxes className="w-3.5 h-3.5" />
+        </button>
+        <button
+          className={`tool-btn ${showAssetPicker ? "active" : ""}`}
+          onClick={toggleAssetPicker}
+          title="Toggle Asset Picker"
+        >
+          <ImageIcon className="w-3.5 h-3.5" />
         </button>
         <button
           className={`tool-btn ${showProperties ? "active" : ""}`}

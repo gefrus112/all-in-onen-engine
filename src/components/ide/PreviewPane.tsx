@@ -282,9 +282,10 @@ export function PreviewPane() {
           <button
             className="tool-btn h-6 px-2"
             onClick={() => {
-              setPreviewScale(previewScale === 1 ? 2 : 1);
+              const next = previewScale === 1 ? 1.5 : previewScale === 1.5 ? 2 : 1;
+              setPreviewScale(next);
             }}
-            title={`Scale: ${previewScale.toFixed(1)}x (click to toggle 1x / 2x)`}
+            title={`Scale: ${previewScale.toFixed(1)}x (click to cycle 1x → 1.5x → 2x)`}
           >
             {previewScale.toFixed(1)}x
           </button>
@@ -343,9 +344,11 @@ export function PreviewPane() {
           className="outline-none"
           style={{
             imageRendering: previewScale > 1 ? "pixelated" : "auto",
-            maxWidth: "100%",
-            maxHeight: "100%",
-            transform: device === "mobile" ? "scale(0.6)" : undefined,
+            width: device === "desktop" ? "min(100%, 900px)" : "375px",
+            height: device === "desktop" ? "auto" : "667px",
+            aspectRatio: device === "desktop" ? "4 / 3" : undefined,
+            transform: previewScale > 1 ? `scale(${previewScale})` : undefined,
+            transformOrigin: "center",
           }}
         />
       </div>

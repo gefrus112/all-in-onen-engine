@@ -1,0 +1,548 @@
+{
+  "version": "1.0.0",
+  "categories": {
+    "player": {
+      "label": "Player Characters",
+      "icon": "user",
+      "items": [
+        {
+          "slug": "archer",
+          "name": "Archer (Green)",
+          "path": "/sprites/player/archer.png",
+          "size": [
+            32,
+            32
+          ]
+        },
+        {
+          "slug": "knight",
+          "name": "Knight (Blue)",
+          "path": "/sprites/player/knight.png",
+          "size": [
+            32,
+            32
+          ]
+        },
+        {
+          "slug": "mage",
+          "name": "Mage (Purple)",
+          "path": "/sprites/player/mage.png",
+          "size": [
+            32,
+            32
+          ]
+        },
+        {
+          "slug": "robot",
+          "name": "Robot (Gray)",
+          "path": "/sprites/player/robot.png",
+          "size": [
+            32,
+            32
+          ]
+        },
+        {
+          "slug": "rogue",
+          "name": "Rogue (Dark)",
+          "path": "/sprites/player/rogue.png",
+          "size": [
+            32,
+            32
+          ]
+        },
+        {
+          "slug": "wizard",
+          "name": "Wizard (Indigo)",
+          "path": "/sprites/player/wizard.png",
+          "size": [
+            32,
+            32
+          ]
+        }
+      ]
+    },
+    "enemies": {
+      "label": "Enemies",
+      "icon": "bug",
+      "items": [
+        {
+          "slug": "bat_black",
+          "name": "Black Bat",
+          "path": "/sprites/enemies/bat_black.png",
+          "size": [
+            32,
+            32
+          ]
+        },
+        {
+          "slug": "bat_purple",
+          "name": "Purple Bat",
+          "path": "/sprites/enemies/bat_purple.png",
+          "size": [
+            32,
+            32
+          ]
+        },
+        {
+          "slug": "ghost_pink",
+          "name": "Pink Ghost",
+          "path": "/sprites/enemies/ghost_pink.png",
+          "size": [
+            32,
+            32
+          ]
+        },
+        {
+          "slug": "ghost_white",
+          "name": "White Ghost",
+          "path": "/sprites/enemies/ghost_white.png",
+          "size": [
+            32,
+            32
+          ]
+        },
+        {
+          "slug": "slime_blue",
+          "name": "Blue Slime",
+          "path": "/sprites/enemies/slime_blue.png",
+          "size": [
+            32,
+            32
+          ]
+        },
+        {
+          "slug": "slime_gold",
+          "name": "Gold Slime",
+          "path": "/sprites/enemies/slime_gold.png",
+          "size": [
+            32,
+            32
+          ]
+        },
+        {
+          "slug": "slime_green",
+          "name": "Green Slime",
+          "path": "/sprites/enemies/slime_green.png",
+          "size": [
+            32,
+            32
+          ]
+        },
+        {
+          "slug": "slime_purple",
+          "name": "Purple Slime",
+          "path": "/sprites/enemies/slime_purple.png",
+          "size": [
+            32,
+            32
+          ]
+        },
+        {
+          "slug": "slime_red",
+          "name": "Red Slime",
+          "path": "/sprites/enemies/slime_red.png",
+          "size": [
+            32,
+            32
+          ]
+        },
+        {
+          "slug": "spider_black",
+          "name": "Black Spider",
+          "path": "/sprites/enemies/spider_black.png",
+          "size": [
+            32,
+            32
+          ]
+        }
+      ]
+    },
+    "tiles": {
+      "label": "Tiles",
+      "icon": "grid",
+      "items": [
+        {
+          "slug": "brick",
+          "name": "Brick Wall",
+          "path": "/sprites/tiles/brick.png",
+          "size": [
+            32,
+            32
+          ]
+        },
+        {
+          "slug": "dirt",
+          "name": "Dirt Block",
+          "path": "/sprites/tiles/dirt.png",
+          "size": [
+            32,
+            32
+          ]
+        },
+        {
+          "slug": "grass",
+          "name": "Grass Block",
+          "path": "/sprites/tiles/grass.png",
+          "size": [
+            32,
+            32
+          ]
+        },
+        {
+          "slug": "lava",
+          "name": "Lava Block",
+          "path": "/sprites/tiles/lava.png",
+          "size": [
+            32,
+            32
+          ]
+        },
+        {
+          "slug": "sand",
+          "name": "Sand Block",
+          "path": "/sprites/tiles/sand.png",
+          "size": [
+            32,
+            32
+          ]
+        },
+        {
+          "slug": "snow",
+          "name": "Snow Block",
+          "path": "/sprites/tiles/snow.png",
+          "size": [
+            32,
+            32
+          ]
+        },
+        {
+          "slug": "stone",
+          "name": "Stone Block",
+          "path": "/sprites/tiles/stone.png",
+          "size": [
+            32,
+            32
+          ]
+        },
+        {
+          "slug": "water",
+          "name": "Water Block",
+          "path": "/sprites/tiles/water.png",
+          "size": [
+            32,
+            32
+          ]
+        },
+        {
+          "slug": "wood",
+          "name": "Wood Plank",
+          "path": "/sprites/tiles/wood.png",
+          "size": [
+            32,
+            32
+          ]
+        }
+      ]
+    },
+    "coins": {
+      "label": "Coins & Gems",
+      "icon": "circle-dollar-sign",
+      "items": [
+        {
+          "slug": "coin_copper",
+          "name": "Copper Coin",
+          "path": "/sprites/coins/coin_copper.png",
+          "size": [
+            16,
+            16
+          ]
+        },
+        {
+          "slug": "coin_gold",
+          "name": "Gold Coin",
+          "path": "/sprites/coins/coin_gold.png",
+          "size": [
+            16,
+            16
+          ]
+        },
+        {
+          "slug": "coin_silver",
+          "name": "Silver Coin",
+          "path": "/sprites/coins/coin_silver.png",
+          "size": [
+            16,
+            16
+          ]
+        },
+        {
+          "slug": "gem_diamond",
+          "name": "Diamond",
+          "path": "/sprites/coins/gem_diamond.png",
+          "size": [
+            16,
+            16
+          ]
+        },
+        {
+          "slug": "gem_emerald",
+          "name": "Emerald",
+          "path": "/sprites/coins/gem_emerald.png",
+          "size": [
+            16,
+            16
+          ]
+        },
+        {
+          "slug": "gem_ruby",
+          "name": "Ruby",
+          "path": "/sprites/coins/gem_ruby.png",
+          "size": [
+            16,
+            16
+          ]
+        },
+        {
+          "slug": "gem_sapphire",
+          "name": "Sapphire",
+          "path": "/sprites/coins/gem_sapphire.png",
+          "size": [
+            16,
+            16
+          ]
+        }
+      ]
+    },
+    "powerups": {
+      "label": "Power-ups",
+      "icon": "heart",
+      "items": [
+        {
+          "slug": "heart",
+          "name": "Heart",
+          "path": "/sprites/powerups/heart.png",
+          "size": [
+            16,
+            16
+          ]
+        },
+        {
+          "slug": "key",
+          "name": "Key",
+          "path": "/sprites/powerups/key.png",
+          "size": [
+            16,
+            16
+          ]
+        },
+        {
+          "slug": "potion_blue",
+          "name": "Blue Potion (MP)",
+          "path": "/sprites/powerups/potion_blue.png",
+          "size": [
+            16,
+            16
+          ]
+        },
+        {
+          "slug": "potion_green",
+          "name": "Green Potion (Antidote)",
+          "path": "/sprites/powerups/potion_green.png",
+          "size": [
+            16,
+            16
+          ]
+        },
+        {
+          "slug": "potion_purple",
+          "name": "Purple Potion (Buff)",
+          "path": "/sprites/powerups/potion_purple.png",
+          "size": [
+            16,
+            16
+          ]
+        },
+        {
+          "slug": "potion_red",
+          "name": "Red Potion (HP)",
+          "path": "/sprites/powerups/potion_red.png",
+          "size": [
+            16,
+            16
+          ]
+        },
+        {
+          "slug": "shield",
+          "name": "Shield",
+          "path": "/sprites/powerups/shield.png",
+          "size": [
+            16,
+            16
+          ]
+        },
+        {
+          "slug": "speed_boot",
+          "name": "Speed Boots",
+          "path": "/sprites/powerups/speed_boot.png",
+          "size": [
+            16,
+            16
+          ]
+        }
+      ]
+    },
+    "projectiles": {
+      "label": "Projectiles",
+      "icon": "zap",
+      "items": [
+        {
+          "slug": "arrow",
+          "name": "Arrow",
+          "path": "/sprites/projectiles/arrow.png",
+          "size": [
+            8,
+            8
+          ]
+        },
+        {
+          "slug": "fireball",
+          "name": "Fireball",
+          "path": "/sprites/projectiles/fireball.png",
+          "size": [
+            8,
+            8
+          ]
+        },
+        {
+          "slug": "iceball",
+          "name": "Ice Ball",
+          "path": "/sprites/projectiles/iceball.png",
+          "size": [
+            8,
+            8
+          ]
+        },
+        {
+          "slug": "lightning",
+          "name": "Lightning",
+          "path": "/sprites/projectiles/lightning.png",
+          "size": [
+            8,
+            8
+          ]
+        },
+        {
+          "slug": "poison",
+          "name": "Poison Bolt",
+          "path": "/sprites/projectiles/poison.png",
+          "size": [
+            8,
+            8
+          ]
+        }
+      ]
+    },
+    "particles": {
+      "label": "Particles",
+      "icon": "sparkles",
+      "items": [
+        {
+          "slug": "magic_pink",
+          "name": "Magic Sparkle",
+          "path": "/sprites/particles/magic_pink.png",
+          "size": [
+            8,
+            8
+          ]
+        },
+        {
+          "slug": "smoke_gray",
+          "name": "Gray Smoke",
+          "path": "/sprites/particles/smoke_gray.png",
+          "size": [
+            8,
+            8
+          ]
+        },
+        {
+          "slug": "spark_blue",
+          "name": "Blue Spark",
+          "path": "/sprites/particles/spark_blue.png",
+          "size": [
+            8,
+            8
+          ]
+        },
+        {
+          "slug": "spark_green",
+          "name": "Green Spark",
+          "path": "/sprites/particles/spark_green.png",
+          "size": [
+            8,
+            8
+          ]
+        },
+        {
+          "slug": "spark_orange",
+          "name": "Orange Spark",
+          "path": "/sprites/particles/spark_orange.png",
+          "size": [
+            8,
+            8
+          ]
+        },
+        {
+          "slug": "spark_purple",
+          "name": "Purple Spark",
+          "path": "/sprites/particles/spark_purple.png",
+          "size": [
+            8,
+            8
+          ]
+        }
+      ]
+    },
+    "ui": {
+      "label": "UI Icons",
+      "icon": "layout",
+      "items": [
+        {
+          "slug": "coin",
+          "name": "Coin",
+          "path": "/sprites/ui/coin.png",
+          "size": [
+            16,
+            16
+          ]
+        },
+        {
+          "slug": "flag",
+          "name": "Flag",
+          "path": "/sprites/ui/flag.png",
+          "size": [
+            16,
+            16
+          ]
+        },
+        {
+          "slug": "heart",
+          "name": "Heart",
+          "path": "/sprites/ui/heart.png",
+          "size": [
+            16,
+            16
+          ]
+        },
+        {
+          "slug": "star",
+          "name": "Star",
+          "path": "/sprites/ui/star.png",
+          "size": [
+            16,
+            16
+          ]
+        }
+      ]
+    }
+  }
+}
