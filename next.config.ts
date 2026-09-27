@@ -3,8 +3,6 @@ import path from "path";
 
 const isGitHubPages = process.env.GITHUB_ACTIONS === "true" || process.env.CI === "true";
 
-console.log("[next.config] GITHUB_ACTIONS:", isGitHubPages, "| cwd:", process.cwd());
-
 const nextConfig: NextConfig = {
   output: isGitHubPages ? "export" : "standalone",
   images: isGitHubPages ? { unoptimized: true } : undefined,
@@ -16,11 +14,15 @@ const nextConfig: NextConfig = {
   trailingSlash: isGitHubPages,
   webpack: (config, ctx) => {
     const srcPath = path.resolve(process.cwd(), "src");
-    console.log("[next.config] webpack config called! Setting @ →", srcPath);
+    // Set the @ alias
     config.resolve.alias = {
       ...config.resolve.alias,
       "@": srcPath,
     };
+    // Ensure .ts/.tsx extensions are resolved
+    if (!config.resolve.extensions.includes(".ts")) {
+      config.resolve.extensions = [".ts", ".tsx", ".js", ".jsx", ".json", ...config.resolve.extensions];
+    }
     return config;
   },
 };
