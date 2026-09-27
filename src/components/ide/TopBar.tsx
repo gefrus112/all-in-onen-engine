@@ -19,6 +19,9 @@ import {
   RotateCcw,
   Github,
   ChevronDown,
+  Rocket,
+  Home,
+  User,
 } from "lucide-react";
 import { useStudio } from "@/lib/studio-store";
 import { toast } from "sonner";
@@ -46,7 +49,7 @@ function MenuButton({ label, children, menuKey, menuOpen, setMenuOpen }: MenuBut
   );
 }
 
-export function TopBar() {
+export function TopBar({ onExitToLanding }: { onExitToLanding?: () => void }) {
   const {
     files,
     activeFile,
@@ -70,6 +73,10 @@ export function TopBar() {
     addConsole,
     pyodideLoading,
     setPyodideLoading,
+    setSettingsOpen,
+    setWizardOpen,
+    setAuthOpen,
+    user,
   } = useStudio();
   const [menuOpen, setMenuOpen] = useState<string | null>(null);
 
@@ -190,6 +197,13 @@ export function TopBar() {
         </button>
         <button
           className="tool-btn"
+          onClick={() => setWizardOpen(true)}
+          title="New project wizard"
+        >
+          <Rocket className="w-3.5 h-3.5" />
+        </button>
+        <button
+          className="tool-btn"
           onClick={() => {
             const name = prompt("New file path:", "new_file.py");
             if (name) {
@@ -268,6 +282,34 @@ export function TopBar() {
           <Settings className="w-3.5 h-3.5" />
         </button>
         <div className="w-px h-5 bg-border mx-1" />
+        <button
+          className="tool-btn"
+          onClick={() => setAuthOpen(true)}
+          title={user ? `Signed in as @${user.githubLogin}` : "Sign in with GitHub"}
+        >
+          {user ? (
+            <img src={user.avatar} alt={user.name} className="w-5 h-5 rounded-full" />
+          ) : (
+            <User className="w-3.5 h-3.5" />
+          )}
+        </button>
+        <button
+          className="tool-btn"
+          onClick={() => setSettingsOpen(true)}
+          title="Settings"
+        >
+          <Settings className="w-3.5 h-3.5" />
+        </button>
+        <div className="w-px h-5 bg-border mx-1" />
+        {onExitToLanding && (
+          <button
+            className="tool-btn"
+            onClick={onExitToLanding}
+            title="Back to landing page"
+          >
+            <Home className="w-3.5 h-3.5" />
+          </button>
+        )}
         <a
           className="tool-btn"
           href="https://github.com/gefrus112/lapia-ai-agent"

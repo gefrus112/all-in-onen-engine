@@ -6,11 +6,24 @@ Lapia Studio is a Roblox Studio-style web IDE for building 2D Python games.
 It pairs a batteries-included Python/Pygame engine with an in-browser editor
 that compiles and runs your game live via Pyodide — no install, no setup.
 
-Includes a built-in sprite asset library (55 sprites), 4 starter templates
+Includes a built-in sprite asset library (134 sprites), 4 starter templates
 (platformer, top-down shooter, **multiplayer arena via socket.io**, physics
 sandbox), and a socket.io multiplayer relay service.
 
 ![Lapia Studio](download/studio-v2.png)
+
+## Sprite Library (134 sprites)
+
+![All Sprites](download/sprites-overview.png)
+
+### By category
+
+| | | |
+|---|---|---|
+| ![Player](download/sprites-player.png) | ![Characters](download/sprites-characters.png) | ![Enemies](download/sprites-enemies.png) |
+| ![Structures](download/sprites-structures.png) | ![Nature](download/sprites-nature.png) | ![Tiles](download/sprites-tiles.png) |
+| ![Coins](download/sprites-coins.png) | ![Power-ups](download/sprites-powerups.png) | ![Props](download/sprites-props.png) |
+| ![Food](download/sprites-food.png) | ![Weapons](download/sprites-weapons.png) | ![Vehicles](download/sprites-vehicles.png) |
 
 ## What you get
 

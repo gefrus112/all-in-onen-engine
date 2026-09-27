@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { TopBar } from "@/components/ide/TopBar";
 import { FileExplorer } from "@/components/ide/FileExplorer";
 import { SceneHierarchy } from "@/components/ide/SceneHierarchy";
@@ -12,6 +12,10 @@ import { EditorTabs } from "@/components/ide/EditorTabs";
 import { PreviewPane } from "@/components/ide/PreviewPane";
 import { AssetPicker } from "@/components/ide/AssetPicker";
 import { TemplatesPanel } from "@/components/ide/TemplatesPanel";
+import { LandingPage } from "@/components/ide/LandingPage";
+import { SettingsDialog } from "@/components/ide/SettingsDialog";
+import { ProjectWizard } from "@/components/ide/ProjectWizard";
+import { GitHubAuth } from "@/components/ide/GitHubAuth";
 import { useStudio } from "@/lib/studio-store";
 import {
   ResizableHandle,
@@ -25,7 +29,10 @@ const CodeEditor = dynamic(
   { ssr: false, loading: () => <div className="p-4 text-muted-foreground text-sm">Loading editor…</div> }
 );
 
+type ViewMode = "landing" | "ide";
+
 export default function Home() {
+  const [viewMode, setViewMode] = useState<ViewMode>("landing");
   const {
     showExplorer,
     showProperties,
@@ -34,15 +41,45 @@ export default function Home() {
     showToolbox,
   } = useStudio();
 
-  // Load socket.io client library and connect to relay.
+  const launchIDE = useCallback(() => setViewMode("ide"), []);
+  const backToLanding = useCallback(() => setViewMode("landing"), []);
+
+  // Listen for #ide hash to auto-launch IDE
   useEffect(() => {
+    if (window.location.hash === "#ide") {
+      /* eslint-disable react-hooks/set-state-in-effect */
+      setViewMode("ide");
+      /* eslint-enable react-hooks/set-state-in-effect */
+    }
+  }, []);
+
+  // Toggle landing-mode class on <html> to allow scrolling on landing page
+  useEffect(() => {
+    const html = document.documentElement;
+    const body = document.body;
+    if (viewMode === "landing") {
+      html.classList.add("landing-mode");
+      html.style.overflow = "auto";
+      html.style.height = "auto";
+      body.style.overflow = "auto";
+      body.style.height = "auto";
+    } else {
+      html.classList.remove("landing-mode");
+      html.style.overflow = "";
+      html.style.height = "";
+      body.style.overflow = "";
+      body.style.height = "";
+    }
+  }, [viewMode]);
+
+  // Load socket.io client library and connect to relay (only in IDE mode).
+  useEffect(() => {
+    if (viewMode !== "ide") return;
     if ((window as any)._lapiaSocket) return;
-    // Inject socket.io client from CDN
     const script = document.createElement("script");
     script.src = "https://cdn.socket.io/4.7.5/socket.io.min.js";
     script.onload = () => {
       try {
-        // Try direct localhost first (works in dev), fall back to gateway
         const isLocalhost = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
         const url = isLocalhost ? "http://localhost:3001" : "";
         const path = isLocalhost ? "/" : "/?XTransformPort=3001";
@@ -61,31 +98,22 @@ export default function Home() {
         sock.on("connect_error", (e: any) => {
           console.warn("[Multiplayer] Connection error:", e?.message || e);
         });
-        sock.on("disconnect", () => {
-          console.log("[Multiplayer] Disconnected from relay");
-        });
       } catch (e) {
         console.warn("[Multiplayer] Failed to connect to relay:", e);
       }
     };
-    script.onerror = () => {
-      console.warn("[Multiplayer] Failed to load socket.io client");
-    };
     document.head.appendChild(script);
-    return () => {
-      // Leave socket alive across HMR
-    };
-  }, []);
+  }, [viewMode]);
+
+  if (viewMode === "landing") {
+    return <LandingPage onLaunchIDE={launchIDE} />;
+  }
 
   return (
     <div className="flex flex-col h-screen w-screen bg-background overflow-hidden text-foreground">
-      {/* Top bar: studio ribbon with file menu, play controls, profile */}
-      <TopBar />
-
-      {/* Main 4-column layout: Explorer | Toolbox | Center (Editor + Preview) | Properties */}
+      <TopBar onExitToLanding={backToLanding} />
       <div className="flex-1 min-h-0">
         <ResizablePanelGroup direction="horizontal" autoSaveId="lapia-main">
-          {/* LEFT: File Explorer + Scene Hierarchy */}
           {showExplorer && (
             <>
               <ResizablePanel defaultSize={16} minSize={12} maxSize={28}>
@@ -99,7 +127,6 @@ export default function Home() {
             </>
           )}
 
-          {/* LEFT-CENTER: Asset Picker + Templates (Toolbox) */}
           {showToolbox && (
             <>
               <ResizablePanel defaultSize={16} minSize={12} maxSize={28}>
@@ -117,7 +144,6 @@ export default function Home() {
             </>
           )}
 
-          {/* CENTER: Editor + Preview */}
           <ResizablePanel defaultSize={42} minSize={25}>
             <ResizablePanelGroup direction="vertical" autoSaveId="lapia-center">
               <ResizablePanel defaultSize={45} minSize={20}>
@@ -135,7 +161,6 @@ export default function Home() {
             </ResizablePanelGroup>
           </ResizablePanel>
 
-          {/* RIGHT: Properties + Console */}
           {showProperties && (
             <>
               <ResizableHandle />
@@ -155,8 +180,10 @@ export default function Home() {
         </ResizablePanelGroup>
       </div>
 
-      {/* Bottom status bar */}
       <StatusBar />
+      <SettingsDialog />
+      <ProjectWizard />
+      <GitHubAuth />
     </div>
   );
 }

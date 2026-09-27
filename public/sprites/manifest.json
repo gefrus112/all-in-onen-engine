@@ -1,5 +1,5 @@
 {
-  "version": "1.0.0",
+  "version": "2.0.0",
   "categories": {
     "player": {
       "label": "Player Characters",
@@ -54,6 +54,120 @@
           "slug": "wizard",
           "name": "Wizard (Indigo)",
           "path": "/sprites/player/wizard.png",
+          "size": [
+            32,
+            32
+          ]
+        }
+      ]
+    },
+    "characters": {
+      "label": "NPCs & Animals",
+      "icon": "users",
+      "items": [
+        {
+          "slug": "cat_black",
+          "name": "Black Cat",
+          "path": "/sprites/characters/cat_black.png",
+          "size": [
+            32,
+            32
+          ]
+        },
+        {
+          "slug": "cat_orange",
+          "name": "Orange Cat",
+          "path": "/sprites/characters/cat_orange.png",
+          "size": [
+            32,
+            32
+          ]
+        },
+        {
+          "slug": "cat_white",
+          "name": "White Cat",
+          "path": "/sprites/characters/cat_white.png",
+          "size": [
+            32,
+            32
+          ]
+        },
+        {
+          "slug": "chicken",
+          "name": "Chicken",
+          "path": "/sprites/characters/chicken.png",
+          "size": [
+            32,
+            32
+          ]
+        },
+        {
+          "slug": "dog_brown",
+          "name": "Brown Dog",
+          "path": "/sprites/characters/dog_brown.png",
+          "size": [
+            32,
+            32
+          ]
+        },
+        {
+          "slug": "dog_gray",
+          "name": "Gray Dog",
+          "path": "/sprites/characters/dog_gray.png",
+          "size": [
+            32,
+            32
+          ]
+        },
+        {
+          "slug": "npc_child",
+          "name": "Child NPC",
+          "path": "/sprites/characters/npc_child.png",
+          "size": [
+            32,
+            32
+          ]
+        },
+        {
+          "slug": "npc_elder",
+          "name": "Elder NPC",
+          "path": "/sprites/characters/npc_elder.png",
+          "size": [
+            32,
+            32
+          ]
+        },
+        {
+          "slug": "npc_guard",
+          "name": "Guard NPC",
+          "path": "/sprites/characters/npc_guard.png",
+          "size": [
+            32,
+            32
+          ]
+        },
+        {
+          "slug": "npc_merchant",
+          "name": "Merchant NPC",
+          "path": "/sprites/characters/npc_merchant.png",
+          "size": [
+            32,
+            32
+          ]
+        },
+        {
+          "slug": "npc_villager",
+          "name": "Villager NPC",
+          "path": "/sprites/characters/npc_villager.png",
+          "size": [
+            32,
+            32
+          ]
+        },
+        {
+          "slug": "npc_wizard",
+          "name": "Wizard NPC",
+          "path": "/sprites/characters/npc_wizard.png",
           "size": [
             32,
             32
@@ -150,6 +264,279 @@
           "slug": "spider_black",
           "name": "Black Spider",
           "path": "/sprites/enemies/spider_black.png",
+          "size": [
+            32,
+            32
+          ]
+        }
+      ]
+    },
+    "structures": {
+      "label": "Buildings",
+      "icon": "home",
+      "items": [
+        {
+          "slug": "castle",
+          "name": "Castle",
+          "path": "/sprites/structures/castle.png",
+          "size": [
+            32,
+            32
+          ]
+        },
+        {
+          "slug": "house_blue",
+          "name": "Blue House",
+          "path": "/sprites/structures/house_blue.png",
+          "size": [
+            32,
+            32
+          ]
+        },
+        {
+          "slug": "house_green",
+          "name": "Green House",
+          "path": "/sprites/structures/house_green.png",
+          "size": [
+            32,
+            32
+          ]
+        },
+        {
+          "slug": "house_purple",
+          "name": "Purple House",
+          "path": "/sprites/structures/house_purple.png",
+          "size": [
+            32,
+            32
+          ]
+        },
+        {
+          "slug": "house_red",
+          "name": "Red House",
+          "path": "/sprites/structures/house_red.png",
+          "size": [
+            32,
+            32
+          ]
+        },
+        {
+          "slug": "house_stone",
+          "name": "Stone House",
+          "path": "/sprites/structures/house_stone.png",
+          "size": [
+            32,
+            32
+          ]
+        },
+        {
+          "slug": "house_wood",
+          "name": "Wooden House",
+          "path": "/sprites/structures/house_wood.png",
+          "size": [
+            32,
+            32
+          ]
+        },
+        {
+          "slug": "shop",
+          "name": "Shop",
+          "path": "/sprites/structures/shop.png",
+          "size": [
+            32,
+            32
+          ]
+        },
+        {
+          "slug": "tent",
+          "name": "Tent",
+          "path": "/sprites/structures/tent.png",
+          "size": [
+            32,
+            32
+          ]
+        }
+      ]
+    },
+    "nature": {
+      "label": "Trees & Plants",
+      "icon": "tree-pine",
+      "items": [
+        {
+          "slug": "bush_green",
+          "name": "Green Bush",
+          "path": "/sprites/nature/bush_green.png",
+          "size": [
+            32,
+            32
+          ]
+        },
+        {
+          "slug": "bush_red",
+          "name": "Red Bush",
+          "path": "/sprites/nature/bush_red.png",
+          "size": [
+            32,
+            32
+          ]
+        },
+        {
+          "slug": "cactus",
+          "name": "Cactus",
+          "path": "/sprites/nature/cactus.png",
+          "size": [
+            32,
+            32
+          ]
+        },
+        {
+          "slug": "crystal_blue",
+          "name": "Blue Crystal",
+          "path": "/sprites/nature/crystal_blue.png",
+          "size": [
+            32,
+            32
+          ]
+        },
+        {
+          "slug": "crystal_green",
+          "name": "Green Crystal",
+          "path": "/sprites/nature/crystal_green.png",
+          "size": [
+            32,
+            32
+          ]
+        },
+        {
+          "slug": "crystal_purple",
+          "name": "Purple Crystal",
+          "path": "/sprites/nature/crystal_purple.png",
+          "size": [
+            32,
+            32
+          ]
+        },
+        {
+          "slug": "flower_purple",
+          "name": "Purple Flower",
+          "path": "/sprites/nature/flower_purple.png",
+          "size": [
+            32,
+            32
+          ]
+        },
+        {
+          "slug": "flower_red",
+          "name": "Red Flower",
+          "path": "/sprites/nature/flower_red.png",
+          "size": [
+            32,
+            32
+          ]
+        },
+        {
+          "slug": "flower_white",
+          "name": "White Flower",
+          "path": "/sprites/nature/flower_white.png",
+          "size": [
+            32,
+            32
+          ]
+        },
+        {
+          "slug": "flower_yellow",
+          "name": "Yellow Flower",
+          "path": "/sprites/nature/flower_yellow.png",
+          "size": [
+            32,
+            32
+          ]
+        },
+        {
+          "slug": "log",
+          "name": "Log",
+          "path": "/sprites/nature/log.png",
+          "size": [
+            32,
+            32
+          ]
+        },
+        {
+          "slug": "mushroom_brown",
+          "name": "Brown Mushroom",
+          "path": "/sprites/nature/mushroom_brown.png",
+          "size": [
+            32,
+            32
+          ]
+        },
+        {
+          "slug": "mushroom_red",
+          "name": "Red Mushroom",
+          "path": "/sprites/nature/mushroom_red.png",
+          "size": [
+            32,
+            32
+          ]
+        },
+        {
+          "slug": "rock",
+          "name": "Rock",
+          "path": "/sprites/nature/rock.png",
+          "size": [
+            32,
+            32
+          ]
+        },
+        {
+          "slug": "tree_cherry",
+          "name": "Cherry Tree",
+          "path": "/sprites/nature/tree_cherry.png",
+          "size": [
+            32,
+            32
+          ]
+        },
+        {
+          "slug": "tree_dead",
+          "name": "Dead Tree",
+          "path": "/sprites/nature/tree_dead.png",
+          "size": [
+            32,
+            32
+          ]
+        },
+        {
+          "slug": "tree_maple",
+          "name": "Maple Tree",
+          "path": "/sprites/nature/tree_maple.png",
+          "size": [
+            32,
+            32
+          ]
+        },
+        {
+          "slug": "tree_oak",
+          "name": "Oak Tree",
+          "path": "/sprites/nature/tree_oak.png",
+          "size": [
+            32,
+            32
+          ]
+        },
+        {
+          "slug": "tree_palm",
+          "name": "Palm Tree",
+          "path": "/sprites/nature/tree_palm.png",
+          "size": [
+            32,
+            32
+          ]
+        },
+        {
+          "slug": "tree_pine",
+          "name": "Pine Tree",
+          "path": "/sprites/nature/tree_pine.png",
           "size": [
             32,
             32
@@ -391,6 +778,216 @@
         }
       ]
     },
+    "props": {
+      "label": "Props & Furniture",
+      "icon": "package",
+      "items": [
+        {
+          "slug": "barrel",
+          "name": "Barrel",
+          "path": "/sprites/props/barrel.png",
+          "size": [
+            32,
+            32
+          ]
+        },
+        {
+          "slug": "bed",
+          "name": "Bed",
+          "path": "/sprites/props/bed.png",
+          "size": [
+            32,
+            32
+          ]
+        },
+        {
+          "slug": "bookshelf",
+          "name": "Bookshelf",
+          "path": "/sprites/props/bookshelf.png",
+          "size": [
+            32,
+            32
+          ]
+        },
+        {
+          "slug": "candle",
+          "name": "Candle",
+          "path": "/sprites/props/candle.png",
+          "size": [
+            32,
+            32
+          ]
+        },
+        {
+          "slug": "chair",
+          "name": "Chair",
+          "path": "/sprites/props/chair.png",
+          "size": [
+            32,
+            32
+          ]
+        },
+        {
+          "slug": "chest",
+          "name": "Treasure Chest",
+          "path": "/sprites/props/chest.png",
+          "size": [
+            32,
+            32
+          ]
+        },
+        {
+          "slug": "crate",
+          "name": "Crate",
+          "path": "/sprites/props/crate.png",
+          "size": [
+            32,
+            32
+          ]
+        },
+        {
+          "slug": "lamp",
+          "name": "Street Lamp",
+          "path": "/sprites/props/lamp.png",
+          "size": [
+            32,
+            32
+          ]
+        },
+        {
+          "slug": "portal",
+          "name": "Magic Portal",
+          "path": "/sprites/props/portal.png",
+          "size": [
+            32,
+            32
+          ]
+        },
+        {
+          "slug": "sign_arrow",
+          "name": "Arrow Sign",
+          "path": "/sprites/props/sign_arrow.png",
+          "size": [
+            32,
+            32
+          ]
+        },
+        {
+          "slug": "sign_wood",
+          "name": "Wooden Sign",
+          "path": "/sprites/props/sign_wood.png",
+          "size": [
+            32,
+            32
+          ]
+        },
+        {
+          "slug": "table",
+          "name": "Table",
+          "path": "/sprites/props/table.png",
+          "size": [
+            32,
+            32
+          ]
+        },
+        {
+          "slug": "torch",
+          "name": "Torch",
+          "path": "/sprites/props/torch.png",
+          "size": [
+            32,
+            32
+          ]
+        }
+      ]
+    },
+    "food": {
+      "label": "Food",
+      "icon": "utensils",
+      "items": [
+        {
+          "slug": "apple",
+          "name": "Apple",
+          "path": "/sprites/food/apple.png",
+          "size": [
+            16,
+            16
+          ]
+        },
+        {
+          "slug": "banana",
+          "name": "Banana",
+          "path": "/sprites/food/banana.png",
+          "size": [
+            16,
+            16
+          ]
+        },
+        {
+          "slug": "bread",
+          "name": "Bread",
+          "path": "/sprites/food/bread.png",
+          "size": [
+            16,
+            16
+          ]
+        },
+        {
+          "slug": "burger",
+          "name": "Burger",
+          "path": "/sprites/food/burger.png",
+          "size": [
+            16,
+            16
+          ]
+        },
+        {
+          "slug": "cake",
+          "name": "Cake",
+          "path": "/sprites/food/cake.png",
+          "size": [
+            16,
+            16
+          ]
+        },
+        {
+          "slug": "cheese",
+          "name": "Cheese",
+          "path": "/sprites/food/cheese.png",
+          "size": [
+            16,
+            16
+          ]
+        },
+        {
+          "slug": "fish",
+          "name": "Fish",
+          "path": "/sprites/food/fish.png",
+          "size": [
+            16,
+            16
+          ]
+        },
+        {
+          "slug": "meat",
+          "name": "Meat",
+          "path": "/sprites/food/meat.png",
+          "size": [
+            16,
+            16
+          ]
+        },
+        {
+          "slug": "pizza",
+          "name": "Pizza Slice",
+          "path": "/sprites/food/pizza.png",
+          "size": [
+            16,
+            16
+          ]
+        }
+      ]
+    },
     "projectiles": {
       "label": "Projectiles",
       "icon": "zap",
@@ -438,6 +1035,162 @@
           "size": [
             8,
             8
+          ]
+        }
+      ]
+    },
+    "weapons": {
+      "label": "Weapons",
+      "icon": "sword",
+      "items": [
+        {
+          "slug": "axe",
+          "name": "Battle Axe",
+          "path": "/sprites/weapons/axe.png",
+          "size": [
+            32,
+            32
+          ]
+        },
+        {
+          "slug": "bow",
+          "name": "Bow & Arrow",
+          "path": "/sprites/weapons/bow.png",
+          "size": [
+            32,
+            32
+          ]
+        },
+        {
+          "slug": "shield",
+          "name": "Shield",
+          "path": "/sprites/weapons/shield.png",
+          "size": [
+            32,
+            32
+          ]
+        },
+        {
+          "slug": "staff",
+          "name": "Magic Staff",
+          "path": "/sprites/weapons/staff.png",
+          "size": [
+            32,
+            32
+          ]
+        },
+        {
+          "slug": "sword_fire",
+          "name": "Fire Sword",
+          "path": "/sprites/weapons/sword_fire.png",
+          "size": [
+            32,
+            32
+          ]
+        },
+        {
+          "slug": "sword_gold",
+          "name": "Gold Sword",
+          "path": "/sprites/weapons/sword_gold.png",
+          "size": [
+            32,
+            32
+          ]
+        },
+        {
+          "slug": "sword_iron",
+          "name": "Iron Sword",
+          "path": "/sprites/weapons/sword_iron.png",
+          "size": [
+            32,
+            32
+          ]
+        },
+        {
+          "slug": "sword_steel",
+          "name": "Steel Sword",
+          "path": "/sprites/weapons/sword_steel.png",
+          "size": [
+            32,
+            32
+          ]
+        },
+        {
+          "slug": "wand",
+          "name": "Magic Wand",
+          "path": "/sprites/weapons/wand.png",
+          "size": [
+            32,
+            32
+          ]
+        }
+      ]
+    },
+    "vehicles": {
+      "label": "Vehicles",
+      "icon": "car",
+      "items": [
+        {
+          "slug": "boat",
+          "name": "Boat",
+          "path": "/sprites/vehicles/boat.png",
+          "size": [
+            32,
+            32
+          ]
+        },
+        {
+          "slug": "car_blue",
+          "name": "Blue Car",
+          "path": "/sprites/vehicles/car_blue.png",
+          "size": [
+            32,
+            32
+          ]
+        },
+        {
+          "slug": "car_green",
+          "name": "Green Car",
+          "path": "/sprites/vehicles/car_green.png",
+          "size": [
+            32,
+            32
+          ]
+        },
+        {
+          "slug": "car_red",
+          "name": "Red Car",
+          "path": "/sprites/vehicles/car_red.png",
+          "size": [
+            32,
+            32
+          ]
+        },
+        {
+          "slug": "car_yellow",
+          "name": "Yellow Car",
+          "path": "/sprites/vehicles/car_yellow.png",
+          "size": [
+            32,
+            32
+          ]
+        },
+        {
+          "slug": "plane",
+          "name": "Airplane",
+          "path": "/sprites/vehicles/plane.png",
+          "size": [
+            32,
+            32
+          ]
+        },
+        {
+          "slug": "train",
+          "name": "Train",
+          "path": "/sprites/vehicles/train.png",
+          "size": [
+            32,
+            32
           ]
         }
       ]
