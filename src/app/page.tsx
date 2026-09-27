@@ -16,6 +16,10 @@ import { LandingPage } from "@/components/ide/LandingPage";
 import { SettingsDialog } from "@/components/ide/SettingsDialog";
 import { ProjectWizard } from "@/components/ide/ProjectWizard";
 import { GitHubAuth } from "@/components/ide/GitHubAuth";
+import { Studio3D } from "@/components/ide/Studio3D";
+import { AvatarPicker } from "@/components/ide/AvatarPicker";
+import { PublishDialog } from "@/components/ide/PublishDialog";
+import { InstructionsDialog } from "@/components/ide/InstructionsDialog";
 import { useStudio } from "@/lib/studio-store";
 import {
   ResizableHandle,
@@ -29,7 +33,7 @@ const CodeEditor = dynamic(
   { ssr: false, loading: () => <div className="p-4 text-muted-foreground text-sm">Loading editor…</div> }
 );
 
-type ViewMode = "landing" | "ide";
+type ViewMode = "landing" | "ide-2d" | "ide-3d";
 
 export default function Home() {
   const [viewMode, setViewMode] = useState<ViewMode>("landing");
@@ -41,14 +45,15 @@ export default function Home() {
     showToolbox,
   } = useStudio();
 
-  const launchIDE = useCallback(() => setViewMode("ide"), []);
+  const launch2DIDE = useCallback(() => setViewMode("ide-2d"), []);
+  const launch3DStudio = useCallback(() => setViewMode("ide-3d"), []);
   const backToLanding = useCallback(() => setViewMode("landing"), []);
 
   // Listen for #ide hash to auto-launch IDE
   useEffect(() => {
     if (window.location.hash === "#ide") {
       /* eslint-disable react-hooks/set-state-in-effect */
-      setViewMode("ide");
+      setViewMode("ide-2d");
       /* eslint-enable react-hooks/set-state-in-effect */
     }
   }, []);
@@ -72,9 +77,9 @@ export default function Home() {
     }
   }, [viewMode]);
 
-  // Load socket.io client library and connect to relay (only in IDE mode).
+  // Load socket.io client library and connect to relay (only in 2D IDE mode).
   useEffect(() => {
-    if (viewMode !== "ide") return;
+    if (viewMode !== "ide-2d") return;
     if ((window as any)._lapiaSocket) return;
     const script = document.createElement("script");
     script.src = "https://cdn.socket.io/4.7.5/socket.io.min.js";
@@ -106,9 +111,23 @@ export default function Home() {
   }, [viewMode]);
 
   if (viewMode === "landing") {
-    return <LandingPage onLaunchIDE={launchIDE} />;
+    return <LandingPage onLaunchIDE={launch2DIDE} onLaunch3DStudio={launch3DStudio} />;
   }
 
+  if (viewMode === "ide-3d") {
+    return (
+      <>
+        <Studio3D onExit={backToLanding} />
+        <AvatarPicker />
+        <PublishDialog />
+        <InstructionsDialog />
+        <GitHubAuth />
+        <SettingsDialog />
+      </>
+    );
+  }
+
+  // 2D IDE
   return (
     <div className="flex flex-col h-screen w-screen bg-background overflow-hidden text-foreground">
       <TopBar onExitToLanding={backToLanding} />
@@ -184,6 +203,9 @@ export default function Home() {
       <SettingsDialog />
       <ProjectWizard />
       <GitHubAuth />
+      <AvatarPicker />
+      <PublishDialog />
+      <InstructionsDialog />
     </div>
   );
 }

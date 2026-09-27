@@ -1,16 +1,16 @@
-# Lapia Studio
+# All In One Engine
 
-**Build 2D games in Python — right in your browser.**
+**Build 2D & 3D games — all in one engine.**
 
-Lapia Studio is a Roblox Studio-style web IDE for building 2D Python games.
-It pairs a batteries-included Python/Pygame engine with an in-browser editor
-that compiles and runs your game live via Pyodide — no install, no setup.
+All In One Engine is a Roblox Studio-style IDE for building 2D and 3D games in Python and JavaScript.
+Write code, see it run live in the browser at 60 FPS. Three engines in one IDE:
+Pygame 2D, Three.js 3D, and experimental Zhitlow 3D.
 
-Includes a built-in sprite asset library (134 sprites), 4 starter templates
-(platformer, top-down shooter, **multiplayer arena via socket.io**, physics
-sandbox), and a socket.io multiplayer relay service.
+Includes a built-in sprite asset library (134 sprites), 4 starter templates, real 3D editor
+with Three.js viewport, custom play-test avatar, multiplayer via socket.io, one-click publishing
+to itch.io / Crazy Games / GitHub Pages, and native installers for Linux / macOS / Chromebook.
 
-![Lapia Studio](download/studio-v2.png)
+![All In One Engine — 3D Studio](download/studio-3d.png)
 
 ## Sprite Library (134 sprites)
 

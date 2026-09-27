@@ -14,13 +14,13 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Lapia Studio — 2D Game Engine",
-  description: "Build 2D games in Python with a Roblox Studio-style IDE. Live preview powered by Pyodide.",
-  keywords: ["Lapia", "game engine", "Pygame", "Python", "IDE", "Roblox Studio", "2D games"],
-  authors: [{ name: "Lapia Engine Contributors" }],
+  title: "All In One Engine — 2D + 3D Game Engine",
+  description: "Build 2D and 3D games with Python. Pygame, Three.js, and Zhitlow engines all in one. Roblox Studio-style IDE with live preview, multiplayer, and one-click publishing.",
+  keywords: ["All In One Engine", "game engine", "Pygame", "Three.js", "Python", "IDE", "Roblox Studio", "2D", "3D", "multiplayer"],
+  authors: [{ name: "All In One Engine Contributors" }],
   openGraph: {
-    title: "Lapia Studio",
-    description: "Build 2D games in Python with a Roblox Studio-style IDE.",
+    title: "All In One Engine — 2D + 3D Game Engine",
+    description: "Build 2D and 3D games with Python. Roblox Studio-style IDE with live preview, multiplayer, and one-click publishing.",
     type: "website",
   },
 };

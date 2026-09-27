@@ -2,15 +2,16 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
   <defs>
     <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#3b82f6"/>
+      <stop offset="0%" stop-color="#06b6d4"/>
+      <stop offset="50%" stop-color="#3b82f6"/>
       <stop offset="100%" stop-color="#8b5cf6"/>
     </linearGradient>
-    <linearGradient id="playGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+    <linearGradient id="cubeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#ffffff"/>
       <stop offset="100%" stop-color="#e6e8eb"/>
     </linearGradient>
     <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feGaussianBlur stdDeviation="6" result="blur"/>
       <feMerge>
         <feMergeNode in="blur"/>
         <feMergeNode in="SourceGraphic"/>
@@ -18,35 +19,44 @@
     </filter>
   </defs>
 
-  <!-- Rounded square background -->
+  <!-- Background rounded square -->
   <rect x="16" y="16" width="224" height="224" rx="48" fill="url(#bgGrad)" filter="url(#glow)"/>
 
-  <!-- Inner border highlight -->
+  <!-- Inner border -->
   <rect x="24" y="24" width="208" height="208" rx="40" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="2"/>
 
-  <!-- Stylized "L" mark combined with a play triangle -->
-  <g transform="translate(128 128)">
-    <!-- L vertical -->
-    <rect x="-44" y="-56" width="20" height="100" rx="4" fill="url(#playGrad)"/>
-    <!-- L horizontal -->
-    <rect x="-44" y="24" width="60" height="20" rx="4" fill="url(#playGrad)"/>
-
-    <!-- Play triangle (interlocked with L) -->
-    <path d="M 14 -34 L 14 34 L 58 0 Z" fill="url(#playGrad)"/>
-
-    <!-- Spark accent -->
-    <circle cx="58" cy="0" r="6" fill="#fbbf24"/>
-    <circle cx="14" cy="-34" r="4" fill="#fbbf24"/>
-    <circle cx="14" cy="34" r="4" fill="#fbbf24"/>
+  <!-- 3D cube (isometric) -->
+  <g transform="translate(128 128)" filter="url(#glow)">
+    <!-- Top face -->
+    <polygon points="0,-50 43,-25 0,0 -43,-25" fill="#ffffff" opacity="0.95"/>
+    <!-- Left face -->
+    <polygon points="-43,-25 0,0 0,50 -43,25" fill="#a0c8e8" opacity="0.9"/>
+    <!-- Right face -->
+    <polygon points="43,-25 0,0 0,50 43,25" fill="#7090c0" opacity="0.9"/>
+    <!-- Edges -->
+    <polyline points="0,-50 43,-25 0,0 -43,-25 0,-50" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="1.5"/>
+    <line x1="0" y1="0" x2="0" y2="50" stroke="rgba(255,255,255,0.6)" stroke-width="1.5"/>
+    <line x1="0" y1="0" x2="-43" y2="25" stroke="rgba(255,255,255,0.4)" stroke-width="1"/>
+    <line x1="0" y1="0" x2="43" y2="25" stroke="rgba(255,255,255,0.4)" stroke-width="1"/>
   </g>
 
-  <!-- Code brackets overlay -->
-  <g opacity="0.35" stroke="#ffffff" stroke-width="3" fill="none" stroke-linecap="round">
-    <path d="M 40 80 L 24 96 L 40 112"/>
-    <path d="M 216 80 L 232 96 L 216 112"/>
+  <!-- "1" badge (representing "All In ONE") -->
+  <g transform="translate(196 60)">
+    <circle cx="0" cy="0" r="22" fill="#fbbf24" stroke="#fff" stroke-width="2"/>
+    <text x="0" y="6" font-family="ui-sans-serif, system-ui, sans-serif" font-size="22" font-weight="900" fill="#1a1a2e" text-anchor="middle">1</text>
   </g>
 
-  <!-- Bottom text strip -->
-  <rect x="0" y="220" width="256" height="36" fill="rgba(0,0,0,0.15)"/>
-  <text x="128" y="244" font-family="ui-sans-serif, system-ui, sans-serif" font-size="18" font-weight="700" fill="#ffffff" text-anchor="middle" letter-spacing="2">LAPIA</text>
+  <!-- 2D triangle accent (representing 2D engine) -->
+  <g transform="translate(60 196)" opacity="0.85">
+    <polygon points="0,-14 12,7 -12,7" fill="#ffffff"/>
+  </g>
+
+  <!-- Sparkles -->
+  <circle cx="50" cy="60" r="3" fill="#fbbf24"/>
+  <circle cx="206" cy="200" r="2.5" fill="#fbbf24"/>
+  <circle cx="40" cy="140" r="2" fill="#fbbf24"/>
+
+  <!-- Bottom brand strip -->
+  <rect x="0" y="220" width="256" height="36" fill="rgba(0,0,0,0.25)"/>
+  <text x="128" y="244" font-family="ui-sans-serif, system-ui, sans-serif" font-size="13" font-weight="800" fill="#ffffff" text-anchor="middle" letter-spacing="1.5">ALL IN ONE</text>
 </svg>
