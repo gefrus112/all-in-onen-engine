@@ -26,6 +26,11 @@ jobs:
         with:
           bun-version: latest
 
+      - name: Setup Node (for Next.js build)
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
       - name: Install dependencies
         run: bun install
 
@@ -39,7 +44,7 @@ jobs:
         run: bun run db:generate || true
 
       - name: Build static export
-        run: bunx next build --webpack
+        run: npx next build --webpack
         env:
           DATABASE_URL: "file:./dev.db"
           NEXTAUTH_SECRET: "build-secret-not-used-in-static-export"
