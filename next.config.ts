@@ -6,7 +6,7 @@ const isGitHubPages = process.env.GITHUB_ACTIONS === "true" || process.env.CI ==
 const nextConfig: NextConfig = {
   output: isGitHubPages ? "export" : "standalone",
   images: isGitHubPages ? { unoptimized: true } : undefined,
-  basePath: isGitHubPages ? "/lapia-ai-agent" : "",
+  basePath: isGitHubPages ? "/all-in-onen-engine" : "",
   typescript: {
     ignoreBuildErrors: true,
   },

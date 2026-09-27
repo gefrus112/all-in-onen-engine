@@ -38,7 +38,7 @@ jobs:
         run: |
           echo "DATABASE_URL=file:./dev.db" > .env
           echo "NEXTAUTH_SECRET=build-secret-not-used-in-static-export" >> .env
-          echo "NEXTAUTH_URL=https://gefrus112.github.io/lapia-ai-agent" >> .env
+          echo "NEXTAUTH_URL=https://gefrus112.github.io/all-in-onen-engine" >> .env
 
       - name: Generate Prisma client
         run: bun run db:generate || true
@@ -48,7 +48,7 @@ jobs:
         env:
           DATABASE_URL: "file:./dev.db"
           NEXTAUTH_SECRET: "build-secret-not-used-in-static-export"
-          NEXTAUTH_URL: "https://gefrus112.github.io/lapia-ai-agent"
+          NEXTAUTH_URL: "https://gefrus112.github.io/all-in-onen-engine"
 
       - name: Setup Pages
         uses: actions/configure-pages@v4

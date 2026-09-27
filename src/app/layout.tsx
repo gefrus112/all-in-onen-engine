@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://gefrus112.github.io/lapia-ai-agent"),
+  metadataBase: new URL("https://gefrus112.github.io/all-in-onen-engine"),
   title: "All In One Engine — 2D + 3D Game Engine",
   description: "Build 2D and 3D games with Python. Pygame, Three.js, and Zhitlow engines all in one. Roblox Studio-style IDE with live preview, multiplayer, and one-click publishing.",
   keywords: ["All In One Engine", "game engine", "Pygame", "Three.js", "Python", "IDE", "Roblox Studio", "2D", "3D", "multiplayer"],
