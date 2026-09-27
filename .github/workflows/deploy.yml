@@ -29,10 +29,24 @@ jobs:
       - name: Install dependencies
         run: bun install
 
+      - name: Create .env for build
+        run: |
+          echo "DATABASE_URL=file:./dev.db" > .env
+          echo "NEXTAUTH_SECRET=build-secret-not-used-in-static-export" >> .env
+          echo "NEXTAUTH_URL=https://gefrus112.github.io/lapia-ai-agent" >> .env
+
+      - name: Generate Prisma client
+        run: bun run db:generate || true
+
       - name: Build static export
-        run: bun run build
+        run: bunx next build
         env:
-          NEXT_PUBLIC_BASE_PATH: ${{ steps.pages.outputs.base_path }}
+          DATABASE_URL: "file:./dev.db"
+          NEXTAUTH_SECRET: "build-secret-not-used-in-static-export"
+          NEXTAUTH_URL: "https://gefrus112.github.io/lapia-ai-agent"
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
