@@ -39,7 +39,7 @@ jobs:
         run: bun run db:generate || true
 
       - name: Build static export
-        run: bunx next build
+        run: bunx next build --webpack
         env:
           DATABASE_URL: "file:./dev.db"
           NEXTAUTH_SECRET: "build-secret-not-used-in-static-export"
