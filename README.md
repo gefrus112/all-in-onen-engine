@@ -2,15 +2,19 @@
 
 **Build 2D & 3D games — all in one engine.**
 
+> **[Live Website — https://gefrus112.github.io/all-in-onen-engine/](https://gefrus112.github.io/all-in-onen-engine/)**
+>
+> Click the link above to launch the IDE right in your browser. No install needed.
+
+[![All In One Engine — 3D Studio](download/studio-3d.png)](https://gefrus112.github.io/all-in-onen-engine/)
+
 All In One Engine is a Roblox Studio-style IDE for building 2D and 3D games in Python and JavaScript.
 Write code, see it run live in the browser at 60 FPS. Three engines in one IDE:
 Pygame 2D, Three.js 3D, and experimental Zhitlow 3D.
 
-Includes a built-in sprite asset library (134 sprites), 4 starter templates, real 3D editor
+Includes a built-in sprite asset library (134 sprites), 4+ starter templates, real 3D editor
 with Three.js viewport, custom play-test avatar, multiplayer via socket.io, one-click publishing
 to itch.io / Crazy Games / GitHub Pages, and native installers for Linux / macOS / Chromebook.
-
-![All In One Engine — 3D Studio](download/studio-3d.png)
 
 ## Sprite Library (134 sprites)
 
@@ -231,6 +235,16 @@ on your local machine.
 ## License
 
 MIT — see [LICENSE](LICENSE).
+
+## Links
+
+| Resource | URL |
+|----------|-----|
+| **Live Website** | [https://gefrus112.github.io/all-in-onen-engine/](https://gefrus112.github.io/all-in-onen-engine/) |
+| **GitHub Repo** | [https://github.com/gefrus112/all-in-onen-engine](https://github.com/gefrus112/all-in-onen-engine) |
+| **Releases** | [https://github.com/gefrus112/all-in-onen-engine/releases](https://github.com/gefrus112/all-in-onen-engine/releases) |
+| **Wiki** | [https://github.com/gefrus112/all-in-onen-engine/wiki](https://github.com/gefrus112/all-in-onen-engine/wiki) |
+| **Issues** | [https://github.com/gefrus112/all-in-onen-engine/issues](https://github.com/gefrus112/all-in-onen-engine/issues) |
 
 ## Contributing
 
