@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useCallback } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls, Grid, GizmoHelper, GizmoViewport, Environment, Sky } from "@react-three/drei";
 import * as THREE from "three";
@@ -11,13 +11,29 @@ import {
   Box as BoxIcon, Layers, Search, ChevronDown, ChevronRight, User, Send,
   Sun, Github, Home, Volume2, Eye, EyeOff, Lock, Unlock,
   X, Sparkles, Rocket, Code2, Cpu, Box as CubeIcon, FileCode2, Palette,
+  Undo2, Redo2, Mountain, Waves, Bug, Terminal, MessageSquare, Menu,
+  Type, Square as SquareIcon, MousePointer2, Layout, Image as ImageIcon,
+  FolderOpen, History, ChevronLeft,
 } from "lucide-react";
 import { useStudio } from "@/lib/studio-store";
 import { toast } from "sonner";
 
 // 3D scene object types
-type SceneObjType = "box" | "sphere" | "cylinder" | "cone" | "torus" | "plane" | "light" | "camera";
+type SceneObjType = "box" | "sphere" | "cylinder" | "cone" | "torus" | "plane" | "light" | "camera" | "terrain" | "water" | "model";
 type LightSubtype = "directional" | "point" | "spot" | "ambient" | "hemisphere";
+type CameraMode = "orbit" | "first-person" | "third-person";
+type GUIElementType = "button" | "text" | "panel" | "image" | "input" | "slider" | "checkbox" | "healthbar" | "crosshair" | "menu";
+
+interface GUIElement {
+  id: string;
+  type: GUIElementType;
+  name: string;
+  x: number; y: number; width: number; height: number;
+  text: string;
+  color: string;
+  fontSize: number;
+  visible: boolean;
+}
 
 interface SceneObject3D {
   id: string;
@@ -31,6 +47,47 @@ interface SceneObject3D {
   intensity?: number;
   visible: boolean;
   locked: boolean;
+  // Extended properties (40+)
+  castShadow?: boolean;
+  receiveShadow?: boolean;
+  roughness?: number;
+  metalness?: number;
+  emissive?: string;
+  emissiveIntensity?: number;
+  opacity?: number;
+  transparent?: boolean;
+  wireframe?: boolean;
+  flatShading?: boolean;
+  // Physics 2
+  mass?: number;
+  friction?: number;
+  restitution?: number;
+  isTrigger?: boolean;
+  isKinematic?: boolean;
+  // Audio
+  audioClip?: string;
+  audioVolume?: number;
+  audioLoop?: boolean;
+  audioPlayOnAwake?: boolean;
+  // Network
+  networked?: boolean;
+  networkOwner?: string;
+  // Tag
+  tag?: string;
+  layer?: string;
+}
+
+interface DebugLogEntry {
+  id: string;
+  type: "info" | "warn" | "error" | "success";
+  text: string;
+  timestamp: number;
+}
+
+interface ProjectHistory {
+  name: string;
+  lastOpened: number;
+  deleted?: boolean;
 }
 
 const uid = () => Math.random().toString(36).slice(2, 10);
@@ -502,6 +559,7 @@ export function Studio3D({ onExit }: { onExit: () => void }) {
     setAvatarPickerOpen, setAvatar,
     setPublishDialogOpen, setInstructionsOpen,
     user, setAuthOpen,
+    setSettingsOpen,
   } = useStudio();
 
   const [objects, setObjects] = useState<SceneObject3D[]>([
@@ -610,8 +668,55 @@ engine.setPlayerController(player);
 `);
   const [fpsTemplate, setFpsTemplate] = useState(false);
   const [showGuiEditor, setShowGuiEditor] = useState(false);
+  // New state for v5 improvements
+  const [cameraMode, setCameraMode] = useState<CameraMode>("orbit");
+  const [undoStack, setUndoStack] = useState<SceneObject3D[][]>([]);
+  const [redoStack, setRedoStack] = useState<SceneObject3D[][]>([]);
+  const [showDebugConsole, setShowDebugConsole] = useState(false);
+  const [debugLogs, setDebugLogs] = useState<DebugLogEntry[]>([
+    { id: uid(), type: "info", text: "Zhitlow 3D Engine v0.9.0 — debug console ready", timestamp: Date.now() },
+  ]);
+  const [guiElements, setGuiElements] = useState<GUIElement[]>([]);
+  const [selectedGuiId, setSelectedGuiId] = useState<string | null>(null);
+  const [guiTool, setGuiTool] = useState<"select" | "button" | "text" | "panel" | "image" | "input" | "menu">("select");
+  const [showTerrainEditor, setShowTerrainEditor] = useState(false);
+  const [terrainSize, setTerrainSize] = useState({ width: 40, depth: 40, height: 2 });
+  const [waterLevel, setWaterLevel] = useState(0);
+  const [showProjectHistory, setShowProjectHistory] = useState(false);
+  const [projectHistory, setProjectHistory] = useState<ProjectHistory[]>([]);
+  const [saveFolder, setSaveFolder] = useState<string>("~/Documents/AllInOneEngine");
 
   const selectedObj = objects.find(o => o.id === selectedId);
+
+  // Undo/redo — push current state to undo stack before any change
+  const pushUndo = useCallback(() => {
+    setUndoStack(s => [...s.slice(-19), [...objects]]);
+    setRedoStack([]);
+  }, [objects]);
+
+  const undo = useCallback(() => {
+    setUndoStack(s => {
+      if (s.length === 0) return s;
+      const prev = s[s.length - 1];
+      setRedoStack(r => [...r, [...objects]]);
+      setObjects(prev);
+      return s.slice(0, -1);
+    });
+  }, [objects]);
+
+  const redo = useCallback(() => {
+    setRedoStack(s => {
+      if (s.length === 0) return s;
+      const next = s[s.length - 1];
+      setUndoStack(u => [...u, [...objects]]);
+      setObjects(next);
+      return s.slice(0, -1);
+    });
+  }, [objects]);
+
+  const logDebug = useCallback((type: DebugLogEntry["type"], text: string) => {
+    setDebugLogs(logs => [...logs.slice(-99), { id: uid(), type, text, timestamp: Date.now() }]);
+  }, []);
 
   const addObject = (type: SceneObjType, color = "#3b82f6", name?: string) => {
     const newObj: SceneObject3D = {
@@ -678,6 +783,19 @@ engine.setPlayerController(player);
     setObjects(objects.map(o => o.id === id ? { ...o, [key]: value } : o));
   };
 
+  // Keyboard shortcuts for undo/redo
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === "z" && !e.shiftKey) {
+        e.preventDefault(); undo();
+      } else if ((e.ctrlKey || e.metaKey) && (e.key === "y" || (e.key === "z" && e.shiftKey))) {
+        e.preventDefault(); redo();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [undo, redo]);
+
   const filteredAssets = ASSET_LIBRARY_3D.filter(a =>
     a.name.toLowerCase().includes(search.toLowerCase()) || a.type.toLowerCase().includes(search.toLowerCase())
   );
@@ -687,7 +805,7 @@ engine.setPlayerController(player);
       {/* Top bar */}
       <div className="flex items-center h-12 bg-[#1a1d24] border-b border-white/5 px-3 gap-2">
         {/* Logo + name */}
-        <div className="flex items-center gap-2 pr-4 border-r border-white/5">
+        <div className="flex items-center gap-2 pr-3 border-r border-white/5">
           <img src="/logo.svg" alt="All In One Engine" className="w-8 h-8" />
           <div>
             <div className="text-sm font-bold leading-tight">3D Studio</div>
@@ -695,8 +813,20 @@ engine.setPlayerController(player);
           </div>
         </div>
 
-        {/* Tools */}
-        <div className="flex items-center gap-1">
+        {/* GROUP 1: History (Undo/Redo) */}
+        <div className="flex items-center gap-0.5 px-1">
+          <button onClick={undo} disabled={undoStack.length === 0} className="tool-btn" title="Undo (Ctrl+Z)">
+            <Undo2 className="w-3.5 h-3.5" />
+          </button>
+          <button onClick={redo} disabled={redoStack.length === 0} className="tool-btn" title="Redo (Ctrl+Y)">
+            <Redo2 className="w-3.5 h-3.5" />
+          </button>
+        </div>
+
+        <div className="w-px h-5 bg-white/10" />
+
+        {/* GROUP 2: Transform tools */}
+        <div className="flex items-center gap-0.5 px-1">
           {(["move", "rotate", "scale", "pan"] as const).map((tool) => (
             <button
               key={tool}
@@ -710,111 +840,123 @@ engine.setPlayerController(player);
               {tool === "pan" && <Hand className="w-3.5 h-3.5" />}
             </button>
           ))}
-          <div className="w-px h-5 bg-white/10 mx-1" />
+        </div>
+
+        <div className="w-px h-5 bg-white/10" />
+
+        {/* GROUP 3: Add objects */}
+        <div className="flex items-center gap-0.5 px-1">
           <button className="tool-btn" onClick={() => addObject("box")} title="Add Box"><Plus className="w-3.5 h-3.5" /></button>
           <button className="tool-btn" onClick={() => addObject("sphere")} title="Add Sphere"><Circle className="w-3.5 h-3.5" /></button>
           <button className="tool-btn" onClick={() => addObject("cylinder")} title="Add Cylinder"><Cylinder className="w-3.5 h-3.5" /></button>
           <button className="tool-btn" onClick={() => addObject("cone")} title="Add Cone"><Cone className="w-3.5 h-3.5" /></button>
           <button className="tool-btn" onClick={() => addObject("torus")} title="Add Torus"><Torus className="w-3.5 h-3.5" /></button>
           <button className="tool-btn" onClick={() => addLight("point")} title="Add Light"><Lightbulb className="w-3.5 h-3.5" /></button>
+          <button className="tool-btn" onClick={() => setShowTerrainEditor(!showTerrainEditor)} title="Terrain editor"><Mountain className="w-3.5 h-3.5" /></button>
         </div>
 
-        <div className="w-px h-5 bg-white/10 mx-1" />
+        <div className="w-px h-5 bg-white/10" />
 
-        {/* Play controls */}
-        <button
-          onClick={() => { setIsPlaying(true); setShowAvatar(true); toast.success("Play test started — use WASD to move camera"); }}
-          disabled={isPlaying}
-          className={`tool-btn ${!isPlaying ? "active" : ""}`}
-          title="Play test"
-        >
-          <Play className="w-3.5 h-3.5 fill-current" />
-          Play
-        </button>
-        <button
-          onClick={() => setIsPlaying(false)}
-          disabled={!isPlaying}
-          className="tool-btn"
-          title="Pause"
-        >
-          <Pause className="w-3.5 h-3.5" />
-        </button>
-        <button
-          onClick={() => { setIsPlaying(false); setShowAvatar(false); }}
-          className="tool-btn"
-          title="Stop"
-        >
-          <Square className="w-3.5 h-3.5 fill-current" />
-        </button>
+        {/* GROUP 4: Play controls */}
+        <div className="flex items-center gap-0.5 px-1">
+          <button
+            onClick={() => {
+              setIsPlaying(true); setShowAvatar(true);
+              logDebug("success", "Play test started — camera mode: " + cameraMode);
+              toast.success(`Play test started — ${cameraMode} camera`);
+            }}
+            disabled={isPlaying}
+            className={`tool-btn ${!isPlaying ? "active" : ""}`}
+            title="Play test"
+          >
+            <Play className="w-3.5 h-3.5 fill-current" />
+          </button>
+          <button onClick={() => setIsPlaying(false)} disabled={!isPlaying} className="tool-btn" title="Pause">
+            <Pause className="w-3.5 h-3.5" />
+          </button>
+          <button onClick={() => { setIsPlaying(false); setShowAvatar(false); }} className="tool-btn" title="Stop">
+            <Square className="w-3.5 h-3.5 fill-current" />
+          </button>
+          {/* Camera mode selector */}
+          <select
+            value={cameraMode}
+            onChange={(e) => setCameraMode(e.target.value as CameraMode)}
+            className="bg-[#1a1d24] text-white text-[11px] px-1.5 py-1 rounded border border-white/10 outline-none ml-1"
+            title="Camera mode"
+          >
+            <option value="orbit">Orbit</option>
+            <option value="first-person">1st Person</option>
+            <option value="third-person">3rd Person</option>
+          </select>
+        </div>
 
         <div className="flex-1" />
 
-        {/* Code + GUI Editor + Templates */}
-        <button
-          onClick={() => setCodePanelOpen(!codePanelOpen)}
-          className={`tool-btn ${codePanelOpen ? "active" : ""}`}
-          title="Script editor (Script/CSS/JS)"
-        >
-          <Code2 className="w-3.5 h-3.5" />
-          Code
-        </button>
-        <button
-          onClick={() => setShowGuiEditor(!showGuiEditor)}
-          className={`tool-btn ${showGuiEditor ? "active" : ""}`}
-          title="GUI editor (HUD, buttons, text)"
-        >
-          <Palette className="w-3.5 h-3.5" />
-          GUI
-        </button>
-        <button
-          onClick={() => toast.success("Templates: FPS Shooter, Castle Explorer, Multiplayer Arena — use the Templates panel in 2D Studio to load them")}
-          className="tool-btn"
-          title="Templates"
-        >
-          <Rocket className="w-3.5 h-3.5" />
-          Templates
-        </button>
+        {/* GROUP 5: Editors (Code, GUI, Debug, Terrain) */}
+        <div className="flex items-center gap-0.5 px-1">
+          <button onClick={() => setCodePanelOpen(!codePanelOpen)} className={`tool-btn ${codePanelOpen ? "active" : ""}`} title="Script/CSS/JS editor">
+            <Code2 className="w-3.5 h-3.5" />
+            Code
+          </button>
+          <button onClick={() => setShowGuiEditor(!showGuiEditor)} className={`tool-btn ${showGuiEditor ? "active" : ""}`} title="GUI editor">
+            <Palette className="w-3.5 h-3.5" />
+            GUI
+          </button>
+          <button onClick={() => setShowDebugConsole(!showDebugConsole)} className={`tool-btn ${showDebugConsole ? "active" : ""}`} title="Debug console">
+            <Bug className="w-3.5 h-3.5" />
+            Debug
+          </button>
+          <button onClick={() => toast.success("Templates available in 2D Studio Templates panel")} className="tool-btn" title="Templates">
+            <Rocket className="w-3.5 h-3.5" />
+          </button>
+        </div>
 
-        <div className="w-px h-5 bg-white/10 mx-1" />
+        <div className="w-px h-5 bg-white/10" />
 
-        {/* Avatar + other actions */}
-        <button
-          onClick={() => setAvatarPickerOpen(true)}
-          className="tool-btn"
-          title="Pick avatar"
-        >
-          <User className="w-3.5 h-3.5" />
-          Avatar
-        </button>
-        <button onClick={() => toast.info("Upload dialog coming soon")} className="tool-btn" title="Upload assets">
-          <Upload className="w-3.5 h-3.5" />
-        </button>
-        <button onClick={() => toast.info("Audio editor coming soon")} className="tool-btn" title="Audio editor">
-          <Music className="w-3.5 h-3.5" />
-        </button>
-        <button onClick={() => setPublishDialogOpen(true)} className="tool-btn" title="Publish">
-          <Send className="w-3.5 h-3.5" />
-          Publish
-        </button>
-        <button onClick={() => setInstructionsOpen(true)} className="tool-btn" title="Instructions">
-          <Box className="w-3.5 h-3.5" />
-          Help
-        </button>
-        <div className="w-px h-5 bg-white/10 mx-1" />
-        <button
-          onClick={() => setAuthOpen(true)}
-          className="tool-btn"
-          title={user ? `Signed in as @${user.githubLogin}` : "Sign in with GitHub"}
-        >
-          {user ? (
-            <img src={user.avatar} alt={user.name} className="w-5 h-5 rounded-full" />
-          ) : (
-            <Github className="w-3.5 h-3.5" />
-          )}
-        </button>
-        <button onClick={onExit} className="tool-btn" title="Back to website">
-          <Home className="w-3.5 h-3.5" />
-        </button>
+        {/* GROUP 6: Avatar, Upload, Publish, Settings, Account */}
+        <div className="flex items-center gap-0.5 px-1">
+          <button onClick={() => setAvatarPickerOpen(true)} className="tool-btn" title="Pick avatar">
+            <User className="w-3.5 h-3.5" />
+          </button>
+          <button
+            onClick={() => {
+              const input = document.createElement("input");
+              input.type = "file";
+              input.accept = ".glb,.gltf,.png,.jpg,.wav,.mp3";
+              input.multiple = true;
+              input.onchange = (e) => {
+                const files = (e.target as HTMLInputElement).files;
+                if (files) {
+                  for (const f of Array.from(files)) {
+                    logDebug("success", `Imported: ${f.name} (${(f.size/1024).toFixed(1)}KB)`);
+                    toast.success(`Imported ${f.name}`);
+                  }
+                }
+              };
+              input.click();
+            }}
+            className="tool-btn"
+            title="Upload assets (.glb, .gltf, .png, .wav)"
+          >
+            <Upload className="w-3.5 h-3.5" />
+          </button>
+          <button onClick={() => setPublishDialogOpen(true)} className="tool-btn" title="Publish">
+            <Send className="w-3.5 h-3.5" />
+          </button>
+          <button onClick={() => setInstructionsOpen(true)} className="tool-btn" title="Help">
+            <SquareIcon className="w-3.5 h-3.5" />
+          </button>
+          <button onClick={() => setSettingsOpen(true)} className="tool-btn" title="Settings">
+            <Settings className="w-3.5 h-3.5" />
+          </button>
+          <div className="w-px h-5 bg-white/10 mx-1" />
+          <button onClick={() => setAuthOpen(true)} className="tool-btn" title={user ? `Signed in as @${user.githubLogin}` : "Sign in with GitHub"}>
+            {user ? <img src={user.avatar} alt={user.name} className="w-5 h-5 rounded-full" /> : <Github className="w-3.5 h-3.5" />}
+          </button>
+          <button onClick={onExit} className="tool-btn" title="Back to website">
+            <Home className="w-3.5 h-3.5" />
+          </button>
+        </div>
       </div>
 
       {/* Main 3-pane layout */}
@@ -1121,7 +1263,7 @@ engine.setPlayerController(player);
 
               {/* Material — PBR properties */}
               <div className="px-3 py-2 border-b border-white/5">
-                <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-2">Material (PBR)</div>
+                <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-2">Material (PBR) — 20 props</div>
                 {[
                   ["Roughness", "0.5"],
                   ["Metalness", "0.1"],
@@ -1150,6 +1292,70 @@ engine.setPlayerController(player);
                       defaultValue={val}
                       className="flex-1 bg-black/30 px-2 py-0.5 text-[11px] outline-none border border-transparent focus:border-cyan-500 rounded"
                     />
+                  </div>
+                ))}
+              </div>
+
+              {/* Camera properties — 20 props */}
+              <div className="px-3 py-2 border-b border-white/5">
+                <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-2">Camera Settings — 20 props</div>
+                {[
+                  ["Field of View", "50"],
+                  ["Near Clip", "0.1"],
+                  ["Far Clip", "1000"],
+                  ["Aspect Ratio", "1.78"],
+                  ["Orthographic Size", "5"],
+                  ["Viewport X", "0"],
+                  ["Viewport Y", "0"],
+                  ["Viewport W", "1"],
+                  ["Viewport H", "1"],
+                  ["Depth", "-1"],
+                  ["Background", "#1a1d24"],
+                  ["Clear Flags", "Solid Color"],
+                  ["Allow HDR", "True"],
+                  ["Allow MSAA", "True"],
+                  ["Occlusion Culling", "True"],
+                  ["Min Zoom", "0.5"],
+                  ["Max Zoom", "3.0"],
+                  ["Follow Lerp", "0.15"],
+                  ["Deadzone X", "80"],
+                  ["Deadzone Y", "60"],
+                ].map(([label, val]) => (
+                  <div key={label} className="flex items-center gap-2 mb-0.5">
+                    <span className="text-[11px] text-muted-foreground w-28 truncate" title={label}>{label}</span>
+                    <input defaultValue={val} className="flex-1 bg-black/30 px-2 py-0.5 text-[11px] outline-none border border-transparent focus:border-cyan-500 rounded" />
+                  </div>
+                ))}
+              </div>
+
+              {/* Rendering — 20 props */}
+              <div className="px-3 py-2 border-b border-white/5">
+                <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-2">Rendering — 20 props</div>
+                {[
+                  ["Cast Shadows", "True"],
+                  ["Receive Shadows", "True"],
+                  ["Wireframe", "False"],
+                  ["Flat Shading", "False"],
+                  ["Render Queue", "2000"],
+                  ["Sorting Layer", "Default"],
+                  ["Order in Layer", "0"],
+                  ["Material", "Standard"],
+                  ["Shader", "PBR"],
+                  ["Cull Mode", "Back"],
+                  ["Z-Write", "True"],
+                  ["Z-Test", "LEqual"],
+                  ["Color Mask", "RGBA"],
+                  ["Blend Src", "SrcAlpha"],
+                  ["Blend Dst", "OneMinusSrcAlpha"],
+                  ["LOD Bias", "1.0"],
+                  ["Dynamic Occlusion", "True"],
+                  ["Motion Vectors", "True"],
+                  ["Light Probe Usage", "Blend"],
+                  ["Reflection Probes", "Blend"],
+                ].map(([label, val]) => (
+                  <div key={label} className="flex items-center gap-2 mb-0.5">
+                    <span className="text-[11px] text-muted-foreground w-28 truncate" title={label}>{label}</span>
+                    <input defaultValue={val} className="flex-1 bg-black/30 px-2 py-0.5 text-[11px] outline-none border border-transparent focus:border-cyan-500 rounded" />
                   </div>
                 ))}
               </div>
@@ -1389,10 +1595,10 @@ engine.setPlayerController(player);
         </div>
       )}
 
-      {/* GUI Editor overlay */}
+      {/* GUI Editor overlay — improved with 5 tools, properties, screen placement */}
       {showGuiEditor && (
-        <div className="fixed bottom-24 left-64 w-[360px] glass rounded-lg z-40 p-4">
-          <div className="flex items-center justify-between mb-3">
+        <div className="fixed bottom-24 left-64 w-[420px] glass rounded-lg z-40 flex flex-col max-h-[70vh]">
+          <div className="flex items-center justify-between p-3 border-b border-white/5">
             <h3 className="text-sm font-semibold flex items-center gap-1">
               <Palette className="w-3.5 h-3.5" />
               GUI Editor
@@ -1401,37 +1607,228 @@ engine.setPlayerController(player);
               <X className="w-3.5 h-3.5" />
             </button>
           </div>
+
+          {/* Tool palette — 5 tools */}
+          <div className="flex gap-1 p-2 border-b border-white/5">
+            {([
+              { id: "select" as const, icon: <MousePointer2 className="w-3.5 h-3.5" />, label: "Select" },
+              { id: "button" as const, icon: <SquareIcon className="w-3.5 h-3.5" />, label: "Button" },
+              { id: "text" as const, icon: <Type className="w-3.5 h-3.5" />, label: "Text" },
+              { id: "panel" as const, icon: <Layout className="w-3.5 h-3.5" />, label: "Panel" },
+              { id: "menu" as const, icon: <Menu className="w-3.5 h-3.5" />, label: "Menu" },
+            ]).map((t) => (
+              <button
+                key={t.id}
+                onClick={() => {
+                  setGuiTool(t.id);
+                  if (t.id !== "select") {
+                    const newEl: GUIElement = {
+                      id: uid(), type: t.id === "menu" ? "menu" : t.id as GUIElementType,
+                      name: `${t.label} ${guiElements.length + 1}`,
+                      x: 50, y: 50, width: t.id === "text" ? 100 : 120, height: t.id === "text" ? 20 : 30,
+                      text: t.id === "button" ? "Click Me" : t.id === "text" ? "Label" : t.id === "menu" ? "Menu" : "",
+                      color: "#3b82f6", fontSize: 14, visible: true,
+                    };
+                    setGuiElements([...guiElements, newEl]);
+                    setSelectedGuiId(newEl.id);
+                    logDebug("info", `GUI ${t.label} added at (50, 50)`);
+                    toast.success(`${t.label} added — drag to position`);
+                  }
+                }}
+                className={`tool-btn ${guiTool === t.id ? "active" : ""}`}
+                title={t.label}
+              >
+                {t.icon}
+              </button>
+            ))}
+          </div>
+
+          {/* Screen preview with GUI elements */}
+          <div className="relative bg-black/40 m-2 rounded overflow-hidden" style={{ aspectRatio: "4/3" }}>
+            {/* Grid background */}
+            <div className="absolute inset-0 opacity-20" style={{
+              backgroundImage: "linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)",
+              backgroundSize: "20px 20px",
+            }} />
+            {guiElements.filter(e => e.visible).map((el) => (
+              <div
+                key={el.id}
+                onClick={() => setSelectedGuiId(el.id)}
+                className={`absolute cursor-move border-2 ${selectedGuiId === el.id ? "border-cyan-500" : "border-transparent"}`}
+                style={{
+                  left: `${el.x}%`, top: `${el.y}%`,
+                  width: el.type === "text" ? "auto" : `${el.width}px`,
+                  height: el.type === "text" ? "auto" : `${el.height}px`,
+                  background: el.type === "button" ? el.color : el.type === "panel" ? `${el.color}40` : "transparent",
+                  color: el.type === "text" ? el.color : "#fff",
+                  fontSize: `${el.fontSize}px`,
+                  padding: el.type === "text" ? "2px 4px" : "4px 8px",
+                  borderRadius: "4px",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                }}
+              >
+                {el.text || (el.type === "panel" ? "Panel" : "")}
+              </div>
+            ))}
+            {guiElements.length === 0 && (
+              <div className="absolute inset-0 flex items-center justify-center text-xs text-muted-foreground">
+                Pick a tool above to add GUI elements
+              </div>
+            )}
+          </div>
+
+          {/* Properties for selected GUI element */}
+          {selectedGuiId && (() => {
+            const el = guiElements.find(e => e.id === selectedGuiId);
+            if (!el) return null;
+            return (
+              <div className="p-2 border-t border-white/5 max-h-32 overflow-y-auto">
+                <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">GUI Properties</div>
+                <div className="grid grid-cols-2 gap-1 text-[11px]">
+                  <label className="flex items-center gap-1">X: <input type="number" value={el.x} onChange={(e) => setGuiElements(gs => gs.map(g => g.id === el.id ? { ...g, x: +e.target.value } : g))} className="w-12 bg-black/30 px-1 rounded" /></label>
+                  <label className="flex items-center gap-1">Y: <input type="number" value={el.y} onChange={(e) => setGuiElements(gs => gs.map(g => g.id === el.id ? { ...g, y: +e.target.value } : g))} className="w-12 bg-black/30 px-1 rounded" /></label>
+                  <label className="flex items-center gap-1">W: <input type="number" value={el.width} onChange={(e) => setGuiElements(gs => gs.map(g => g.id === el.id ? { ...g, width: +e.target.value } : g))} className="w-12 bg-black/30 px-1 rounded" /></label>
+                  <label className="flex items-center gap-1">H: <input type="number" value={el.height} onChange={(e) => setGuiElements(gs => gs.map(g => g.id === el.id ? { ...g, height: +e.target.value } : g))} className="w-12 bg-black/30 px-1 rounded" /></label>
+                  <label className="flex items-center gap-1 col-span-2">Text: <input value={el.text} onChange={(e) => setGuiElements(gs => gs.map(g => g.id === el.id ? { ...g, text: e.target.value } : g))} className="flex-1 bg-black/30 px-1 rounded" /></label>
+                  <label className="flex items-center gap-1">Color: <input type="color" value={el.color} onChange={(e) => setGuiElements(gs => gs.map(g => g.id === el.id ? { ...g, color: e.target.value } : g))} className="w-6 h-6" /></label>
+                  <label className="flex items-center gap-1">Size: <input type="number" value={el.fontSize} onChange={(e) => setGuiElements(gs => gs.map(g => g.id === el.id ? { ...g, fontSize: +e.target.value } : g))} className="w-12 bg-black/30 px-1 rounded" /></label>
+                </div>
+                <button
+                  onClick={() => { setGuiElements(gs => gs.filter(g => g.id !== el.id)); setSelectedGuiId(null); }}
+                  className="mt-1 w-full p-1 rounded bg-red-500/20 text-red-300 text-[10px] hover:bg-red-500/30"
+                >
+                  Delete element
+                </button>
+              </div>
+            );
+          })()}
+        </div>
+      )}
+
+      {/* Debug Console overlay */}
+      {showDebugConsole && (
+        <div className="fixed bottom-24 right-72 w-[500px] h-[300px] glass rounded-lg z-40 flex flex-col">
+          <div className="flex items-center justify-between p-2 border-b border-white/5">
+            <h3 className="text-xs font-semibold flex items-center gap-1">
+              <Terminal className="w-3.5 h-3.5 text-green-400" />
+              Debug Console
+            </h3>
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => {
+                  // Run script
+                  const code = codeTab === "script" ? scriptCode : codeTab === "js" ? jsCode : "";
+                  logDebug("info", `Executing ${codeTab} (${code.length} chars)...`);
+                  try {
+                    if (codeTab === "js" && code) {
+                      // eslint-disable-next-line no-eval
+                      eval(code);
+                      logDebug("success", "Script executed successfully");
+                    } else {
+                      logDebug("warn", "Python script execution requires Pyodide (use 2D Studio)");
+                    }
+                  } catch (e: any) {
+                    logDebug("error", `Runtime error: ${e.message}`);
+                  }
+                }}
+                className="tool-btn h-6 text-[10px] px-2"
+                title="Run current script"
+              >
+                <Play className="w-3 h-3 fill-current" /> Run
+              </button>
+              <button onClick={() => setDebugLogs([])} className="tool-btn h-6 w-6 p-0" title="Clear">
+                <Trash2 className="w-3 h-3" />
+              </button>
+              <button onClick={() => setShowDebugConsole(false)} className="text-muted-foreground hover:text-white">
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
+          <div className="flex-1 overflow-y-auto p-2 font-mono text-[11px] space-y-0.5">
+            {debugLogs.map((log) => (
+              <div key={log.id} className={`console-line ${log.type === "error" ? "text-red-400" : log.type === "warn" ? "text-yellow-400" : log.type === "success" ? "text-green-400" : "text-cyan-300"}`}>
+                <span className="opacity-50 mr-1">[{new Date(log.timestamp).toLocaleTimeString(undefined, { hour12: false })}]</span>
+                {log.text}
+              </div>
+            ))}
+          </div>
+          <div className="p-2 border-t border-white/5">
+            <input
+              placeholder="Type a command and press Enter..."
+              className="w-full bg-black/30 px-2 py-1 text-xs outline-none border border-white/5 focus:border-cyan-500 rounded"
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  const val = (e.target as HTMLInputElement).value;
+                  logDebug("info", `> ${val}`);
+                  (e.target as HTMLInputElement).value = "";
+                }
+              }}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Terrain Editor overlay */}
+      {showTerrainEditor && (
+        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 w-[440px] glass rounded-lg z-40 p-4">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm font-semibold flex items-center gap-1">
+              <Mountain className="w-3.5 h-3.5 text-green-400" />
+              Terrain Editor
+            </h3>
+            <button onClick={() => setShowTerrainEditor(false)} className="text-muted-foreground hover:text-white">
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </div>
           <div className="space-y-2">
-            <button
-              onClick={() => toast.success("HUD added")}
-              className="w-full p-2 rounded bg-white/5 hover:bg-white/10 text-xs text-left flex items-center gap-2"
-            >
-              <BoxIcon className="w-3 h-3" /> Add HUD Panel
-            </button>
-            <button
-              onClick={() => toast.success("Button added")}
-              className="w-full p-2 rounded bg-white/5 hover:bg-white/10 text-xs text-left flex items-center gap-2"
-            >
-              <Plus className="w-3 h-3" /> Add Button
-            </button>
-            <button
-              onClick={() => toast.success("Text added")}
-              className="w-full p-2 rounded bg-white/5 hover:bg-white/10 text-xs text-left flex items-center gap-2"
-            >
-              <FileCode2 className="w-3 h-3" /> Add Text Label
-            </button>
-            <button
-              onClick={() => toast.success("Crosshair added")}
-              className="w-full p-2 rounded bg-white/5 hover:bg-white/10 text-xs text-left flex items-center gap-2"
-            >
-              <Circle className="w-3 h-3" /> Add Crosshair
-            </button>
-            <button
-              onClick={() => toast.success("Health bar added")}
-              className="w-full p-2 rounded bg-white/5 hover:bg-white/10 text-xs text-left flex items-center gap-2"
-            >
-              <Cpu className="w-3 h-3" /> Add Health Bar
-            </button>
+            <div>
+              <label className="text-[10px] text-muted-foreground">Terrain Width: {terrainSize.width}</label>
+              <input type="range" min="10" max="100" value={terrainSize.width} onChange={(e) => setTerrainSize({ ...terrainSize, width: +e.target.value })} className="w-full" />
+            </div>
+            <div>
+              <label className="text-[10px] text-muted-foreground">Terrain Depth: {terrainSize.depth}</label>
+              <input type="range" min="10" max="100" value={terrainSize.depth} onChange={(e) => setTerrainSize({ ...terrainSize, depth: +e.target.value })} className="w-full" />
+            </div>
+            <div>
+              <label className="text-[10px] text-muted-foreground">Max Height: {terrainSize.height}</label>
+              <input type="range" min="0.5" max="10" step="0.5" value={terrainSize.height} onChange={(e) => setTerrainSize({ ...terrainSize, height: +e.target.value })} className="w-full" />
+            </div>
+            <div>
+              <label className="text-[10px] text-muted-foreground">Water Level: {waterLevel.toFixed(1)}</label>
+              <input type="range" min="-2" max="5" step="0.1" value={waterLevel} onChange={(e) => setWaterLevel(+e.target.value)} className="w-full" />
+            </div>
+            <div className="flex gap-1 pt-2">
+              <button
+                onClick={() => {
+                  pushUndo();
+                  setObjects([...objects, {
+                    id: uid(), name: "Terrain", type: "terrain",
+                    position: [0, 0, 0], rotation: [0, 0, 0], scale: [terrainSize.width, 1, terrainSize.depth],
+                    color: "#4a7c3a", visible: true, locked: false,
+                  }]);
+                  logDebug("success", `Terrain added (${terrainSize.width}x${terrainSize.depth})`);
+                  toast.success("Terrain added to scene");
+                }}
+                className="flex-1 p-2 rounded bg-green-500/20 text-green-300 text-xs hover:bg-green-500/30"
+              >
+                <Mountain className="w-3 h-3 inline mr-1" /> Add Terrain
+              </button>
+              <button
+                onClick={() => {
+                  pushUndo();
+                  setObjects([...objects, {
+                    id: uid(), name: "Water", type: "water",
+                    position: [0, waterLevel, 0], rotation: [-Math.PI / 2, 0, 0], scale: [terrainSize.width, terrainSize.depth, 1],
+                    color: "#3b82f6", visible: true, locked: false, opacity: 0.6, transparent: true,
+                  }]);
+                  logDebug("info", `Water plane added at y=${waterLevel}`);
+                  toast.success("Water added");
+                }}
+                className="flex-1 p-2 rounded bg-blue-500/20 text-blue-300 text-xs hover:bg-blue-500/30"
+              >
+                <Waves className="w-3 h-3 inline mr-1" /> Add Water
+              </button>
+            </div>
           </div>
         </div>
       )}

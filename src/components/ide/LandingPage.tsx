@@ -874,6 +874,52 @@ bun run dev
         </section>
       )}
 
+      {/* AI Assistant — coming soon */}
+      <section className="py-20 px-6">
+        <div className="max-w-3xl mx-auto text-center">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full glass text-xs text-muted-foreground mb-4">
+            <Sparkles className="w-3 h-3 text-yellow-400" />
+            Under Development
+          </div>
+          <h2 className="text-3xl md:text-5xl font-bold mb-3">AI Game Assistant</h2>
+          <p className="text-muted-foreground max-w-2xl mx-auto mb-8">
+            An AI assistant that helps you write game code, debug scripts, generate levels,
+            and suggest improvements — right inside the studio. Coming soon.
+          </p>
+          <div className="glass rounded-2xl p-8 max-w-md mx-auto">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-yellow-400 via-orange-500 to-pink-500 flex items-center justify-center mx-auto mb-4 animate-glow-pulse">
+              <Sparkles className="w-8 h-8 text-white" />
+            </div>
+            <h3 className="font-semibold mb-1">AI Assistant</h3>
+            <p className="text-xs text-muted-foreground mb-4">Status: In Development</p>
+            <div className="space-y-2 text-left">
+              <div className="flex items-center gap-2 text-xs">
+                <Check className="w-3 h-3 text-green-400" />
+                <span className="text-muted-foreground">Code generation from natural language</span>
+              </div>
+              <div className="flex items-center gap-2 text-xs">
+                <Check className="w-3 h-3 text-green-400" />
+                <span className="text-muted-foreground">Debug script errors automatically</span>
+              </div>
+              <div className="flex items-center gap-2 text-xs">
+                <Check className="w-3 h-3 text-green-400" />
+                <span className="text-muted-foreground">Generate 3D scenes from descriptions</span>
+              </div>
+              <div className="flex items-center gap-2 text-xs">
+                <Check className="w-3 h-3 text-green-400" />
+                <span className="text-muted-foreground">Suggest gameplay improvements</span>
+              </div>
+            </div>
+            <button
+              onClick={() => toast.info("AI Assistant is under development — check back soon!")}
+              className="mt-4 w-full px-4 py-2 rounded-lg glass hover:bg-white/10 text-sm font-medium transition-all"
+            >
+              Notify Me When Ready
+            </button>
+          </div>
+        </div>
+      </section>
+
       {/* Footer */}
       <footer className="border-t border-white/5 py-10 px-6">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
