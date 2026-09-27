@@ -21,6 +21,29 @@ import {
 import { useStudio } from "@/lib/studio-store";
 import { toast } from "sonner";
 
+interface MenuButtonProps {
+  label: string;
+  children?: React.ReactNode;
+  menuKey?: string;
+  menuOpen: string | null;
+  setMenuOpen: (s: string | null) => void;
+}
+
+function MenuButton({ label, children, menuKey, menuOpen, setMenuOpen }: MenuButtonProps) {
+  return (
+    <button
+      className="tool-btn"
+      onClick={(e) => {
+        e.stopPropagation();
+        if (menuKey) setMenuOpen(menuOpen === menuKey ? null : menuKey);
+      }}
+    >
+      {children}
+      <span>{label}</span>
+    </button>
+  );
+}
+
 export function TopBar() {
   const {
     files,
@@ -60,7 +83,6 @@ export function TopBar() {
     }
     setRunState("loading");
     setPyodideLoading(true);
-    // The PreviewPane watches runState === 'loading' and starts the game.
     addConsole("system", `Running ${activeFile}…`);
   };
 
@@ -70,7 +92,6 @@ export function TopBar() {
   };
 
   const handleSave = () => {
-    // Files are persisted via Zustand; we just confirm.
     toast.success("All files saved.");
     addConsole("success", "Files saved to local storage.");
   };
@@ -81,27 +102,6 @@ export function TopBar() {
       window.location.reload();
     }
   };
-
-  const MenuButton = ({
-    label,
-    children,
-    menuKey,
-  }: {
-    label: string;
-    children?: React.ReactNode;
-    menuKey?: string;
-  }) => (
-    <button
-      className="tool-btn"
-      onClick={(e) => {
-        e.stopPropagation();
-        if (menuKey) setMenuOpen(menuOpen === menuKey ? null : menuKey);
-      }}
-    >
-      {children}
-      <span>{label}</span>
-    </button>
-  );
 
   return (
     <div className="flex items-stretch h-10 bg-[var(--studio-toolbar)] border-b border-border select-none">
@@ -117,19 +117,19 @@ export function TopBar() {
 
       {/* Menu items */}
       <div className="flex items-center gap-1 px-2">
-        <MenuButton label="File" menuKey="file">
+        <MenuButton label="File" menuKey="file" menuOpen={menuOpen} setMenuOpen={setMenuOpen}>
           <FileText className="w-3.5 h-3.5" />
         </MenuButton>
-        <MenuButton label="Edit" menuKey="edit">
+        <MenuButton label="Edit" menuKey="edit" menuOpen={menuOpen} setMenuOpen={setMenuOpen}>
           <ChevronDown className="w-3 h-3 opacity-50" />
         </MenuButton>
-        <MenuButton label="View" menuKey="view">
+        <MenuButton label="View" menuKey="view" menuOpen={menuOpen} setMenuOpen={setMenuOpen}>
           <ChevronDown className="w-3 h-3 opacity-50" />
         </MenuButton>
-        <MenuButton label="Insert" menuKey="insert">
+        <MenuButton label="Insert" menuKey="insert" menuOpen={menuOpen} setMenuOpen={setMenuOpen}>
           <ChevronDown className="w-3 h-3 opacity-50" />
         </MenuButton>
-        <MenuButton label="Help" menuKey="help">
+        <MenuButton label="Help" menuKey="help" menuOpen={menuOpen} setMenuOpen={setMenuOpen}>
           <ChevronDown className="w-3 h-3 opacity-50" />
         </MenuButton>
       </div>

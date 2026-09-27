@@ -112,6 +112,7 @@ export function PreviewPane() {
   useEffect(() => {
     if (runState !== "loading") return;
     let cancelled = false;
+    /* eslint-disable react-hooks/set-state-in-effect */
     setError(null);
 
     const code = activeFile ? files[activeFile]?.content ?? "" : "";
@@ -160,7 +161,7 @@ export function PreviewPane() {
     return () => {
       cancelled = true;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    /* eslint-enable react-hooks/set-state-in-effect */
   }, [runState]);
 
   // ---- Phase 2: Drive the rAF loop when runState is "running".
@@ -214,7 +215,6 @@ export function PreviewPane() {
         rafRef.current = null;
       }
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [runState]);
 
   // Stop the game when runState goes to idle/error
