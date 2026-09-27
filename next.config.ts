@@ -17,11 +17,11 @@ const nextConfig: NextConfig = {
   reactStrictMode: false,
   // Trailing slash for static hosting
   trailingSlash: isGitHubPages,
-  // Webpack config to ensure @ alias resolves (Turbopack doesn't in CI)
-  webpack: (config, { dir }) => {
+  // Webpack config to ensure @ alias resolves
+  webpack: (config) => {
     config.resolve.alias = {
       ...config.resolve.alias,
-      "@": path.join(dir, "src"),
+      "@": path.resolve(process.cwd(), "src"),
     };
     return config;
   },
