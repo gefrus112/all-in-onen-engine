@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import path from "path";
 
 const isGitHubPages = process.env.GITHUB_ACTIONS === "true" || process.env.CI === "true";
 
@@ -16,11 +17,11 @@ const nextConfig: NextConfig = {
   reactStrictMode: false,
   // Trailing slash for static hosting
   trailingSlash: isGitHubPages,
-  // Webpack config to ensure @ alias resolves (Turbopack has issues with tsconfig paths in CI)
-  webpack: (config, { isServer }) => {
+  // Webpack config to ensure @ alias resolves (Turbopack doesn't in CI)
+  webpack: (config, { dir }) => {
     config.resolve.alias = {
       ...config.resolve.alias,
-      "@": "./src",
+      "@": path.join(dir, "src"),
     };
     return config;
   },
