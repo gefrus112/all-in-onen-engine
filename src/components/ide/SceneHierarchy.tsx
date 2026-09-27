@@ -14,7 +14,7 @@ import {
   ChevronDown,
   Search,
 } from "lucide-react";
-import { useStudio, SceneEntity } from "@/lib/studio-store";
+import { useStudio, SceneEntity } from "../../lib/studio-store";
 
 function iconForEntity(type: string) {
   switch (type.toLowerCase()) {

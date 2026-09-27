@@ -23,7 +23,7 @@ import {
   Home,
   User,
 } from "lucide-react";
-import { useStudio } from "@/lib/studio-store";
+import { useStudio } from "../../lib/studio-store";
 import { toast } from "sonner";
 
 interface MenuButtonProps {

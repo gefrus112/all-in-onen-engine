@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { Trash2, X, ChevronDown } from "lucide-react";
-import { useStudio } from "@/lib/studio-store";
+import { useStudio } from "../../lib/studio-store";
 
 export function Console() {
   const { consoleMessages, clearConsole } = useStudio();

@@ -15,7 +15,7 @@ import {
   Type, Square as SquareIcon, MousePointer2, Layout, Image as ImageIcon,
   FolderOpen, History, ChevronLeft,
 } from "lucide-react";
-import { useStudio } from "@/lib/studio-store";
+import { useStudio } from "../../lib/studio-store";
 import { toast } from "sonner";
 
 // 3D scene object types

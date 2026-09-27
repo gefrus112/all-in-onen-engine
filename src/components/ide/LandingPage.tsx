@@ -8,7 +8,7 @@ import {
   Box, Monitor, Apple, Chrome, BookOpen, Upload, Music, Send,
   Cpu, Globe, TrendingUp, Heart,
 } from "lucide-react";
-import { useStudio, EngineKind } from "@/lib/studio-store";
+import { useStudio, EngineKind } from "../../lib/studio-store";
 import { toast } from "sonner";
 
 const ENGINES: {

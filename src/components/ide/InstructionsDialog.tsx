@@ -6,8 +6,8 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
-} from "@/components/ui/dialog";
-import { useStudio } from "@/lib/studio-store";
+} from "../../components/ui/dialog";
+import { useStudio } from "../../lib/studio-store";
 import {
   Rocket, Wand2, Code2, Upload, Users, Send, Package, BookOpen,
 } from "lucide-react";

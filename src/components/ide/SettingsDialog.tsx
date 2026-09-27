@@ -6,12 +6,12 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
-} from "@/components/ui/dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
-import { Slider } from "@/components/ui/slider";
-import { useStudio, StudioTheme } from "@/lib/studio-store";
+} from "../../components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
+import { Switch } from "../../components/ui/switch";
+import { Label } from "../../components/ui/label";
+import { Slider } from "../../components/ui/slider";
+import { useStudio, StudioTheme } from "../../lib/studio-store";
 import { Palette, Settings2, Type, Volume2, Monitor, Sparkles } from "lucide-react";
 
 const THEMES: { id: StudioTheme; name: string; preview: string; colors: string[] }[] = [

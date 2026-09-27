@@ -1,7 +1,7 @@
 "use client";
 
 import { Boxes, FileCode2, Users, Gamepad2, Target, Zap } from "lucide-react";
-import { useStudio } from "@/lib/studio-store";
+import { useStudio } from "../../lib/studio-store";
 import { toast } from "sonner";
 
 interface Template {

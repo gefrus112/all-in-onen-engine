@@ -12,7 +12,7 @@ import {
   Plus,
   Trash2,
 } from "lucide-react";
-import { useStudio } from "@/lib/studio-store";
+import { useStudio } from "../../lib/studio-store";
 import { toast } from "sonner";
 
 function iconForFile(path: string, kind: string) {

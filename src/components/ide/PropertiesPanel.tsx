@@ -1,6 +1,6 @@
 "use client";
 
-import { useStudio, SceneEntity } from "@/lib/studio-store";
+import { useStudio, SceneEntity } from "../../lib/studio-store";
 import { Search, Settings2, ChevronDown, ChevronRight } from "lucide-react";
 import { useState, useMemo } from "react";
 

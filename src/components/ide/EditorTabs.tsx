@@ -1,7 +1,7 @@
 "use client";
 
 import { X, Circle } from "lucide-react";
-import { useStudio } from "@/lib/studio-store";
+import { useStudio } from "../../lib/studio-store";
 
 function kindIcon(kind: string) {
   const color =

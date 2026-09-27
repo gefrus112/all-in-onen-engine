@@ -1,6 +1,6 @@
 "use client";
 
-import { useStudio } from "@/lib/studio-store";
+import { useStudio } from "../../lib/studio-store";
 import { GitBranch, Wifi, Cpu, Activity, Box, Check } from "lucide-react";
 
 export function StatusBar() {

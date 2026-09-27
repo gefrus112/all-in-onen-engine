@@ -2,12 +2,12 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Play, Loader2, Monitor, Smartphone } from "lucide-react";
-import { useStudio } from "@/lib/studio-store";
+import { useStudio } from "../../lib/studio-store";
 import {
   loadPyodide,
   startGame,
   type LapiaGameHandle,
-} from "@/lib/pyodide-runner";
+} from "../../lib/pyodide-runner";
 
 export function PreviewPane() {
   const {

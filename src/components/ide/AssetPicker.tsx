@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Image as ImageIcon, Search, ChevronDown, ChevronRight, X } from "lucide-react";
-import { useStudio } from "@/lib/studio-store";
+import { useStudio } from "../../lib/studio-store";
 import { toast } from "sonner";
 
 interface SpriteManifestItem {

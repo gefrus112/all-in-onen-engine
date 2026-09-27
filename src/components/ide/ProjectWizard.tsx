@@ -8,11 +8,11 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { useStudio } from "@/lib/studio-store";
+} from "../../components/ui/dialog";
+import { Button } from "../../components/ui/button";
+import { Input } from "../../components/ui/input";
+import { Label } from "../../components/ui/label";
+import { useStudio } from "../../lib/studio-store";
 import { toast } from "sonner";
 import {
   Rocket, Folder, Package, FileCode2, ChevronRight, ChevronLeft, Check,

@@ -7,9 +7,9 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { useStudio, AvatarPreset } from "@/lib/studio-store";
+} from "../../components/ui/dialog";
+import { Button } from "../../components/ui/button";
+import { useStudio, AvatarPreset } from "../../lib/studio-store";
 import { User, Check } from "lucide-react";
 
 const AVATAR_PRESETS: { id: AvatarPreset; name: string; sprite: string; defaultColor: string }[] = [

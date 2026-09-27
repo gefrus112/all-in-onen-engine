@@ -2,34 +2,34 @@
 
 import dynamic from "next/dynamic";
 import { useEffect, useState, useCallback } from "react";
-import { TopBar } from "@/components/ide/TopBar";
-import { FileExplorer } from "@/components/ide/FileExplorer";
-import { SceneHierarchy } from "@/components/ide/SceneHierarchy";
-import { PropertiesPanel } from "@/components/ide/PropertiesPanel";
-import { Console } from "@/components/ide/Console";
-import { StatusBar } from "@/components/ide/StatusBar";
-import { EditorTabs } from "@/components/ide/EditorTabs";
-import { PreviewPane } from "@/components/ide/PreviewPane";
-import { AssetPicker } from "@/components/ide/AssetPicker";
-import { TemplatesPanel } from "@/components/ide/TemplatesPanel";
-import { LandingPage } from "@/components/ide/LandingPage";
-import { SettingsDialog } from "@/components/ide/SettingsDialog";
-import { ProjectWizard } from "@/components/ide/ProjectWizard";
-import { GitHubAuth } from "@/components/ide/GitHubAuth";
-import { Studio3D } from "@/components/ide/Studio3D";
-import { AvatarPicker } from "@/components/ide/AvatarPicker";
-import { PublishDialog } from "@/components/ide/PublishDialog";
-import { InstructionsDialog } from "@/components/ide/InstructionsDialog";
-import { useStudio } from "@/lib/studio-store";
+import { TopBar } from "../components/ide/TopBar";
+import { FileExplorer } from "../components/ide/FileExplorer";
+import { SceneHierarchy } from "../components/ide/SceneHierarchy";
+import { PropertiesPanel } from "../components/ide/PropertiesPanel";
+import { Console } from "../components/ide/Console";
+import { StatusBar } from "../components/ide/StatusBar";
+import { EditorTabs } from "../components/ide/EditorTabs";
+import { PreviewPane } from "../components/ide/PreviewPane";
+import { AssetPicker } from "../components/ide/AssetPicker";
+import { TemplatesPanel } from "../components/ide/TemplatesPanel";
+import { LandingPage } from "../components/ide/LandingPage";
+import { SettingsDialog } from "../components/ide/SettingsDialog";
+import { ProjectWizard } from "../components/ide/ProjectWizard";
+import { GitHubAuth } from "../components/ide/GitHubAuth";
+import { Studio3D } from "../components/ide/Studio3D";
+import { AvatarPicker } from "../components/ide/AvatarPicker";
+import { PublishDialog } from "../components/ide/PublishDialog";
+import { InstructionsDialog } from "../components/ide/InstructionsDialog";
+import { useStudio } from "../lib/studio-store";
 import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
-} from "@/components/ui/resizable";
+} from "../components/ui/resizable";
 
 // Monaco editor must be loaded client-side only.
 const CodeEditor = dynamic(
-  () => import("@/components/ide/CodeEditor").then((m) => m.CodeEditor),
+  () => import("../components/ide/CodeEditor").then((m) => m.CodeEditor),
   { ssr: false, loading: () => <div className="p-4 text-muted-foreground text-sm">Loading editor…</div> }
 );
 

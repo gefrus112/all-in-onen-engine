@@ -7,9 +7,9 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { useStudio } from "@/lib/studio-store";
+} from "../../components/ui/dialog";
+import { Button } from "../../components/ui/button";
+import { useStudio } from "../../lib/studio-store";
 import { toast } from "sonner";
 import {
   Send, Gamepad2, Zap, Github, Globe, Download, Check, ArrowRight,

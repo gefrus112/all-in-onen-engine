@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import Editor, { OnMount } from "@monaco-editor/react";
-import { useStudio } from "@/lib/studio-store";
+import { useStudio } from "../../lib/studio-store";
 
 const MONACO_THEME = "lapia-dark";
 

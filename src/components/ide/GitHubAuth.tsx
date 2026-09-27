@@ -7,9 +7,9 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { useStudio } from "@/lib/studio-store";
+} from "../../components/ui/dialog";
+import { Button } from "../../components/ui/button";
+import { useStudio } from "../../lib/studio-store";
 import { Github, LogOut, User, Check } from "lucide-react";
 
 export function GitHubAuth() {
