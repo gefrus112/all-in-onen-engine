@@ -56,3 +56,66 @@ Stage Summary:
 - Verified working end-to-end: Play → compile Python → render to canvas → keyboard input → game responds
 - 1165 files committed, ready to push to GitHub
 - Push credentials required from user (push-to-github.sh script provided)
+
+---
+Task ID: v2
+Agent: main
+Task: Fix bugs, make pygame preview cooler + bigger, add sprite asset picker, add multiplayer templates using socket.io, make it more like Roblox Studio, push to GitHub with provided PAT.
+
+Work Log:
+- Generated 55 sprite assets programmatically using Python (scripts/gen_sprites.py):
+  - 6 player characters (knight, mage, archer, rogue, wizard, robot) — 32x32
+  - 10 enemies (slimes x5, bats x2, ghosts x2, spider) — 32x32
+  - 9 tiles (grass, dirt, stone, water, lava, sand, snow, wood, brick) — 32x32
+  - 8 coins/gems (gold/silver/copper coins, emerald/ruby/sapphire/diamond gems, star) — 16x16
+  - 8 power-ups (heart, potions x4, speed boot, shield, key) — 16x16
+  - 5 projectiles (fireball, iceball, lightning, poison, arrow) — 8x8
+  - 6 particles (sparks x4, smoke, magic) — 8x8
+  - 4 UI icons (heart, star, coin, flag) — 16x16
+- Generated manifest.json (scripts/gen_sprite_manifest.py) — 8 categories, 55 sprites
+- Built AssetPicker component (src/components/ide/AssetPicker.tsx) with:
+  - Category tree with expand/collapse
+  - Search filter
+  - Click-to-copy Python code to clipboard
+  - Pixel-art grid layout with hover labels
+- Built TemplatesPanel component (src/components/ide/TemplatesPanel.tsx) with 4 templates:
+  - Platformer (player movement, gravity, jumping, tilemap collision)
+  - Top-Down Shooter (player rotation, shooting, enemy spawning, particles)
+  - Multiplayer Arena (socket.io, 2-4 players, real-time position sync)
+  - Physics Sandbox (bouncing balls, gravity, walls, restitution, ball-ball collisions)
+- Built multiplayer-relay mini-service (mini-services/multiplayer-relay/):
+  - socket.io server on port 3001
+  - Player join/leave/state_update protocol
+  - 5s auto-cleanup of stale players
+  - CORS enabled, bound to 0.0.0.0
+- Built MultiplayerClient Python class (in multiplayer_template.py) that bridges Pyodide to socket.io via JS
+- Updated store (src/lib/studio-store.ts):
+  - Added showAssetPicker, showToolbox, selectedSpritePath state
+  - Persisted new state in localStorage
+- Updated TopBar (src/components/ide/TopBar.tsx):
+  - Added Toolbox toggle (Boxes icon)
+  - Added Asset Picker toggle (Image icon)
+- Updated page.tsx to use new 4-panel layout:
+  - Explorer | Toolbox (AssetPicker + Templates) | Editor+Preview | Properties+Console
+- Made preview bigger and cooler:
+  - Canvas can be up to 900px wide (was 800px max)
+  - Added CRT scanline effect via CSS
+  - Added radial vignette
+  - Added blue glow around canvas
+  - Scale button cycles 1x → 1.5x → 2x (was toggle 1x/2x)
+- Auto-loads socket.io client from CDN and connects to relay on IDE startup
+- Created start-multiplayer.sh helper script
+- Lint passes with 0 errors
+- Pushed to GitHub (force push, since remote only had stub README):
+  - All 6 commits now on github.com/gefrus112/lapia-ai-agent
+  - Token used inline for one push, then remote URL reset to clean URL
+  - Verified: git fetch shows all commits on remote
+
+Stage Summary:
+- 55 sprite assets + manifest.json
+- 2 new IDE panels (AssetPicker + TemplatesPanel)
+- 4 starter templates (including multiplayer arena)
+- Multiplayer relay mini-service running on port 3001
+- Bigger, CRT-styled preview pane
+- All pushed to GitHub: https://github.com/gefrus112/lapia-ai-agent
+- IDE verified working end-to-end: platformer runs at 59 FPS with 102 draw calls
