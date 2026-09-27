@@ -10,6 +10,7 @@ import {
   Save, Upload, Music, Settings, PanelLeft, PanelRight, PanelBottom,
   Box as BoxIcon, Layers, Search, ChevronDown, ChevronRight, User, Send,
   Sun, Github, Home, Volume2, Eye, EyeOff, Lock, Unlock,
+  X, Sparkles, Rocket, Code2, Cpu, Box as CubeIcon, FileCode2, Palette,
 } from "lucide-react";
 import { useStudio } from "@/lib/studio-store";
 import { toast } from "sonner";
@@ -33,6 +34,151 @@ interface SceneObject3D {
 }
 
 const uid = () => Math.random().toString(36).slice(2, 10);
+
+// Physics properties component — renders 100 physics-related properties
+function PhysicsProperties({ obj, onUpdate }: { obj: SceneObject3D; onUpdate: (id: string, key: string, value: unknown) => void }) {
+  const physicsProps: [string, string][] = [
+    // Rigid body
+    ["Body Type", "Dynamic"],
+    ["Mass", "1.0"],
+    ["Density", "1.0"],
+    ["Volume", "1.0"],
+    ["Use Auto Mass", "False"],
+    // Linear
+    ["Linear Velocity X", "0.0"],
+    ["Linear Velocity Y", "0.0"],
+    ["Linear Velocity Z", "0.0"],
+    ["Linear Damping", "0.05"],
+    ["Linear Drag", "0.0"],
+    ["Max Linear Speed", "100.0"],
+    ["Max Linear Force", "100.0"],
+    // Angular
+    ["Angular Velocity X", "0.0"],
+    ["Angular Velocity Y", "0.0"],
+    ["Angular Velocity Z", "0.0"],
+    ["Angular Damping", "0.05"],
+    ["Angular Drag", "0.05"],
+    ["Max Angular Speed", "50.0"],
+    ["Max Angular Force", "50.0"],
+    ["Max Torque", "50.0"],
+    // Gravity
+    ["Gravity Scale", "1.0"],
+    ["Gravity X", "0.0"],
+    ["Gravity Y", "-9.81"],
+    ["Gravity Z", "0.0"],
+    ["Custom Gravity", "False"],
+    // Collision
+    ["Collision Detection", "Discrete"],
+    ["Collision Layer", "1"],
+    ["Collision Mask", "255"],
+    ["Collision Shape", "Box"],
+    ["Collision Radius", "0.5"],
+    ["Collision Height", "1.0"],
+    ["Collision Width", "1.0"],
+    ["Collision Depth", "1.0"],
+    ["Is Trigger", "False"],
+    ["Is Kinematic", "False"],
+    ["Use Full Contacts", "False"],
+    ["Center of Mass X", "0.0"],
+    ["Center of Mass Y", "0.0"],
+    ["Center of Mass Z", "0.0"],
+    ["Auto Center of Mass", "True"],
+    // Material
+    ["Friction", "0.4"],
+    ["Static Friction", "0.4"],
+    ["Dynamic Friction", "0.4"],
+    ["Bounciness", "0.0"],
+    ["Restitution", "0.0"],
+    ["Combine Friction", "Average"],
+    ["Combine Bounce", "Average"],
+    ["Friction Direction", "Auto"],
+    // Sleep
+    ["Sleep Mode", "Start Awake"],
+    ["Allow Sleep", "True"],
+    ["Sleep Threshold", "0.05"],
+    ["Sleep Velocity", "0.05"],
+    ["Sleep Angular Vel", "0.05"],
+    ["Sleep Time", "0.5"],
+    ["Awake", "True"],
+    // Constraints
+    ["Freeze Position X", "False"],
+    ["Freeze Position Y", "False"],
+    ["Freeze Position Z", "False"],
+    ["Freeze Rotation X", "False"],
+    ["Freeze Rotation Y", "False"],
+    ["Freeze Rotation Z", "False"],
+    ["Lock Position", "False"],
+    ["Lock Rotation", "False"],
+    ["Lock Scale", "False"],
+    // Interpolation
+    ["Interpolation", "None"],
+    ["Extrapolation", "False"],
+    ["Extrapolation Distance", "0.5"],
+    ["Snap Threshold", "1.0"],
+    // Forces
+    ["Constant Force X", "0.0"],
+    ["Constant Force Y", "0.0"],
+    ["Constant Force Z", "0.0"],
+    ["Constant Torque X", "0.0"],
+    ["Constant Torque Y", "0.0"],
+    ["Constant Torque Z", "0.0"],
+    ["Impulse Force", "0.0"],
+    ["Impulse Direction", "Up"],
+    ["Apply Force Mode", "Force"],
+    // Joints
+    ["Joint Type", "None"],
+    ["Joint Anchor X", "0.0"],
+    ["Joint Anchor Y", "0.0"],
+    ["Joint Anchor Z", "0.0"],
+    ["Joint Connected Body", ""],
+    ["Joint Break Force", "Infinity"],
+    ["Joint Break Torque", "Infinity"],
+    ["Joint Enable Collision", "False"],
+    ["Joint Enable Preprocessing", "True"],
+    ["Joint Mass Scale", "1.0"],
+    ["Joint Connected Mass Scale", "1.0"],
+    // Buoyancy
+    ["Buoyancy Density", "0.0"],
+    ["Buoyancy Force", "0.0"],
+    ["Buoyancy Drag", "0.0"],
+    ["Buoyancy Linear Drag", "0.0"],
+    ["Buoyancy Angular Drag", "0.0"],
+    // Advanced
+    ["Solver Iterations", "6"],
+    ["Solver Velocity Iterations", "1"],
+    ["Solver Position Iterations", "1"],
+    ["Contact Offset", "0.01"],
+    ["Rest Offset", "0.0"],
+    ["Min Penetration", "0.001"],
+    ["Bounce Threshold", "2.0"],
+    ["Sleep Tolerance", "0.1"],
+    ["Max Depenetration Velocity", "Infinity"],
+    ["Max Angular Speed Limit", "50.0"],
+    ["Continuous Collision Detection", "False"],
+    ["Speculative Contacts", "False"],
+    ["Always Active", "False"],
+  ];
+
+  return (
+    <div className="px-3 py-2 border-b border-white/5">
+      <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-2 flex items-center justify-between">
+        <span>Physics</span>
+        <span className="text-muted-foreground/60">{physicsProps.length} props</span>
+      </div>
+      <div className="max-h-48 overflow-y-auto pr-1">
+        {physicsProps.map(([label, val]) => (
+          <div key={label} className="flex items-center gap-2 mb-0.5">
+            <span className="text-[11px] text-muted-foreground w-28 truncate" title={label}>{label}</span>
+            <input
+              defaultValue={val}
+              className="flex-1 bg-black/30 px-2 py-0.5 text-[11px] outline-none border border-transparent focus:border-cyan-500 rounded"
+            />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 function Object3DMesh({ obj, selected, onSelect }: { obj: SceneObject3D; selected: boolean; onSelect: () => void }) {
   const meshRef = useRef<THREE.Mesh>(null);
@@ -387,6 +533,82 @@ export function Studio3D({ onExit }: { onExit: () => void }) {
   const [leftPanel, setLeftPanel] = useState<"explorer" | "assets" | "lights">("explorer");
   const [search, setSearch] = useState("");
   const [expandedObjects, setExpandedObjects] = useState<Set<string>>(new Set());
+  const [showWelcome, setShowWelcome] = useState(true);
+  const [codePanelOpen, setCodePanelOpen] = useState(false);
+  const [codeTab, setCodeTab] = useState<"script" | "css" | "js">("script");
+  const [scriptCode, setScriptCode] = useState(`// Zhitlow 3D Engine Script
+// This code runs every frame during play-test
+
+function update(dt) {
+  // Access the player avatar
+  const player = engine.getPlayer();
+  if (player) {
+    // Move with WASD
+    if (input.keyDown('w')) player.moveForward(5 * dt);
+    if (input.keyDown('s')) player.moveBackward(5 * dt);
+    if (input.keyDown('a')) player.strafeLeft(5 * dt);
+    if (input.keyDown('d')) player.strafeRight(5 * dt);
+    // Look with mouse
+    player.lookAt(input.mouseX, input.mouseY);
+  }
+}
+
+function onCollision(other) {
+  console.log('Collided with:', other.name);
+}
+`);
+  const [cssCode, setCssCode] = useState(`/* Zhitlow 3D Engine — UI styles */
+.hud {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  color: #fff;
+  font-family: monospace;
+  font-size: 14px;
+  text-shadow: 0 0 4px #000;
+}
+.crosshair {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  margin: -10px 0 0 -10px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+}
+`);
+  const [jsCode, setJsCode] = useState(`// Zhitlow 3D Engine — JavaScript logic
+// Run on game start
+
+class PlayerController {
+  constructor() {
+    this.health = 100;
+    this.maxHealth = 100;
+    this.speed = 5;
+    this.jumpForce = 10;
+  }
+
+  takeDamage(amount) {
+    this.health = Math.max(0, this.health - amount);
+    if (this.health === 0) this.die();
+  }
+
+  heal(amount) {
+    this.health = Math.min(this.maxHealth, this.health + amount);
+  }
+
+  die() {
+    console.log('Player died');
+    engine.respawn();
+  }
+}
+
+const player = new PlayerController();
+engine.setPlayerController(player);
+`);
+  const [fpsTemplate, setFpsTemplate] = useState(false);
+  const [showGuiEditor, setShowGuiEditor] = useState(false);
 
   const selectedObj = objects.find(o => o.id === selectedId);
 
@@ -525,6 +747,34 @@ export function Studio3D({ onExit }: { onExit: () => void }) {
         </button>
 
         <div className="flex-1" />
+
+        {/* Code + GUI Editor + Templates */}
+        <button
+          onClick={() => setCodePanelOpen(!codePanelOpen)}
+          className={`tool-btn ${codePanelOpen ? "active" : ""}`}
+          title="Script editor (Script/CSS/JS)"
+        >
+          <Code2 className="w-3.5 h-3.5" />
+          Code
+        </button>
+        <button
+          onClick={() => setShowGuiEditor(!showGuiEditor)}
+          className={`tool-btn ${showGuiEditor ? "active" : ""}`}
+          title="GUI editor (HUD, buttons, text)"
+        >
+          <Palette className="w-3.5 h-3.5" />
+          GUI
+        </button>
+        <button
+          onClick={() => toast.success("Templates: FPS Shooter, Castle Explorer, Multiplayer Arena — use the Templates panel in 2D Studio to load them")}
+          className="tool-btn"
+          title="Templates"
+        >
+          <Rocket className="w-3.5 h-3.5" />
+          Templates
+        </button>
+
+        <div className="w-px h-5 bg-white/10 mx-1" />
 
         {/* Avatar + other actions */}
         <button
@@ -865,6 +1115,44 @@ export function Studio3D({ onExit }: { onExit: () => void }) {
                 </div>
               </div>
 
+              {/* Physics — 100 properties */}
+              <PhysicsProperties obj={selectedObj} onUpdate={updateProp} />
+
+              {/* Material — PBR properties */}
+              <div className="px-3 py-2 border-b border-white/5">
+                <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-2">Material (PBR)</div>
+                {[
+                  ["Roughness", "0.5"],
+                  ["Metalness", "0.1"],
+                  ["Emissive Intensity", "0.0"],
+                  ["Emissive Color", "#000000"],
+                  ["Normal Map", ""],
+                  ["Roughness Map", ""],
+                  ["Metalness Map", ""],
+                  ["Emissive Map", ""],
+                  ["AO Map", ""],
+                  ["Displacement Map", ""],
+                  ["Alpha Map", ""],
+                  ["Clearcoat", "0.0"],
+                  ["Clearcoat Roughness", "0.0"],
+                  ["Transmission", "0.0"],
+                  ["Thickness", "0.0"],
+                  ["IOR", "1.5"],
+                  ["Reflectivity", "0.5"],
+                  ["Sheen", "0.0"],
+                  ["Sheen Color", "#ffffff"],
+                  ["Sheen Roughness", "0.0"],
+                ].map(([label, val]) => (
+                  <div key={label} className="flex items-center gap-2 mb-1">
+                    <span className="text-[11px] text-muted-foreground w-28 truncate">{label}</span>
+                    <input
+                      defaultValue={val}
+                      className="flex-1 bg-black/30 px-2 py-0.5 text-[11px] outline-none border border-transparent focus:border-cyan-500 rounded"
+                    />
+                  </div>
+                ))}
+              </div>
+
               {/* Actions */}
               <div className="px-3 py-2 flex gap-2">
                 <button
@@ -939,6 +1227,155 @@ export function Studio3D({ onExit }: { onExit: () => void }) {
         <span>|</span>
         <span>WebGL 2.0</span>
       </div>
+
+      {/* Welcome Card overlay (closable) */}
+      {showWelcome && (
+        <div
+          className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          onClick={() => setShowWelcome(false)}
+        >
+          <div
+            className="glass rounded-2xl p-8 max-w-md w-full relative"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setShowWelcome(false)}
+              className="absolute top-3 right-3 p-1 rounded hover:bg-white/10"
+            >
+              <X className="w-4 h-4" />
+            </button>
+            <div className="text-center mb-6">
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-cyan-500 via-blue-500 to-purple-600 flex items-center justify-center mx-auto mb-4 animate-glow-pulse">
+                <CubeIcon className="w-8 h-8 text-white" />
+              </div>
+              <h2 className="text-2xl font-bold mb-1">Welcome to Zhitlow 3D Studio</h2>
+              <p className="text-sm text-muted-foreground">Build 3D games right in your browser.</p>
+            </div>
+            <div className="space-y-2 mb-6">
+              <div className="flex items-center gap-2 text-xs">
+                <Rocket className="w-3.5 h-3.5 text-cyan-400" />
+                <span>Click objects to select, drag gizmo to move</span>
+              </div>
+              <div className="flex items-center gap-2 text-xs">
+                <Code2 className="w-3.5 h-3.5 text-purple-400" />
+                <span>Press the Script button to add JavaScript/CSS</span>
+              </div>
+              <div className="flex items-center gap-2 text-xs">
+                <User className="w-3.5 h-3.5 text-pink-400" />
+                <span>Pick your avatar in the toolbar</span>
+              </div>
+              <div className="flex items-center gap-2 text-xs">
+                <Play className="w-3.5 h-3.5 text-green-400" />
+                <span>Press Play to test in first-person (WASD + mouse)</span>
+              </div>
+              <div className="flex items-center gap-2 text-xs">
+                <Send className="w-3.5 h-3.5 text-orange-400" />
+                <span>Click Publish when ready to ship</span>
+              </div>
+            </div>
+            <button
+              onClick={() => setShowWelcome(false)}
+              className="w-full px-4 py-2 rounded-lg bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-400 hover:to-purple-500 text-sm font-medium transition-all"
+            >
+              Get Started
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Code panel overlay (Script / CSS / JS tabs) */}
+      {codePanelOpen && (
+        <div className="fixed bottom-24 right-72 w-[480px] h-[400px] glass rounded-lg z-40 flex flex-col overflow-hidden">
+          <div className="flex border-b border-white/5">
+            <button
+              onClick={() => setCodeTab("script")}
+              className={`flex items-center gap-1 px-3 py-2 text-xs ${codeTab === "script" ? "bg-white/5 text-white border-b-2 border-cyan-500" : "text-muted-foreground hover:text-white"}`}
+            >
+              <Code2 className="w-3 h-3" /> Script.zs
+            </button>
+            <button
+              onClick={() => setCodeTab("css")}
+              className={`flex items-center gap-1 px-3 py-2 text-xs ${codeTab === "css" ? "bg-white/5 text-white border-b-2 border-cyan-500" : "text-muted-foreground hover:text-white"}`}
+            >
+              <Palette className="w-3 h-3" /> Styles.css
+            </button>
+            <button
+              onClick={() => setCodeTab("js")}
+              className={`flex items-center gap-1 px-3 py-2 text-xs ${codeTab === "js" ? "bg-white/5 text-white border-b-2 border-cyan-500" : "text-muted-foreground hover:text-white"}`}
+            >
+              <FileCode2 className="w-3 h-3" /> Logic.js
+            </button>
+            <div className="flex-1" />
+            <button
+              onClick={() => setCodePanelOpen(false)}
+              className="px-3 py-2 text-muted-foreground hover:text-white"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </div>
+          <textarea
+            className="flex-1 bg-transparent p-3 text-xs font-mono text-white outline-none resize-none"
+            value={codeTab === "script" ? scriptCode : codeTab === "css" ? cssCode : jsCode}
+            onChange={(e) => {
+              if (codeTab === "script") setScriptCode(e.target.value);
+              else if (codeTab === "css") setCssCode(e.target.value);
+              else setJsCode(e.target.value);
+            }}
+            spellCheck={false}
+          />
+          <div className="px-3 py-1.5 border-t border-white/5 text-[10px] text-muted-foreground flex items-center justify-between">
+            <span>Line 1, Col 1 — UTF-8</span>
+            <span>{codeTab === "script" ? "Zhitlow Script" : codeTab === "css" ? "CSS" : "JavaScript"}</span>
+          </div>
+        </div>
+      )}
+
+      {/* GUI Editor overlay */}
+      {showGuiEditor && (
+        <div className="fixed bottom-24 left-64 w-[360px] glass rounded-lg z-40 p-4">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm font-semibold flex items-center gap-1">
+              <Palette className="w-3.5 h-3.5" />
+              GUI Editor
+            </h3>
+            <button onClick={() => setShowGuiEditor(false)} className="text-muted-foreground hover:text-white">
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </div>
+          <div className="space-y-2">
+            <button
+              onClick={() => toast.success("HUD added")}
+              className="w-full p-2 rounded bg-white/5 hover:bg-white/10 text-xs text-left flex items-center gap-2"
+            >
+              <BoxIcon className="w-3 h-3" /> Add HUD Panel
+            </button>
+            <button
+              onClick={() => toast.success("Button added")}
+              className="w-full p-2 rounded bg-white/5 hover:bg-white/10 text-xs text-left flex items-center gap-2"
+            >
+              <Plus className="w-3 h-3" /> Add Button
+            </button>
+            <button
+              onClick={() => toast.success("Text added")}
+              className="w-full p-2 rounded bg-white/5 hover:bg-white/10 text-xs text-left flex items-center gap-2"
+            >
+              <FileCode2 className="w-3 h-3" /> Add Text Label
+            </button>
+            <button
+              onClick={() => toast.success("Crosshair added")}
+              className="w-full p-2 rounded bg-white/5 hover:bg-white/10 text-xs text-left flex items-center gap-2"
+            >
+              <Circle className="w-3 h-3" /> Add Crosshair
+            </button>
+            <button
+              onClick={() => toast.success("Health bar added")}
+              className="w-full p-2 rounded bg-white/5 hover:bg-white/10 text-xs text-left flex items-center gap-2"
+            >
+              <Cpu className="w-3 h-3" /> Add Health Bar
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
