@@ -6,7 +6,11 @@ Lapia Studio is a Roblox Studio-style web IDE for building 2D Python games.
 It pairs a batteries-included Python/Pygame engine with an in-browser editor
 that compiles and runs your game live via Pyodide — no install, no setup.
 
-![Lapia Studio](download/studio-screenshot.png)
+Includes a built-in sprite asset library (55 sprites), 4 starter templates
+(platformer, top-down shooter, **multiplayer arena via socket.io**, physics
+sandbox), and a socket.io multiplayer relay service.
+
+![Lapia Studio](download/studio-v2.png)
 
 ## What you get
 
@@ -48,11 +52,20 @@ core systems covering:
 A Roblox Studio-inspired web IDE built with Next.js 16 + TypeScript +
 Tailwind CSS 4 + shadcn/ui. Features:
 
+- **4-panel layout** — Explorer | Toolbox | Editor+Preview | Properties+Console (all resizable)
 - **Monaco code editor** with Python syntax highlighting, multi-tab editing,
   autosave to localStorage, Ctrl+S to save, F5 to run.
 - **Live preview** that actually runs your Python game in the browser via
   Pyodide + a custom canvas shim. Real-time at 60 FPS, with keyboard /
-  mouse / gamepad input piped through.
+  mouse / gamepad input piped through. CRT-style scanline glow effect.
+- **Asset Picker** — browse 55 built-in sprites (players, enemies, tiles,
+  coins, power-ups, projectiles, particles, UI icons) organized by category.
+  Click any sprite to copy paste-ready Python code to your clipboard.
+- **Templates panel** — 4 starter templates you can load with one click:
+  - **Platformer** — player movement, gravity, jumping, tilemap collision
+  - **Top-Down Shooter** — player rotation, shooting, enemy spawning, particles
+  - **Multiplayer Arena** — 2-4 player online arena via socket.io relay
+  - **Physics Sandbox** — bouncing balls with gravity, walls, restitution
 - **CSS editor** — styles the preview container around the canvas.
 - **File Explorer** — tree view of all your project files.
 - **Scene Hierarchy** — list of game objects in the current scene.
@@ -62,11 +75,24 @@ Tailwind CSS 4 + shadcn/ui. Features:
   timestamps and severity coloring.
 - **Status bar** — shows FPS, frame time, draw calls, entity count,
   Pyodide status, current file kind.
-- **Top toolbar** — Play / Stop / Pause controls, view toggles, GitHub
-  link.
+- **Top toolbar** — Play / Stop / Pause controls, view toggles for every
+  panel, GitHub link.
 - **Resizable panels** — drag handles to resize any panel.
 
-### 3. Demo Platformer
+### 3. Multiplayer Relay (`/mini-services/multiplayer-relay`)
+
+A lightweight socket.io server (Bun + TypeScript) that relays player state
+between browser sessions. Used by the Multiplayer Arena template.
+
+- Protocol: `join` → `player_joined`, `state_update` (bidirectional), `player_left`
+- Auto-cleanup of stale players (5s timeout)
+- Up to 4 players per room
+- CORS enabled for any origin
+- Bound to `0.0.0.0:3001` so it's reachable from other machines on your LAN
+
+Start it with: `./start-multiplayer.sh`
+
+### 4. Demo Platformer
 
 A complete platformer demo built with the engine showcasing:
 - Sprite rendering with player + enemies + coins
@@ -80,10 +106,11 @@ A complete platformer demo built with the engine showcasing:
 
 ## Quick start
 
-### Run the IDE locally
+### Run the IDE + multiplayer relay
 
 ```bash
 bun install
+./start-multiplayer.sh  # optional: starts socket.io relay on :3001
 bun run dev
 ```
 
