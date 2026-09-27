@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Zhitlow 3D Engine icon — a stylized "Z" with a glowing core -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <defs>
+    <linearGradient id="zBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0e7490"/>
+      <stop offset="50%" stop-color="#155e75"/>
+      <stop offset="100%" stop-color="#0c4a6e"/>
+    </linearGradient>
+    <linearGradient id="zBody" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#22d3ee"/>
+      <stop offset="50%" stop-color="#06b6d4"/>
+      <stop offset="100%" stop-color="#0891b2"/>
+    </linearGradient>
+    <radialGradient id="zCore" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#fef3c7"/>
+      <stop offset="40%" stop-color="#fbbf24"/>
+      <stop offset="100%" stop-color="#f59e0b"/>
+    </radialGradient>
+    <filter id="zGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <!-- Background -->
+  <rect x="8" y="8" width="112" height="112" rx="24" fill="url(#zBg)"/>
+  <rect x="12" y="12" width="104" height="104" rx="20" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1.5"/>
+
+  <!-- Hexagon frame (representing "engine"/structure) -->
+  <g transform="translate(64 64)" filter="url(#zGlow)">
+    <polygon points="0,-44 38,-22 38,22 0,44 -38,22 -38,-22"
+             fill="none" stroke="rgba(34,211,238,0.4)" stroke-width="1.5" stroke-dasharray="4 3"/>
+  </g>
+
+  <!-- "Z" letterform -->
+  <g transform="translate(64 64)" filter="url(#zGlow)">
+    <path d="M -28 -28 L 28 -28 L 28 -16 L -8 24 L 28 24 L 28 32 L -28 32 L -28 20 L 8 -20 L -28 -20 Z"
+          fill="url(#zBody)" stroke="#67e8f9" stroke-width="1.2" stroke-linejoin="round"/>
+    <!-- Inner glow -->
+    <path d="M -22 -22 L 22 -22 L 22 -18 L -10 22 L 22 22 L 22 26 L -22 26 L -22 22 L 12 -18 L -22 -18 Z"
+          fill="rgba(255,255,255,0.15)"/>
+  </g>
+
+  <!-- Glowing core (center of Z) -->
+  <circle cx="64" cy="64" r="6" fill="url(#zCore)" filter="url(#zGlow)"/>
+  <circle cx="64" cy="64" r="3" fill="#fef3c7"/>
+
+  <!-- Spark accents around -->
+  <g fill="#fbbf24">
+    <circle cx="22" cy="32" r="1.5"/>
+    <circle cx="106" cy="40" r="2"/>
+    <circle cx="28" cy="100" r="1.5"/>
+    <circle cx="100" cy="96" r="2"/>
+  </g>
+
+  <!-- Bottom "3D" tag -->
+  <g transform="translate(96 100)">
+    <rect x="-12" y="-9" width="24" height="18" rx="4" fill="#0c4a6e" stroke="#22d3ee" stroke-width="1"/>
+    <text x="0" y="4" font-family="ui-sans-serif, system-ui, sans-serif" font-size="10" font-weight="900" fill="#22d3ee" text-anchor="middle">3D</text>
+  </g>
+</svg>

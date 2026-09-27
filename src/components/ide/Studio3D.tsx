@@ -534,6 +534,7 @@ export function Studio3D({ onExit }: { onExit: () => void }) {
   const [search, setSearch] = useState("");
   const [expandedObjects, setExpandedObjects] = useState<Set<string>>(new Set());
   const [showWelcome, setShowWelcome] = useState(true);
+  const [welcomeTab, setWelcomeTab] = useState<"welcome" | "updates">("welcome");
   const [codePanelOpen, setCodePanelOpen] = useState(false);
   const [codeTab, setCodeTab] = useState<"script" | "css" | "js">("script");
   const [scriptCode, setScriptCode] = useState(`// Zhitlow 3D Engine Script
@@ -1228,14 +1229,14 @@ engine.setPlayerController(player);
         <span>WebGL 2.0</span>
       </div>
 
-      {/* Welcome Card overlay (closable) */}
+      {/* Welcome Card overlay (closable, with Welcome + Updates tabs) */}
       {showWelcome && (
         <div
           className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4"
           onClick={() => setShowWelcome(false)}
         >
           <div
-            className="glass rounded-2xl p-8 max-w-md w-full relative"
+            className="glass rounded-2xl p-6 max-w-lg w-full relative"
             onClick={(e) => e.stopPropagation()}
           >
             <button
@@ -1244,35 +1245,93 @@ engine.setPlayerController(player);
             >
               <X className="w-4 h-4" />
             </button>
-            <div className="text-center mb-6">
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-cyan-500 via-blue-500 to-purple-600 flex items-center justify-center mx-auto mb-4 animate-glow-pulse">
-                <CubeIcon className="w-8 h-8 text-white" />
-              </div>
-              <h2 className="text-2xl font-bold mb-1">Welcome to Zhitlow 3D Studio</h2>
-              <p className="text-sm text-muted-foreground">Build 3D games right in your browser.</p>
-            </div>
-            <div className="space-y-2 mb-6">
-              <div className="flex items-center gap-2 text-xs">
-                <Rocket className="w-3.5 h-3.5 text-cyan-400" />
-                <span>Click objects to select, drag gizmo to move</span>
-              </div>
-              <div className="flex items-center gap-2 text-xs">
-                <Code2 className="w-3.5 h-3.5 text-purple-400" />
-                <span>Press the Script button to add JavaScript/CSS</span>
-              </div>
-              <div className="flex items-center gap-2 text-xs">
-                <User className="w-3.5 h-3.5 text-pink-400" />
-                <span>Pick your avatar in the toolbar</span>
-              </div>
-              <div className="flex items-center gap-2 text-xs">
-                <Play className="w-3.5 h-3.5 text-green-400" />
-                <span>Press Play to test in first-person (WASD + mouse)</span>
-              </div>
-              <div className="flex items-center gap-2 text-xs">
-                <Send className="w-3.5 h-3.5 text-orange-400" />
-                <span>Click Publish when ready to ship</span>
+
+            {/* Header with Zhitlow icon */}
+            <div className="flex items-center gap-3 mb-5">
+              <img src="/engine-zhitlow.svg" alt="Zhitlow 3D" className="w-14 h-14" />
+              <div>
+                <h2 className="text-xl font-bold leading-tight">Zhitlow 3D Studio</h2>
+                <p className="text-xs text-cyan-400">v0.9.0 (beta) · Updated 2026-09-27</p>
               </div>
             </div>
+
+            {/* Tabs */}
+            <div className="flex border-b border-white/10 mb-4">
+              <button
+                onClick={() => setWelcomeTab("welcome")}
+                className={`px-4 py-2 text-xs font-medium ${welcomeTab === "welcome" ? "text-white border-b-2 border-cyan-500" : "text-muted-foreground hover:text-white"}`}
+              >
+                Welcome
+              </button>
+              <button
+                onClick={() => setWelcomeTab("updates")}
+                className={`px-4 py-2 text-xs font-medium ${welcomeTab === "updates" ? "text-white border-b-2 border-cyan-500" : "text-muted-foreground hover:text-white"}`}
+              >
+                What's New
+              </button>
+            </div>
+
+            {/* Welcome tab */}
+            {welcomeTab === "welcome" && (
+              <div className="space-y-2 mb-6">
+                <div className="flex items-center gap-2 text-xs">
+                  <Rocket className="w-3.5 h-3.5 text-cyan-400" />
+                  <span>Click objects to select, drag gizmo to move</span>
+                </div>
+                <div className="flex items-center gap-2 text-xs">
+                  <Code2 className="w-3.5 h-3.5 text-purple-400" />
+                  <span>Press the Code button to add Script/CSS/JS</span>
+                </div>
+                <div className="flex items-center gap-2 text-xs">
+                  <Palette className="w-3.5 h-3.5 text-pink-400" />
+                  <span>Open GUI editor for HUD, buttons, crosshair</span>
+                </div>
+                <div className="flex items-center gap-2 text-xs">
+                  <User className="w-3.5 h-3.5 text-blue-400" />
+                  <span>Pick your avatar in the toolbar</span>
+                </div>
+                <div className="flex items-center gap-2 text-xs">
+                  <Play className="w-3.5 h-3.5 text-green-400" />
+                  <span>Press Play to test in first-person (WASD)</span>
+                </div>
+                <div className="flex items-center gap-2 text-xs">
+                  <Send className="w-3.5 h-3.5 text-orange-400" />
+                  <span>Click Publish when ready to ship</span>
+                </div>
+              </div>
+            )}
+
+            {/* Updates tab */}
+            {welcomeTab === "updates" && (
+              <div className="mb-6">
+                <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-2 flex items-center gap-1">
+                  <Sparkles className="w-3 h-3 text-yellow-400" />
+                  Latest updates in v0.9.0
+                </div>
+                <ul className="space-y-1.5">
+                  {[
+                    "100 physics properties per object (joints, buoyancy, CCD)",
+                    "20 PBR material properties (clearcoat, transmission, IOR, sheen)",
+                    "Script/CSS/JS code editor with Zhitlow Script language",
+                    "GUI editor overlay (HUD, crosshair, health bar)",
+                    "Welcome card with tabbed updates (you're looking at it)",
+                    "Real SVG icons everywhere — no emojis",
+                    "3D Castle, 3D FPS Arena, 3D Multiplayer Arena templates",
+                  ].map((u, i) => (
+                    <li key={i} className="text-xs text-muted-foreground flex items-start gap-1.5">
+                      <span className="w-1 h-1 rounded-full bg-cyan-400 mt-1.5 flex-shrink-0" />
+                      <span>{u}</span>
+                    </li>
+                  ))}
+                </ul>
+                <div className="mt-4 p-2 rounded-md bg-cyan-500/10 border border-cyan-500/20">
+                  <div className="text-[10px] text-cyan-300">
+                    Full changelog at github.com/gefrus112/lapia-ai-agent/releases
+                  </div>
+                </div>
+              </div>
+            )}
+
             <button
               onClick={() => setShowWelcome(false)}
               className="w-full px-4 py-2 rounded-lg bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-400 hover:to-purple-500 text-sm font-medium transition-all"

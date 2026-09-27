@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Three.js 3D Engine icon — a wireframe isometric cube -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <defs>
+    <linearGradient id="threeBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4c1d95"/>
+      <stop offset="100%" stop-color="#1e1b4b"/>
+    </linearGradient>
+    <linearGradient id="threeFace" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#a78bfa"/>
+      <stop offset="100%" stop-color="#7c3aed"/>
+    </linearGradient>
+  </defs>
+  <!-- Background -->
+  <rect x="8" y="8" width="112" height="112" rx="24" fill="url(#threeBg)"/>
+  <rect x="12" y="12" width="104" height="104" rx="20" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1.5"/>
+  <!-- 3D cube (isometric wireframe) -->
+  <g transform="translate(64 64)">
+    <!-- Top face (filled, lighter) -->
+    <polygon points="0,-36 31,-18 0,0 -31,-18" fill="#c4b5fd" opacity="0.95"/>
+    <!-- Left face (medium) -->
+    <polygon points="-31,-18 0,0 0,36 -31,18" fill="url(#threeFace)" opacity="0.85"/>
+    <!-- Right face (darker) -->
+    <polygon points="31,-18 0,0 0,36 31,18" fill="#5b21b6" opacity="0.9"/>
+    <!-- Wireframe edges -->
+    <g fill="none" stroke="#e9d5ff" stroke-width="1.5" stroke-linejoin="round">
+      <polygon points="0,-36 31,-18 0,0 -31,-18"/>
+      <line x1="0" y1="0" x2="0" y2="36"/>
+      <line x1="0" y1="0" x2="-31" y2="18"/>
+      <line x1="0" y1="0" x2="31" y2="18"/>
+      <polygon points="-31,-18 -31,18 0,36 31,18 31,-18"/>
+    </g>
+    <!-- Vertex dots -->
+    <g fill="#fbbf24">
+      <circle cx="0" cy="-36" r="2.5"/>
+      <circle cx="31" cy="-18" r="2.5"/>
+      <circle cx="-31" cy="-18" r="2.5"/>
+      <circle cx="0" cy="36" r="2.5"/>
+      <circle cx="31" cy="18" r="2.5"/>
+      <circle cx="-31" cy="18" r="2.5"/>
+    </g>
+  </g>
+  <!-- "3D" badge -->
+  <g transform="translate(100 100)">
+    <circle cx="0" cy="0" r="14" fill="#fbbf24" stroke="#fff" stroke-width="1.5"/>
+    <text x="0" y="4" font-family="ui-sans-serif, system-ui, sans-serif" font-size="11" font-weight="900" fill="#1e1b4b" text-anchor="middle">3D</text>
+  </g>
+</svg>

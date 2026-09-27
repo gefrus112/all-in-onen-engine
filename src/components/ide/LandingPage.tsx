@@ -13,34 +13,62 @@ import { toast } from "sonner";
 
 const ENGINES: {
   id: EngineKind; name: string; tagline: string; description: string;
-  icon: React.ReactNode; gradient: string; tags: string[];
+  iconSrc: string; gradient: string; tags: string[];
+  version: string; lastUpdate: string; updates: string[];
 }[] = [
   {
     id: "pygame2d",
     name: "Pygame 2D Engine",
     tagline: "Python in your browser",
     description: "Write Python, see it run live in the browser via Pyodide at 60 FPS. Sprite-based 2D games with full physics, ECS, AI, multiplayer.",
-    icon: <Code2 className="w-6 h-6" />,
+    iconSrc: "/engine-pygame.svg",
     gradient: "linear-gradient(135deg, #3b82f6, #1e40af)",
     tags: ["Python", "Pyodide", "2D", "Sprite-based"],
+    version: "v1.0.0",
+    lastUpdate: "2026-09-27",
+    updates: [
+      "Pyodide 0.26 (Python 3.12) runtime",
+      "134 sprite asset library across 15 categories",
+      "Multiplayer relay via socket.io",
+      "CRT scanline preview with glow effect",
+      "PyInstaller .exe / Linux AppImage / Mac .dmg build scripts",
+    ],
   },
   {
     id: "threejs3d",
     name: "Three.js 3D Engine",
     tagline: "Real 3D in the browser",
     description: "Build 3D games with a live Three.js viewport. Place meshes, lights, cameras. Full Roblox Studio-style editor with explorer, properties, timeline.",
-    icon: <Box className="w-6 h-6" />,
+    iconSrc: "/engine-threejs.svg",
     gradient: "linear-gradient(135deg, #8b5cf6, #4c1d95)",
     tags: ["Three.js", "WebGL", "3D", "Real-time"],
+    version: "v1.0.0",
+    lastUpdate: "2026-09-27",
+    updates: [
+      "Three.js r186 with @react-three/fiber + drei",
+      "Real-time shadows + Sky + Environment lighting",
+      "OrbitControls + RGB axis gizmo",
+      "Animation timeline with keyframes",
+      "Play-test mode with WASD camera + custom avatar",
+    ],
   },
   {
     id: "zhitlow3d",
     name: "Zhitlow 3D Engine",
     tagline: "Experimental high-perf 3D",
     description: "Our experimental custom 3D engine with deferred rendering, PBR materials, and built-in networking. Optimized for large open-world games.",
-    icon: <Box className="w-6 h-6 rotate-45" />,
+    iconSrc: "/engine-zhitlow.svg",
     gradient: "linear-gradient(135deg, #06b6d4, #0e7490)",
     tags: ["Experimental", "PBR", "Deferred", "Open-world"],
+    version: "v0.9.0 (beta)",
+    lastUpdate: "2026-09-27",
+    updates: [
+      "100 physics properties per object (joints, buoyancy, CCD)",
+      "20 PBR material properties (clearcoat, transmission, IOR, sheen)",
+      "Script/CSS/JS code editor with Zhitlow Script language",
+      "GUI editor overlay (HUD, crosshair, health bar)",
+      "Closable welcome card with quick-start guide",
+    ],
   },
 ];
 
@@ -531,13 +559,20 @@ export function LandingPage({
                     onClick={() => handlePickEngine(e.id)}
                     className="text-left glass rounded-2xl p-6 hover:border-cyan-500/50 transition-all group"
                   >
-                    <div className="w-14 h-14 rounded-xl flex items-center justify-center mb-4 text-white" style={{ background: e.gradient }}>
-                      {e.icon}
+                    <div className="flex items-center gap-3 mb-4">
+                      <img src={e.iconSrc} alt={e.name} className="w-14 h-14" />
+                      <div>
+                        <h3 className="text-xl font-semibold leading-tight">{e.name}</h3>
+                        <p className="text-xs text-cyan-400">{e.tagline}</p>
+                      </div>
                     </div>
-                    <h3 className="text-xl font-semibold mb-1">{e.name}</h3>
-                    <p className="text-xs text-cyan-400 mb-3">{e.tagline}</p>
-                    <p className="text-sm text-muted-foreground mb-4">{e.description}</p>
-                    <div className="flex flex-wrap gap-1">
+                    <p className="text-sm text-muted-foreground mb-3">{e.description}</p>
+                    <div className="flex items-center gap-2 mb-4 text-[10px] text-muted-foreground">
+                      <span className="px-1.5 py-0.5 rounded bg-white/5">{e.version}</span>
+                      <span>·</span>
+                      <span>Updated {e.lastUpdate}</span>
+                    </div>
+                    <div className="flex flex-wrap gap-1 mb-3">
                       {e.tags.map((t) => (
                         <span key={t} className="text-[10px] px-2 py-0.5 rounded-full bg-white/5 text-muted-foreground">{t}</span>
                       ))}
@@ -864,12 +899,12 @@ bun run dev
           onClick={() => setShowEnginePicker(false)}
         >
           <div
-            className="glass rounded-2xl p-8 max-w-2xl w-full"
+            className="glass rounded-2xl p-8 max-w-3xl w-full max-h-[90vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="text-center mb-6">
               <h2 className="text-2xl font-bold mb-2">Pick your engine</h2>
-              <p className="text-sm text-muted-foreground">Choose which engine to launch. You can switch later.</p>
+              <p className="text-sm text-muted-foreground">Choose which engine to launch. You can switch later. Each card shows the latest updates.</p>
             </div>
             <div className="grid md:grid-cols-3 gap-4">
               {ENGINES.map((e) => (
@@ -878,12 +913,35 @@ bun run dev
                   onClick={() => handlePickEngine(e.id)}
                   className="text-left glass rounded-xl p-5 hover:border-cyan-500/50 hover:scale-[1.03] transition-all"
                 >
-                  <div className="w-12 h-12 rounded-lg flex items-center justify-center mb-3 text-white" style={{ background: e.gradient }}>
-                    {e.icon}
+                  <div className="flex items-center gap-2 mb-3">
+                    <img src={e.iconSrc} alt={e.name} className="w-12 h-12" />
+                    <div>
+                      <h3 className="font-semibold leading-tight">{e.name}</h3>
+                      <p className="text-xs text-cyan-400">{e.tagline}</p>
+                    </div>
                   </div>
-                  <h3 className="font-semibold mb-1">{e.name}</h3>
-                  <p className="text-xs text-cyan-400 mb-2">{e.tagline}</p>
-                  <p className="text-xs text-muted-foreground">{e.description}</p>
+                  <p className="text-xs text-muted-foreground mb-3">{e.description}</p>
+                  {/* Updates tab */}
+                  <div className="rounded-md bg-black/30 border border-white/5 p-2 mb-3">
+                    <div className="flex items-center gap-1.5 mb-1.5">
+                      <Sparkles className="w-3 h-3 text-yellow-400" />
+                      <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Updates</span>
+                      <span className="text-[9px] text-muted-foreground ml-auto">{e.version}</span>
+                    </div>
+                    <ul className="space-y-1">
+                      {e.updates.map((u, i) => (
+                        <li key={i} className="text-[10px] text-muted-foreground flex items-start gap-1">
+                          <Check className="w-2.5 h-2.5 text-cyan-400 flex-shrink-0 mt-0.5" />
+                          <span>{u}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div className="flex flex-wrap gap-1">
+                    {e.tags.map((t) => (
+                      <span key={t} className="text-[9px] px-1.5 py-0.5 rounded-full bg-white/5 text-muted-foreground">{t}</span>
+                    ))}
+                  </div>
                 </button>
               ))}
             </div>
