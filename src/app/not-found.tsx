@@ -9,7 +9,7 @@ export default function NotFound() {
         <div className="text-6xl font-bold mb-4">404</div>
         <p className="text-muted-foreground mb-6">Page not found</p>
         <Link
-          href="/"
+          href={`${process.env.NEXT_PUBLIC_ASSET_BASE || ""}/`}
           className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-400 hover:to-purple-500 text-sm font-medium transition-all"
         >
           Back to All In One Engine

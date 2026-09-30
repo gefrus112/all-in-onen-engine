@@ -1,0 +1,64 @@
+{
+  "registry": "lapia-packages",
+  "version": "1.0.0",
+  "updated": "2026-10-01",
+  "description": "Official package registry for the Lapia Pygame engine. Install from the built-in Terminal with: pip install <name>",
+  "packages": [
+    {
+      "name": "lapia-kit",
+      "version": "1.2.0",
+      "size_kb": 58,
+      "author": "all-in-onen-engine",
+      "description": "Core engine helpers: screen shake, timers, tweens, sprite pooling and camera utilities."
+    },
+    {
+      "name": "ally-kernel",
+      "version": "5.0.3",
+      "size_kb": 96,
+      "author": "ally-ai",
+      "description": "Ally-5 runtime kernel — the local game-generation model the AI assistant runs on. Pre-installed."
+    },
+    {
+      "name": "sfx-kit",
+      "version": "0.9.1",
+      "size_kb": 34,
+      "author": "all-in-onen-engine",
+      "description": "Synthesized sound effects for the desktop engine: jumps, coins, explosions, UI blips. Zero audio files."
+    },
+    {
+      "name": "sprite-kit",
+      "version": "1.1.0",
+      "size_kb": 71,
+      "author": "all-in-onen-engine",
+      "description": "Sprite sheet slicing, animation state machines and pixel-perfect collision helpers."
+    },
+    {
+      "name": "level-kit",
+      "version": "0.8.0",
+      "size_kb": 45,
+      "author": "all-in-onen-engine",
+      "description": "Tilemap loader, procedural level generation (platformer caves, rooms, mazes) and spawn markers."
+    },
+    {
+      "name": "particles-kit",
+      "version": "1.0.2",
+      "size_kb": 27,
+      "author": "ally-ai",
+      "description": "Juicy particle systems: bursts, trails, confetti, explosions and weather effects."
+    },
+    {
+      "name": "pygame",
+      "version": "2.6.0",
+      "size_kb": 13200,
+      "author": "pygame community",
+      "description": "The real desktop pygame (SDL bindings) — used by the Python engine outside the browser sandbox."
+    },
+    {
+      "name": "numpy",
+      "version": "2.1.0",
+      "size_kb": 18700,
+      "author": "numpy developers",
+      "description": "Fast arrays and math — pre-installed in the browser Pyodide runtime."
+    }
+  ]
+}

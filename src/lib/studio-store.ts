@@ -99,6 +99,11 @@ interface StudioState {
   publishDialogOpen: boolean;
   instructionsOpen: boolean;
 
+  // Ally AI assistant + Terminal (Pygame engine)
+  showAlly: boolean;
+  showTerminal: boolean;
+  runSignal: number;
+
   // Pyodide
   pyodideReady: boolean;
   pyodideLoading: boolean;
@@ -164,6 +169,13 @@ interface StudioState {
   setAvatarBodyType: (b: "slim" | "average" | "tall") => void;
   setPublishDialogOpen: (open: boolean) => void;
   setInstructionsOpen: (open: boolean) => void;
+
+  // Ally AI + Terminal + run signaling
+  toggleAlly: () => void;
+  toggleTerminal: () => void;
+  setShowAlly: (v: boolean) => void;
+  setShowTerminal: (v: boolean) => void;
+  requestRun: () => void;
 }
 
 const uid = () => Math.random().toString(36).slice(2, 10);
@@ -635,6 +647,11 @@ export const useStudio = create<StudioState>()(
       publishDialogOpen: false,
       instructionsOpen: false,
 
+      // Ally AI assistant + Terminal (Ally opens by default — say hi!)
+      showAlly: true,
+      showTerminal: false,
+      runSignal: 0,
+
       pyodideReady: false,
       pyodideLoading: false,
 
@@ -777,6 +794,13 @@ export const useStudio = create<StudioState>()(
       setAvatarBodyType: (avatarBodyType) => set({ avatarBodyType }),
       setPublishDialogOpen: (publishDialogOpen) => set({ publishDialogOpen }),
       setInstructionsOpen: (instructionsOpen) => set({ instructionsOpen }),
+
+      // Ally AI + Terminal + run signaling
+      toggleAlly: () => set((s) => ({ showAlly: !s.showAlly })),
+      toggleTerminal: () => set((s) => ({ showTerminal: !s.showTerminal })),
+      setShowAlly: (showAlly) => set({ showAlly }),
+      setShowTerminal: (showTerminal) => set({ showTerminal }),
+      requestRun: () => set((s) => ({ runSignal: s.runSignal + 1 })),
     }),
     {
       name: "lapia-studio",
@@ -804,6 +828,8 @@ export const useStudio = create<StudioState>()(
         avatar: s.avatar,
         avatarColor: s.avatarColor,
         avatarBodyType: s.avatarBodyType,
+        showAlly: s.showAlly,
+        showTerminal: s.showTerminal,
       }),
     }
   )

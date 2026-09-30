@@ -23,6 +23,10 @@ interface SpriteManifest {
   categories: Record<string, SpriteManifestCategory>;
 }
 
+// GitHub Pages serves the app under /all-in-onen-engine — plain fetch()/img
+// paths need the base prefix (Next basePath does NOT apply to them).
+const ASSET_BASE = process.env.NEXT_PUBLIC_ASSET_BASE || "";
+
 export function AssetPicker() {
   const { setSelectedSpritePath, setFile, openFile, activeFile, addConsole } = useStudio();
   const [manifest, setManifest] = useState<SpriteManifest | null>(null);
@@ -31,7 +35,7 @@ export function AssetPicker() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/sprites/manifest.json")
+    fetch(`${ASSET_BASE}/sprites/manifest.json`)
       .then((r) => r.json())
       .then((m) => {
         setManifest(m);
@@ -58,9 +62,9 @@ export function AssetPicker() {
       description: "Paste-ready code is in your clipboard.",
     });
     // Build a Python snippet that the user can paste
-    const code = `# Loaded from ${item.path}\n` +
-      `# Sprite: ${item.name} (${item.size[0]}x${item.size[1]})\n` +
-      `_sprite = Sprite(color=Color(255, 255, 255), size=(${item.size[0]}, ${item.size[1]}))\n` +
+    const code = `# Sprite: ${item.name} (${item.size[0]}x${item.size[1]})\n` +
+      `from lapia_shim import Sprite, Vector2, Color, load_image\n\n` +
+      `_sprite = Sprite(image=load_image("${item.path}"), size=(${item.size[0]}, ${item.size[1]}))\n` +
       `_sprite.position = Vector2(100, 100)\n`;
     navigator.clipboard?.writeText(code).catch(() => {});
     addConsole("info", `Asset "${item.name}" copied to clipboard. Paste into your code.`);
@@ -127,7 +131,7 @@ export function AssetPicker() {
                       onClick={() => insertSpriteIntoCode(item)}
                     >
                       <img
-                        src={item.path}
+                        src={`${ASSET_BASE}${item.path}`}
                         alt={item.name}
                         className="w-full h-full object-contain"
                         style={{ imageRendering: "pixelated" }}

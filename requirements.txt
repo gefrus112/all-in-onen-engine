@@ -1,0 +1,6 @@
+# All In One Engine — Python engine requirements (desktop runtime)
+# The browser studio needs nothing: Pyodide + numpy load automatically.
+pygame>=2.6.0
+numpy>=1.26.0
+pyinstaller>=6.10.0 ; platform_system != "Windows"
+nuitka>=2.4 ; platform_system == "Windows"

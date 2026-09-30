@@ -26,6 +26,7 @@ export function PreviewPane() {
     showDebug,
     previewScale,
     setPreviewScale,
+    runSignal,
   } = useStudio();
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -163,6 +164,25 @@ export function PreviewPane() {
     };
     /* eslint-enable react-hooks/set-state-in-effect */
   }, [runState]);
+
+  // ---- Run requests from Ally-5 / Terminal (runSignal bumps) ----
+  useEffect(() => {
+    if (!runSignal) return;
+    const st = useStudio.getState();
+    if (st.runState === "loading") return;
+    // Stop any current instance, then start fresh so rewritten main.py is used.
+    if (handleRef.current) {
+      handleRef.current.stop();
+      handleRef.current = null;
+    }
+    if (rafRef.current !== null) {
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
+    }
+    setRunState("idle");
+    const t = window.setTimeout(() => useStudio.getState().setRunState("loading"), 80);
+    return () => window.clearTimeout(t);
+  }, [runSignal, setRunState]);
 
   // ---- Phase 2: Drive the rAF loop when runState is "running".
   // This effect owns the loop and stops it on cleanup.

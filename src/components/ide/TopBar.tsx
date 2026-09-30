@@ -22,6 +22,8 @@ import {
   Rocket,
   Home,
   User,
+  Sparkles,
+  TerminalSquare,
 } from "lucide-react";
 import { useStudio } from "../../lib/studio-store";
 import { toast } from "sonner";
@@ -62,6 +64,10 @@ export function TopBar({ onExitToLanding }: { onExitToLanding?: () => void }) {
     showDebug,
     showAssetPicker,
     showToolbox,
+    showAlly,
+    showTerminal,
+    toggleAlly,
+    toggleTerminal,
     toggleExplorer,
     toggleProperties,
     toggleConsole,
@@ -225,6 +231,22 @@ export function TopBar({ onExitToLanding }: { onExitToLanding?: () => void }) {
       {/* Right: Panel toggles + GitHub */}
       <div className="flex items-center gap-1 px-2">
         <button
+          className={`ally-topbar-btn ${showAlly ? "active" : ""}`}
+          onClick={toggleAlly}
+          title="Ally-5 AI assistant (built into your engine)"
+        >
+          <Sparkles className="w-3.5 h-3.5" />
+          <span>Ally</span>
+        </button>
+        <button
+          className={`tool-btn ${showTerminal ? "active" : ""}`}
+          onClick={toggleTerminal}
+          title="Toggle Terminal (pip, ally, python main.py)"
+        >
+          <TerminalSquare className="w-3.5 h-3.5" />
+        </button>
+        <div className="w-px h-5 bg-border mx-1" />
+        <button
           className={`tool-btn ${showExplorer ? "active" : ""}`}
           onClick={toggleExplorer}
           title="Toggle Explorer"
@@ -312,7 +334,7 @@ export function TopBar({ onExitToLanding }: { onExitToLanding?: () => void }) {
         )}
         <a
           className="tool-btn"
-          href="https://github.com/gefrus112/lapia-ai-agent"
+          href="https://github.com/gefrus112/all-in-onen-engine"
           target="_blank"
           rel="noreferrer"
           title="Open GitHub repo"

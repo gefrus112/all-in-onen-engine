@@ -16,6 +16,7 @@ Write **Python** or **JavaScript**, hit **Play**, and see your game run live at 
 [![Python](https://img.shields.io/badge/Python-3.12-3776ab?style=flat-square&logo=python&logoColor=white&labelColor=0a0a12)](https://www.python.org/)
 [![Three.js](https://img.shields.io/badge/Three.js-r186-white?style=flat-square&logo=threedotjs&labelColor=0a0a12)](https://threejs.org/)
 [![Pyodide](https://img.shields.io/badge/Pyodide-0.26-8b5cf6?style=flat-square&labelColor=0a0a12)](https://pyodide.org/)
+[![Ally-5 AI](https://img.shields.io/badge/🤖_Ally--5-AI_Assistant-6366f1?style=flat-square&labelColor=0a0a12)](#-new-in-v33--meet-ally-5-your-built-in-ai-game-developer)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-f97316?style=flat-square&labelColor=0a0a12)](CONTRIBUTING.md)
 
 **[🌐 Launch the IDE](https://gefrus112.github.io/all-in-onen-engine/)** · **[📖 Wiki](https://github.com/gefrus112/all-in-onen-engine/wiki)** · **[📦 Releases](https://github.com/gefrus112/all-in-onen-engine/releases)** · **[🐛 Report Bug](https://github.com/gefrus112/all-in-onen-engine/issues)**
@@ -29,6 +30,21 @@ Write **Python** or **JavaScript**, hit **Play**, and see your game run live at 
 [![🎬 Watch: building an RPG with the engine](public/videos/rpg-poster.jpg)](https://github.com/gefrus112/all-in-onen-engine/raw/main/public/videos/rpg-build.mp4)
 
 <p align="center"><i>🎬 <b>Showreel</b> — building and playing the RPG Village Quest inside 3D Studio (click to watch) · <a href="public/demo/rpg-build-demo.html">interactive demo</a></i></p>
+
+<br />
+
+## 🤖 NEW in v3.3 — Meet Ally-5, your built-in AI game developer
+
+> **The AI Game Assistant is no longer “under development” — it's live in every Pygame studio.**
+
+- **Ally-5 AI assistant** — a real game-generation model built into the engine, running **100% in your browser** (no API keys, no accounts, nothing leaves your machine). Describe any game — *“make a neon snake game called Voltage”*, *“build a space shooter”*, *“surprise me”* — and Ally writes a complete, playable `main.py`, then you press Run.
+- **5-model family** — switch between **Ally-5 Nano** (instant), **Fast** (quick builds), **Pro** (balanced · default), **Max** (deep thinking, extra particles & juice) and **Game** (tuned on game code only).
+- **It tunes your game** — “make it harder”, “add 25 coins”, “make it purple” — Ally rewrites `main.py` with the change applied.
+- **Explains & debugs** — one-minute engine tour (Game / Scene / Sprite / Vector2 / Input), plus **static diagnostics** on your code (missing `game.run()`, wrong imports, `pygame.*` usage, hook typos) before you even press Run.
+- **Built-in Terminal** — a real shell for the Pygame engine: `python main.py`, `ls`, `cat`, and **`pip install`** from the repo's own package registry (`lapia-kit`, `sfx-kit`, `particles-kit`…). Ally lives here too: `ally make me a pong`.
+- **Packages on GitHub** — [`packages/`](packages) adds the Lapia engine package registry, desktop engine modules (`sprite_kit`, `sfx_kit`, `level_kit`, `particles_kit`, `ally_engine`) and the **Ally-5 knowledge base** (model card + training corpus).
+- **Real sprites in games** — new `load_image()` API: `Sprite(image=load_image("sprites/coins/coin_gold.png"))` loads actual bitmaps from the 134-sprite toolbox (with a magenta checker for missing paths). Fixed asset loading on GitHub Pages (basePath was breaking the toolbox manifest + icons).
+- **🛡 Lapia Shield** — native browser DevTools are blocked site-wide (right-click, F12, view-source shortcuts) and the site now ships its **own working DevTools** (Elements inspector with live picker, Console, Page Source, Network) instead.
 
 <br />
 
@@ -47,11 +63,12 @@ Write **Python** or **JavaScript**, hit **Play**, and see your game run live at 
 
 All In One Engine is a complete game development platform in a single browser tab. No installs, no accounts, no setup — click the link, pick an engine, and start building. It bundles **three game engines**, a **full code editor**, a **134-sprite asset library**, **multiplayer networking**, and **one-click publishing** behind one Roblox Studio-inspired interface.
 
-It ships in four parts:
+It ships in five parts:
 
 | | Part | What it is |
 |---|---|---|
 | 🎨 | **Lapia Studio IDE** (`/src`) | The web IDE — Monaco editor, live preview, 3D viewport, properties inspector |
+| 🤖 | **Ally-5 + Packages** (`/packages`, `/src/lib/ally5*`) | Built-in AI game developer, terminal, and the engine package registry |
 | ⚙️ | **Lapia Engine** (`/engine`) | A MIT-licensed 2D game engine for Python with ~50 core systems |
 | 🌐 | **Multiplayer Relay** (`/mini-services`) | A socket.io relay server for real-time multiplayer |
 | 📦 | **Build Scripts** (`/build_*.sh`) | Native installers: Linux AppImage, macOS .dmg, Chromebook .deb |

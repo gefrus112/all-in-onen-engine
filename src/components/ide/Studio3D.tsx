@@ -11,6 +11,8 @@ import {
   Boxes, Magnet, Camera as CameraIcon, Focus, Crosshair, Mountain, Layers, Gamepad2,
   FileCode2, Power, ChevronDown,
 } from "lucide-react";
+const ASSET_BASE = process.env.NEXT_PUBLIC_ASSET_BASE || "";
+
 import { useStudio } from "../../lib/studio-store";
 import { toast } from "sonner";
 import { playTap, playClick, playPop, playSuccess } from "../../lib/ui-sounds";
@@ -451,7 +453,7 @@ engine.setPlayerController(player);
       <div className="flex items-center h-12 bg-[#14171e] border-b border-white/5 px-3 gap-2 shadow-[0_1px_0_rgba(34,211,238,0.15)]">
         {/* Logo + name */}
         <div className="flex items-center gap-2 pr-3 border-r border-white/5">
-          <img src="/icon.svg" alt="All In One Engine" className="w-8 h-8 ae-drop-shadow" />
+          <img src={`${ASSET_BASE}/icon.svg`} alt="All In One Engine" className="w-8 h-8 ae-drop-shadow" />
           <div>
             <div className="text-sm font-bold leading-tight bg-gradient-to-r from-cyan-400 to-violet-400 bg-clip-text text-transparent">3D Studio</div>
             <div className="text-[10px] text-muted-foreground leading-tight">All In One Engine</div>

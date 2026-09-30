@@ -1,0 +1,23 @@
+{
+  "corpus": "Ally-5 game-generation training corpus",
+  "version": "5.0.3",
+  "intents": [
+    { "intent": "generate", "examples": ["make me a snake game", "build a neon space shooter called Voltage", "create a flappy game with a pink bird", "i want a breakout with 8 rows", "make a coin collector with 25 coins"], "targets": ["snake", "pong", "shooter", "flappy", "breakout", "collect"] },
+    { "intent": "feature", "examples": ["make it harder", "make it easier", "add 20 coins", "make it purple", "speed it up"], "actions": ["speed", "coins", "palette"] },
+    { "intent": "explain", "examples": ["how does the scene loop work", "what is a Sprite", "explain load_image", "how do inputs work"], "targets": ["game", "scene", "sprite", "vector2", "input", "renderer", "camera", "load_image"] },
+    { "intent": "debug", "examples": ["fix my game", "I get NameError on line 12", "nothing happens when I press run", "traceback: game instance was not created"], "tools": ["static analysis of main.py", "console error context"] },
+    { "intent": "assets", "examples": ["how do I add sprites", "load the gold coin image", "what sprites are in the toolbox"], "catalog": "public/sprites/manifest.json" },
+    { "intent": "terminal", "examples": ["what is pip", "how do I install lapia-kit", "open the terminal"], "commands": ["help", "ls", "cat", "python main.py", "pip install", "pip list", "ally", "model", "neofetch"] },
+    { "intent": "capabilities", "examples": ["what can you do", "who are you", "help"] },
+    { "intent": "greeting", "examples": ["hi", "hey ally", "hello"] }
+  ],
+  "game_kernels": {
+    "snake": { "source": "src/lib/ally5-games.ts :: snakeCode", "grid": "24x18 @ 32px", "features": ["speed ramp", "best score", "restart flow"] },
+    "pong": { "source": "src/lib/ally5-games.ts :: pongCode", "size": "800x560", "features": ["mouse or keys", "adaptive AI", "first to 5"] },
+    "shooter": { "source": "src/lib/ally5-games.ts :: shooterCode", "size": "800x600", "features": ["bullets", "waves", "invulnerability frames", "particles (juice>=1)"] },
+    "flappy": { "source": "src/lib/ally5-games.ts :: flappyCode", "size": "720x600", "features": ["flap physics", "pipe spawning", "parallax (juice>=1)"] },
+    "breakout": { "source": "src/lib/ally5-games.ts :: breakoutCode", "size": "800x600", "features": ["10x6 bricks", "lives", "paddle english"] },
+    "collect": { "source": "src/lib/ally5-games.ts :: collectCode", "size": "800x576", "features": ["real sprite assets via load_image", "chasing slime", "timer", "collectibles"] }
+  },
+  "parameter_extractors": ["title (called/named X)", "colors (16 color words)", "difficulty (harder/easier)", "collectible count", "model juice level 0-2"]
+}

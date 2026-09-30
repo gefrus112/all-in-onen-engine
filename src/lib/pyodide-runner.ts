@@ -16,6 +16,61 @@
 const PYODIDE_VERSION = "0.26.2";
 const PYODIDE_BASE = `https://cdn.jsdelivr.net/pyodide/v${PYODIDE_VERSION}/full/`;
 
+// Base path for static assets (GitHub Pages needs /all-in-onen-engine prefix).
+// Empty in local dev — public/ assets are served from the root there.
+const ASSET_BASE = process.env.NEXT_PUBLIC_ASSET_BASE || "";
+
+/**
+ * Image loader used by the Python `load_image()` shim. Returns a small
+ * surface object { canvas, ready, width, height } immediately and decodes
+ * the bitmap asynchronously; sprites re-render every frame, so the image
+ * pops in automatically. Missing files render a magenta/black checker.
+ */
+function makeImageLoader() {
+  const cache = new Map<
+    string,
+    { canvas: HTMLCanvasElement; ready: boolean; width: number; height: number }
+  >();
+  return (rawPath: string) => {
+    const key = String(rawPath).replace(/^\/+/, "").replace(/[?#].*$/, "");
+    let surf = cache.get(key);
+    if (surf) return surf;
+    const canvas = document.createElement("canvas");
+    canvas.width = 32;
+    canvas.height = 32;
+    surf = { canvas, ready: false, width: 32, height: 32 };
+    cache.set(key, surf);
+    const img = new Image();
+    img.onload = () => {
+      canvas.width = img.naturalWidth || 32;
+      canvas.height = img.naturalHeight || 32;
+      const c2 = canvas.getContext("2d");
+      if (c2) {
+        c2.imageSmoothingEnabled = false;
+        c2.clearRect(0, 0, canvas.width, canvas.height);
+        c2.drawImage(img, 0, 0);
+      }
+      surf!.ready = true;
+      surf!.width = canvas.width;
+      surf!.height = canvas.height;
+    };
+    img.onerror = () => {
+      const c2 = canvas.getContext("2d");
+      if (c2) {
+        c2.fillStyle = "#ff00ff";
+        c2.fillRect(0, 0, 16, 16);
+        c2.fillRect(16, 16, 16, 16);
+        c2.fillStyle = "#111111";
+        c2.fillRect(16, 0, 16, 16);
+        c2.fillRect(0, 16, 16, 16);
+      }
+      surf!.ready = true;
+    };
+    img.src = `${ASSET_BASE}/${key}`;
+    return surf;
+  };
+}
+
 export type ConsoleSink = (
   type: "info" | "error" | "warn" | "success" | "debug" | "system",
   text: string
@@ -224,6 +279,24 @@ class Math:
     def random_choice(seq): return random.choice(seq)
     @staticmethod
     def random_seed(seed): random.seed(seed)
+    @staticmethod
+    def sin(x): return math.sin(x)
+    @staticmethod
+    def cos(x): return math.cos(x)
+    @staticmethod
+    def tan(x): return math.tan(x)
+    @staticmethod
+    def atan2(y, x): return math.atan2(y, x)
+    @staticmethod
+    def sqrt(x): return math.sqrt(x)
+    @staticmethod
+    def pow(x, y): return math.pow(x, y)
+    @staticmethod
+    def floor(x): return math.floor(x)
+    @staticmethod
+    def ceil(x): return math.ceil(x)
+    @staticmethod
+    def dist(a, b): return math.hypot(a.x - b.x, a.y - b.y)
 
 
 # --- Keyboard key code mapping ---
@@ -357,6 +430,36 @@ class Camera:
         return Vector2(screen.x / self.zoom + off.x, screen.y / self.zoom + off.y)
 
 
+class Surface:
+    """Image surface backed by a JS-loaded bitmap (see load_image)."""
+    def __init__(self, js_surf):
+        self._js = js_surf
+    def get_size(self):
+        return (int(self._js.width), int(self._js.height))
+    @property
+    def width(self): return int(self._js.width)
+    @property
+    def height(self): return int(self._js.height)
+
+
+def load_image(path):
+    """Load an image from the project assets (e.g. "sprites/player/knight.png").
+
+    Works in the browser preview AND in the desktop engine. The bitmap may
+    pop in a moment after the game starts (async decode); sprites redraw
+    every frame so no extra code is needed.
+    """
+    try:
+        fn = getattr(_win, '_lapiaLoadImage', None)
+        if fn is None:
+            print('[load_image] image loader unavailable', file=sys.stderr)
+            return None
+        return Surface(fn(str(path)))
+    except Exception as e:
+        print(f'[load_image] failed for {path}: {e}', file=sys.stderr)
+        return None
+
+
 class Sprite:
     _id_counter = 0
     def __init__(self, image=None, color=None, size=None, layer='entity'):
@@ -386,11 +489,13 @@ class Sprite:
     @property
     def width(self):
         if self._size: return self._size[0]
+        if isinstance(self.image, Surface): return self.image.width
         if self.image is not None: return 64
         return 32
     @property
     def height(self):
         if self._size: return self._size[1]
+        if isinstance(self.image, Surface): return self.image.height
         if self.image is not None: return 64
         return 32
     def set_color(self, c): self.color = c
@@ -407,6 +512,20 @@ class Sprite:
         oy = self.origin.y * h
         x = sp.x - ox
         y = sp.y - oy
+        # Image sprites (loaded via load_image) draw the actual bitmap.
+        img = self.image if isinstance(self.image, Surface) else None
+        if img is not None and getattr(img._js, 'ready', False):
+            ctx.save()
+            if self.alpha < 255: ctx.globalAlpha = self.alpha / 255
+            if abs(self.rotation) > 0.001 or self.flip_x or self.flip_y:
+                ctx.translate(x + w/2, y + h/2)
+                ctx.rotate(self.rotation)
+                ctx.scale(-1 if self.flip_x else 1, -1 if self.flip_y else 1)
+                ctx.drawImage(img._js.canvas, -w/2, -h/2, w, h)
+            else:
+                ctx.drawImage(img._js.canvas, int(x), int(y), w, h)
+            ctx.restore()
+            return
         col = self.color
         if self.alpha < 255:
             ctx.fillStyle = f"rgba({col.r},{col.g},{col.b},{self.alpha/255})"
@@ -685,6 +804,8 @@ export async function startGame(
     mouseY: 0,
   };
   (window as any)._lapiaLog = onLog;
+  // Asset image loader for the Python load_image() shim (fresh cache per run)
+  (window as any)._lapiaLoadImage = makeImageLoader();
 
   // Route Python stdout/stderr to the console sink.
   let lineBuf = "";

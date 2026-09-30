@@ -17,6 +17,8 @@ import { SettingsDialog } from "../components/ide/SettingsDialog";
 import { ProjectWizard } from "../components/ide/ProjectWizard";
 import { GitHubAuth } from "../components/ide/GitHubAuth";
 import { Studio3D } from "../components/ide/Studio3D";
+import { AllyPanel } from "../components/ide/AllyPanel";
+import { Terminal } from "../components/ide/Terminal";
 import { AvatarPicker } from "../components/ide/AvatarPicker";
 import { PublishDialog } from "../components/ide/PublishDialog";
 import { InstructionsDialog } from "../components/ide/InstructionsDialog";
@@ -44,6 +46,8 @@ export default function Home() {
     showConsole,
     showAssetPicker,
     showToolbox,
+    showAlly,
+    showTerminal,
     theme,
   } = useStudio();
 
@@ -146,6 +150,15 @@ export default function Home() {
       <TopBar onExitToLanding={backToLanding} />
       <div className="flex-1 min-h-0">
         <ResizablePanelGroup direction="horizontal" autoSaveId="lapia-main">
+          {showAlly && (
+            <>
+              <ResizablePanel defaultSize={22} minSize={15} maxSize={34}>
+                <AllyPanel />
+              </ResizablePanel>
+              <ResizableHandle />
+            </>
+          )}
+
           {showExplorer && (
             <>
               <ResizablePanel defaultSize={16} minSize={12} maxSize={28}>
@@ -203,7 +216,7 @@ export default function Home() {
                   </ResizablePanel>
                   <ResizableHandle />
                   <ResizablePanel defaultSize={45} minSize={20}>
-                    {showConsole ? <Console /> : <div className="h-full bg-card" />}
+                    {showTerminal ? <Terminal /> : showConsole ? <Console /> : <div className="h-full bg-card" />}
                   </ResizablePanel>
                 </ResizablePanelGroup>
               </ResizablePanel>

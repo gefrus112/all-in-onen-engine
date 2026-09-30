@@ -34,11 +34,12 @@ const ENGINES: {
     version: "v1.0.0",
     lastUpdate: "2026-09-27",
     updates: [
+      "NEW: Ally-5 AI assistant — builds games from a prompt",
+      "NEW: Terminal with pip packages + `ally` command",
+      "Real sprite loading: load_image() in games",
       "Pyodide 0.26 (Python 3.12) runtime",
       "134 sprite asset library across 15 categories",
       "Multiplayer relay via socket.io",
-      "CRT scanline preview with glow effect",
-      "PyInstaller .exe / Linux AppImage / Mac .dmg build scripts",
     ],
   },
   {
@@ -1064,44 +1065,116 @@ bun run dev   # → http://localhost:3000`}</code></pre>
         </div>
       </section>
 
-      {/* ============ AI TEASER ============ */}
+      {/* ============ ALLY-5 — AI GAME ASSISTANT ============ */}
       <section className="relative z-10 py-24 px-6">
-        <div className="max-w-3xl mx-auto text-center reveal">
-          <div className="ae-eyebrow mb-5">
-            <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-            Under development
+        <div className="max-w-6xl mx-auto reveal">
+          <div className="text-center mb-14">
+            <div className="ae-eyebrow mb-5">
+              <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
+              New · ships in every Pygame studio
+            </div>
+            <h2 className="text-4xl md:text-6xl font-bold tracking-tight mb-5">
+              Meet <span className="ae-gradient-text">Ally-5</span>
+            </h2>
+            <p className="text-white/50 max-w-2xl mx-auto">
+              A real AI game developer built into the engine. Describe any game in one sentence and Ally-5 writes a complete,
+              playable <span className="text-emerald-300 font-mono text-[13px]">main.py</span> — then runs it. Five models. Zero setup. 100% in your browser.
+            </p>
           </div>
-          <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-4">
-            Meet the <span className="ae-gradient-text">AI Game Assistant</span>
-          </h2>
-          <p className="text-white/50 max-w-xl mx-auto mb-10">
-            An AI that helps you write game code, debug scripts, generate levels and suggest improvements — right inside the studio.
-          </p>
-          <div className="ae-card p-8 max-w-md mx-auto">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-400 via-fuchsia-500 to-violet-600 flex items-center justify-center mx-auto mb-5 ae-float">
-              <Sparkles className="w-8 h-8 text-white" />
-            </div>
-            <h3 className="font-bold mb-1">AI Assistant</h3>
-            <p className="text-xs text-white/40 font-mono uppercase tracking-widest mb-5">Status: In Development</p>
-            <div className="space-y-2.5 text-left">
-              {[
-                "Code generation from natural language",
-                "Debug script errors automatically",
-                "Generate 3D scenes from descriptions",
-                "Suggest gameplay improvements",
-              ].map((f) => (
-                <div key={f} className="flex items-center gap-2.5 text-xs">
-                  <Check className="w-3.5 h-3.5 text-green-400 flex-shrink-0" />
-                  <span className="text-white/55">{f}</span>
+
+          <div className="grid lg:grid-cols-5 gap-5">
+            {/* Mock chat — spans 3 */}
+            <div className="lg:col-span-3 ae-card p-0 overflow-hidden">
+              <div className="flex items-center gap-2.5 px-4 py-3 border-b border-white/5 bg-white/[0.02]">
+                <div className="w-7 h-7 rounded-full bg-gradient-to-br from-indigo-500 via-emerald-400 to-pink-500 flex items-center justify-center">
+                  <Sparkles className="w-3.5 h-3.5 text-white" />
                 </div>
-              ))}
+                <div>
+                  <div className="text-[13px] font-bold text-white">Ally</div>
+                  <div className="text-[9.5px] font-mono text-white/35 uppercase tracking-widest">Ally-5 Pro · in your engine</div>
+                </div>
+                <div className="flex-1" />
+                <span className="text-[9.5px] font-mono px-2 py-1 rounded-full border border-emerald-400/30 text-emerald-300">online</span>
+              </div>
+              <div className="p-4 md:p-5 space-y-3 bg-[#0b0d16]">
+                <div className="flex justify-end">
+                  <div className="max-w-[80%] rounded-2xl rounded-br-md px-3.5 py-2.5 text-[13px] bg-gradient-to-br from-indigo-500/40 to-cyan-500/25 border border-indigo-400/30 text-indigo-50">
+                    make me a neon snake game called Voltage
+                  </div>
+                </div>
+                <div className="flex justify-start">
+                  <div className="max-w-[88%] rounded-2xl rounded-bl-md px-3.5 py-2.5 text-[13px] bg-white/[0.04] border border-white/10 text-white/80 space-y-2">
+                    <p>Done — I designed <b className="text-white">Voltage</b> (Snake) and wrote <code className="px-1 py-0.5 rounded bg-black/40 text-emerald-300 text-[11px] font-mono">main.py</code> with neon grid, glow trail and speed ramp.</p>
+                    <pre className="rounded-lg bg-black/50 border border-emerald-400/20 p-2.5 text-[10.5px] font-mono text-emerald-200/85 overflow-hidden">{`from lapia_shim import Game, Scene, Vector2, Color
+
+class SnakeScene(Scene):
+    def on_load(self):
+        self.snake = [Vector2(6, 9), Vector2(5, 9)]
+        ...`}</pre>
+                    <p className="text-[11.5px] text-white/45">Press Run ▶ to play — 24×18 grid, best-score tracking, game-over flow.</p>
+                  </div>
+                </div>
+                <div className="flex justify-end">
+                  <div className="max-w-[80%] rounded-2xl rounded-br-md px-3.5 py-2.5 text-[13px] bg-gradient-to-br from-indigo-500/40 to-cyan-500/25 border border-indigo-400/30 text-indigo-50">
+                    make it harder ⚡
+                  </div>
+                </div>
+                <div className="flex justify-start">
+                  <div className="max-w-[88%] rounded-2xl rounded-bl-md px-3.5 py-2.5 text-[13px] bg-white/[0.04] border border-white/10 text-white/80">
+                    Speed bumped to <b className="text-emerald-300">140%</b>, step interval tightens as you score. main.py rewritten — hit Run ▶.
+                  </div>
+                </div>
+              </div>
             </div>
-            <button
-              onClick={() => toast.info("AI Assistant is under development — check back soon!")}
-              className="mt-6 w-full px-4 py-2.5 rounded-lg ae-btn-ghost text-sm font-semibold"
-            >
-              Notify Me When Ready
+
+            {/* Right column: models + abilities */}
+            <div className="lg:col-span-2 space-y-5">
+              <div className="ae-card p-5">
+                <h3 className="font-bold text-[15px] mb-1">The Ally-5 model family</h3>
+                <p className="text-[11px] text-white/35 font-mono uppercase tracking-widest mb-4">5 models · one switch</p>
+                <div className="space-y-2.5">
+                  {[
+                    ["#4ade80", "Ally-5 Nano", "instant answers"],
+                    ["#22d3ee", "Ally-5 Fast", "quick builds"],
+                    ["#818cf8", "Ally-5 Pro", "balanced · default"],
+                    ["#f472b6", "Ally-5 Max", "deep thinking + juice"],
+                    ["#fbbf24", "Ally-5 Game", "game genesis specialist"],
+                  ].map(([c, n, d]) => (
+                    <div key={n} className="flex items-center gap-2.5">
+                      <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: c as string, boxShadow: `0 0 8px ${c}` }} />
+                      <span className="text-[12.5px] font-semibold text-white/85 w-24">{n}</span>
+                      <span className="text-[11px] text-white/40">{d}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="ae-card p-5">
+                <h3 className="font-bold text-[15px] mb-4">Also on board</h3>
+                <div className="space-y-2.5">
+                  {[
+                    "Writes complete games from any prompt",
+                    "Terminal access — `ally make me a pong`",
+                    "Explains the engine, line by line",
+                    "Diagnoses errors before you hit Run",
+                    "Knows all 134 toolbox sprites",
+                  ].map((f) => (
+                    <div key={f} className="flex items-center gap-2.5 text-xs">
+                      <Check className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
+                      <span className="text-white/55">{f}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="text-center mt-10">
+            <button onClick={handleLaunchClick} className="group inline-flex items-center gap-2.5 px-8 py-4 rounded-xl ae-btn-primary font-bold">
+              <Sparkles className="w-5 h-5" />
+              Launch the studio &amp; meet Ally
+              <ArrowRight className="w-5 h-5 group-hover:translate-x-1.5 transition-transform" />
             </button>
+            <p className="text-[11px] text-white/30 font-mono mt-4">runs 100% locally in your browser — no API keys, no accounts, nothing leaves your machine</p>
           </div>
         </div>
       </section>

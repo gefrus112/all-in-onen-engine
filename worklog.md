@@ -139,3 +139,36 @@ Stage Summary:
 - LICENSE now blocks showcase/portfolio reuse of the code
 - RPG Village Quest template included and playable from the Templates panel
 - All README media verified present (14 images + showreel video + poster)
+
+---
+Task ID: v3.2-engine
+Agent: main
+Task: Improve 3D engine — Roblox-style script blocks (plus sign → add script, rename, runs in game), water at baseplate edge, fix settings, satisfying UI tap/click sounds.
+
+Work Log:
+- Added ScriptBlock type + default scene SpinScript demo; scripts nested under objects in Explorer
+- Explorer: '+' per object row (hover) + scene header → dropdown (Script / Box / Sphere / Light); click-to-edit, double-click inline rename, power toggle, delete
+- New ScriptEditor modal overlay with API cheatsheet and RUNS ON PLAY badge
+- New ScriptRuntime in canvas.tsx: compiles scripts via new Function IIFE wrapper (fixed Identifier collision bug found during testing), onStart + update(dt,self) per frame, self/engine/input/print API, transform+material restore on stop, errors logged once
+- EdgeWater component: 240x240 vertex-animated sine-wave ocean, shoreline foam ring scaled to baseplate, drifting foam dots; Edge Water section in World panel (toggle, level, color); swim physics in PlayerController (buoyancy spring, slower movement, paddle up with Space); baseHalf computed from largest plane/terrain
+- Settings fixes: themes now apply via data-theme on <html> (5 CSS themes added to globals.css), Audio tab (enable toggle, volume slider, preview buttons Tap/Pop/Toggle/Success/Coin), branding corrected, sound previews wired
+- New src/lib/ui-sounds.ts: synthesized Web Audio sounds (tap, click, pop, toggle, success, error, whoosh, coin) with global pointerdown/keydown install honoring enableSounds + uiSoundVolume from store
+- Verified end-to-end in headless browser: water renders, SpinScript logs "[SpinScript] Box 1 started!" in debug console, theme switching visibly works (Sunset), + menu adds scripts
+- Committed 4c8966e and pushed; GitHub Pages deploy succeeded
+
+Stage Summary:
+- 3D engine v3.2 live on the site: scripts system, edge water, fixed settings, UI sounds
+
+---
+Task ID: v3.3-devtools
+Agent: main
+Task: Block native DevTools site-wide + add real working built-in dev tools (inspect, page source).
+
+Work Log:
+- New src/lib/devtools-guard.ts: blocks right-click, F12 (retargeted to built-in tools), Ctrl/Cmd+Shift+I/J/C/K/E, Ctrl+U/S/P; silent-blocks right-drag gestures; DevTools-open detection via debugger-timing + dpr-aware size heuristic; console deterrent.
+- New src/components/devtools/: LapiaDevTools shell (tabs, resize, picker, shield overlay, toast) + ElementsPanel (live DOM tree, filter, breadcrumbs, attributes/computed styles), ConsolePanel (log capture + JS eval with history), SourcePanel (page source fetch + rendered DOM, copy/download), NetworkPanel (fetch/XHR recorder).
+- Mounted globally in layout.tsx; styled via globals.css .ldev-*
+- Verified end-to-end in headless browser: F12 toggle, picker select, console eval, source fetch (HTTP 200, 137KB), right-click toast, shield overlay show/hide.
+
+Stage Summary:
+- Site protected: native DevTools blocked; built-in Lapia DevTools (F12) replace them.

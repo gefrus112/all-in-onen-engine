@@ -9,6 +9,8 @@ import {
 import { useState } from "react";
 import type { GUIElement, DebugLogEntry } from "./types";
 
+const ASSET_BASE = process.env.NEXT_PUBLIC_ASSET_BASE || "";
+
 const uid = () => Math.random().toString(36).slice(2, 10);
 
 // ================= Welcome card =================
@@ -19,7 +21,7 @@ export function WelcomeCard({ onClose }: { onClose: () => void }) {
       <div className="glass rounded-2xl p-6 max-w-lg w-full relative" onClick={(e) => e.stopPropagation()}>
         <button onClick={onClose} className="absolute top-3 right-3 p-1 rounded hover:bg-white/10"><X className="w-4 h-4" /></button>
         <div className="flex items-center gap-3 mb-5">
-          <img src="/icon.svg" alt="All In One Engine" className="w-14 h-14" />
+          <img src={`${ASSET_BASE}/icon.svg`} alt="All In One Engine" className="w-14 h-14" />
           <div>
             <h2 className="text-xl font-bold leading-tight">All In One 3D Studio</h2>
             <p className="text-xs text-cyan-400">v3.1 · First-person play test · Components · RPG template</p>
