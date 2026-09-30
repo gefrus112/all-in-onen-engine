@@ -50,14 +50,14 @@ const ENGINES: {
     gradient: "linear-gradient(135deg, #8b5cf6, #4c1d95)",
     glow: "139,92,246",
     tags: ["Three.js", "WebGL", "3D", "Real-time"],
-    version: "v1.0.0",
-    lastUpdate: "2026-09-27",
+    version: "v3.1.0",
+    lastUpdate: "2026-09-30",
     updates: [
-      "Three.js r186 with @react-three/fiber + drei",
-      "Real-time shadows + Sky + Environment lighting",
-      "OrbitControls + RGB axis gizmo",
-      "Animation timeline with keyframes",
-      "Play-test mode with WASD camera + custom avatar",
+      "First-person play test with pointer-lock mouse look",
+      "Blender-style Components panel (Rigid Body, Script, Audio…)",
+      "Map lighting presets + rendering settings (shadows, tone map)",
+      "3 new assets: Castle Tower, Fountain, Treasure Chest",
+      "Playable RPG Village Quest template with quests and combat",
     ],
   },
   {
@@ -69,14 +69,14 @@ const ENGINES: {
     gradient: "linear-gradient(135deg, #06b6d4, #0e7490)",
     glow: "6,182,212",
     tags: ["Experimental", "PBR", "Deferred", "Open-world"],
-    version: "v0.9.0 (beta)",
-    lastUpdate: "2026-09-27",
+    version: "v3.1.0 (beta)",
+    lastUpdate: "2026-09-30",
     updates: [
-      "100 physics properties per object (joints, buoyancy, CCD)",
-      "20 PBR material properties (clearcoat, transmission, IOR, sheen)",
-      "Script/CSS/JS code editor with Zhitlow Script language",
+      "Real move / rotate / scale gizmos with grid snapping",
+      "Adjustable asset palette size (S / M / L)",
+      "Screenshot tool, focus selection (F), snap toggle",
       "GUI editor overlay (HUD, crosshair, health bar)",
-      "Closable welcome card with quick-start guide",
+      "Wired material properties — roughness, metalness, emissive",
     ],
   },
 ];
@@ -305,6 +305,7 @@ const SPRITE_LIST = [
 const NAV_SECTIONS = [
   { id: "home", label: "Home" },
   { id: "engines", label: "Engines" },
+  { id: "showreel", label: "Showreel" },
   { id: "features", label: "Features" },
   { id: "how", label: "How it works" },
   { id: "download", label: "Download" },
@@ -560,7 +561,7 @@ export function LandingPage({
       <nav className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${scrolled ? "ae-glass" : ""}`} style={{ padding: scrolled ? "10px 0" : "18px 0" }}>
         <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
           <button onClick={() => scrollTo("home")} className="flex items-center gap-2.5 group">
-            <img src={A("/logo.svg")} alt="All In One Engine" className="w-9 h-9 group-hover:rotate-12 transition-transform duration-300" />
+            <img src={A("/icon.svg")} alt="All In One Engine" className="w-9 h-9 group-hover:rotate-12 transition-transform duration-300 ae-drop-shadow" />
             <div className="text-left">
               <div className="font-bold text-[15px] leading-tight tracking-tight">
                 All In One <span className="ae-gradient-text">Engine</span>
@@ -588,6 +589,19 @@ export function LandingPage({
 
       {/* ============ HERO ============ */}
       <section id="home" className="relative z-10 min-h-screen flex items-center justify-center px-6 pt-28 pb-16">
+        {/* background video: someone building an RPG with the engine */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
+          <video
+            className="absolute inset-0 w-full h-full object-cover ae-hero-video"
+            autoPlay muted loop playsInline preload="auto"
+            poster={A("/videos/rpg-poster.jpg")}
+          >
+            <source src={A("/videos/rpg-build.mp4")} type="video/mp4" />
+          </video>
+          <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse at 50% 42%, rgba(10,11,14,0.55) 0%, rgba(10,11,14,0.82) 62%, #0a0b0e 100%)" }} />
+          <div className="absolute inset-x-0 bottom-0 h-40" style={{ background: "linear-gradient(to bottom, transparent, #0a0b0e)" }} />
+        </div>
+
         <div ref={heroRef} className="max-w-6xl mx-auto text-center relative">
           {/* floating pixel sprites */}
           <div className="hidden md:block absolute -left-24 top-10 ae-float opacity-90 pointer-events-none">
@@ -605,7 +619,7 @@ export function LandingPage({
 
           <div className="ae-eyebrow mb-8">
             <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-            v3.0 — 3D Studio · Avatar Customizer · One-click Publishing
+            v3.1 — RPG Template · First-Person Play Test · Blender-style Components
             <ArrowUpRight className="w-3.5 h-3.5" />
           </div>
 
@@ -617,8 +631,8 @@ export function LandingPage({
 
           <p className="text-base md:text-lg text-white/55 max-w-2xl mx-auto mb-10 leading-relaxed">
             A Roblox Studio-style IDE that lives in your browser. Write Python or JavaScript,
-            hit <kbd className="px-1.5 py-0.5 rounded bg-white/10 border border-white/15 text-[0.8em] font-mono">Play</kbd> and watch it run at 60 FPS.
-            Three engines, 134 sprites, multiplayer, publishing — zero installs.
+            hit <kbd className="px-1.5 py-0.5 rounded bg-white/10 border border-white/15 text-[0.8em] font-mono">Play</kbd> and get locked into first person at 60 FPS.
+            Three engines, 134 sprites, a playable RPG template, multiplayer, publishing — zero installs.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-14">
@@ -657,6 +671,48 @@ export function LandingPage({
         <button onClick={() => scrollTo("engines")} className="absolute bottom-6 left-1/2 -translate-x-1/2 animate-bounce text-white/30 hover:text-white/70 transition-colors" aria-label="Scroll down">
           <ChevronDown className="w-6 h-6" />
         </button>
+      </section>
+
+      {/* ============ SHOWREEL ============ */}
+      <section id="showreel" className="relative z-10 py-24 px-6 scroll-mt-20">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-12 reveal">
+            <div className="ae-eyebrow mb-5">
+              <Play className="w-3.5 h-3.5 text-cyan-400" />
+              Showreel — recorded inside 3D Studio
+            </div>
+            <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-4">
+              Watch an RPG get built <span className="ae-gradient-text">with the engine</span>
+            </h2>
+            <p className="text-white/50 max-w-2xl mx-auto">
+              This is a real capture of the 3D Studio workflow: placing assets from the palette,
+              pressing Play, and running the RPG Village Quest template in first person —
+              collecting coins, opening chests and fighting slimes.
+            </p>
+          </div>
+
+          <div className="relative rounded-2xl overflow-hidden border border-white/10 ae-video-glow reveal">
+            <video
+              className="w-full aspect-video object-cover bg-black"
+              controls preload="metadata"
+              poster={A("/videos/rpg-poster.jpg")}
+            >
+              <source src={A("/videos/rpg-build.mp4")} type="video/mp4" />
+              Your browser does not support HTML5 video.
+            </video>
+          </div>
+
+          <div className="flex flex-wrap justify-center gap-2 mt-6 reveal">
+            {[
+              "RPG Village Quest template",
+              "Asset palette: Castle Tower · Fountain · Treasure Chest",
+              "First-person play test with pointer lock",
+              "Quest: 8 coins · 2 chests · Elder Rowan · 3 slimes",
+            ].map((chip) => (
+              <span key={chip} className="text-[11px] px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-white/55">{chip}</span>
+            ))}
+          </div>
+        </div>
       </section>
 
       {/* ============ ENGINES ============ */}
@@ -1072,7 +1128,7 @@ bun run dev   # → http://localhost:3000`}</code></pre>
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="flex items-center gap-2.5">
-              <img src={A("/logo.svg")} alt="All In One Engine" className="w-7 h-7" />
+              <img src={A("/icon.svg")} alt="All In One Engine" className="w-7 h-7 ae-drop-shadow" />
               <div>
                 <div className="text-sm font-bold">All In One <span className="ae-gradient-text">Engine</span></div>
                 <div className="text-[10px] text-white/35 font-mono">MIT License · 2D + 3D + Multiplayer</div>

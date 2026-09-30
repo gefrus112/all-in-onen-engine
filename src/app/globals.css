@@ -326,3 +326,17 @@ html.landing-mode body {
 .float-shadow {
   box-shadow: 0 4px 16px rgba(0,0,0,0.4);
 }
+
+/* App icon drop shadow (Roblox-style mark) */
+.ae-drop-shadow {
+  filter: drop-shadow(0 4px 12px rgba(59, 130, 246, 0.45));
+}
+
+/* Hero background video + showreel glow */
+.ae-hero-video {
+  opacity: 0.38;
+  filter: saturate(1.15) contrast(1.05);
+}
+.ae-video-glow {
+  box-shadow: 0 0 0 1px rgba(34, 211, 238, 0.15), 0 20px 80px -20px rgba(139, 92, 246, 0.45), 0 8px 40px -12px rgba(34, 211, 238, 0.25);
+}

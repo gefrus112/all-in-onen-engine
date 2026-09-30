@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="public/logo.svg" alt="All In One Engine" width="88" />
+<img src="public/icon.svg" alt="All In One Engine" width="88" />
 
 # All In One Engine
 
@@ -11,7 +11,7 @@ Write **Python** or **JavaScript**, hit **Play**, and see your game run live at 
 
 [![Live Site](https://img.shields.io/badge/▶_LIVE_SITE-gefrus112.github.io-8b5cf6?style=for-the-badge&labelColor=0a0a12)](https://gefrus112.github.io/all-in-onen-engine/)
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-4ade80?style=flat-square&labelColor=0a0a12)](LICENSE)
+[![License: Modified MIT](https://img.shields.io/badge/License-Modified%20MIT%20%2B%20Showcase%20Clause-4ade80?style=flat-square&labelColor=0a0a12)](LICENSE)
 [![Next.js](https://img.shields.io/badge/Next.js-16-black?style=flat-square&logo=next.js&labelColor=0a0a12)](https://nextjs.org/)
 [![Python](https://img.shields.io/badge/Python-3.12-3776ab?style=flat-square&logo=python&logoColor=white&labelColor=0a0a12)](https://www.python.org/)
 [![Three.js](https://img.shields.io/badge/Three.js-r186-white?style=flat-square&logo=threedotjs&labelColor=0a0a12)](https://threejs.org/)
@@ -26,7 +26,22 @@ Write **Python** or **JavaScript**, hit **Play**, and see your game run live at 
 
 [![All In One Engine — 3D Studio](download/studio-3d.png)](https://gefrus112.github.io/all-in-onen-engine/)
 
+[![🎬 Watch: building an RPG with the engine](public/videos/rpg-poster.jpg)](https://github.com/gefrus112/all-in-onen-engine/raw/main/public/videos/rpg-build.mp4)
+
+<p align="center"><i>🎬 <b>Showreel</b> — building and playing the RPG Village Quest inside 3D Studio (click to watch) · <a href="public/demo/rpg-build-demo.html">interactive demo</a></i></p>
+
 <br />
+
+## 🆕 What's new in v3.1
+
+- **First-person play test** — the Play button now locks your mouse into the game, true FPS-style. WASD + Shift to run, Space to jump, <kbd>Esc</kbd> releases the cursor. No more orbiting while you play-test.
+- **Blender-style Components** — every object gets a component stack: Transform, Mesh Renderer, Rigid Body, Box Collider, Audio Source, Script, Particle Emitter, Network Sync. Add and remove them per object.
+- **Map lighting presets** — one click switches the whole map: Daylight, Golden Hour, Night, Dawn or Underworld. Fine-tune sun elevation/azimuth, ambient color and fog.
+- **Rendering settings** — shadows on/off, shadow map size, tone mapping (ACES/Linear/Reinhard), exposure, FOV, grid and gizmo toggles.
+- **Real gizmos + new tools** — move/rotate/scale actually move objects now, with optional grid snapping, focus selection (<kbd>F</kbd>) and a one-click viewport screenshot.
+- **3 new compound assets** — 🏰 Castle Tower, ⛲ Fountain, 💎 Treasure Chest (multi-part meshes, used across the RPG template).
+- **Adjustable palette size** — the asset palette now resizes: S / M / L icon densities.
+- **RPG Village Quest template** — a real, playable RPG built from the assets: collect 8 coins, open chests, talk to Elder Rowan, defeat 3 slimes. Quest HUD, health bar, dialogue boxes and sword combat included.
 
 ## 💡 What is this?
 
@@ -53,7 +68,7 @@ Pick your engine when you launch — or switch anytime:
 | **Runtime** | Pyodide (WASM) | WebGL / Three.js r186 | Custom renderer |
 | **Best for** | Sprite games, platformers, shooters | 3D worlds, meshes, lighting | Experimental open worlds |
 | **Status** | ✅ Stable | ✅ Stable | 🧪 Experimental |
-| **Highlights** | 134 sprites · physics · ECS · AI · CRT preview | Shadows · Sky · keyframe timeline · WASD play-test | 100 physics props · 20 PBR materials · GUI editor |
+| **Highlights** | 134 sprites · physics · ECS · AI · CRT preview | FPS play-test · components · lighting presets · RPG template | Real gizmos · PBR materials · GUI editor |
 
 ---
 
@@ -63,7 +78,7 @@ Pick your engine when you launch — or switch anytime:
 |---|---|---|
 | ✍️ | **Monaco Code Editor** | Python + JS syntax highlighting, multi-tab, autosave, Ctrl+S / F5 |
 | 👁️ | **Live Preview** | Runs your Python game in-browser via Pyodide at 60 FPS with real input |
-| 🧊 | **3D Studio** | Interactive Three.js viewport — place meshes, lights, cameras, animate keyframes |
+| 🧊 | **3D Studio** | Interactive Three.js viewport — gizmos, components, lighting presets, first-person play test, playable RPG template |
 | 👥 | **Multiplayer** | Socket.io relay included — 2-4 players, real-time position sync |
 | 🖼️ | **134+ Sprite Library** | 15 categories of pixel art — players, enemies, tiles, props, weapons |
 | 📤 | **Asset Upload** | Drag in your own `.glb` `.gltf` `.wav` `.mp3` `.png` files |
@@ -183,12 +198,14 @@ all-in-onen-engine/
 │   ├── components/ide/        # TopBar, FileExplorer, SceneHierarchy,
 │   │                          # PropertiesPanel, CodeEditor, PreviewPane,
 │   │                          # Console, StatusBar, LandingPage, Studio3D
+│   │   └── studio3d/          # 3D Studio modules: types, meshes, rpg runtime,
+│   │                          # components/world panels, templates, canvas
 │   └── lib/
 │       ├── studio-store.ts    # Zustand store
 │       └── pyodide-runner.ts  # Pyodide loader + lapia_shim module
 │
 ├── mini-services/             # socket.io multiplayer relay (Bun)
-├── public/                    # sprites, logos, static assets
+├── public/                    # sprites, logos, videos (showreel), demo page
 ├── prisma/                    # DB schema (reserved)
 └── build_*.sh                 # native installer build scripts
 ```
@@ -230,6 +247,9 @@ Because `lapia_shim` mirrors the real engine API, your code is **portable**: dow
 
 - [x] Pygame 2D engine + live browser preview
 - [x] Three.js 3D Studio with keyframe timeline
+- [x] First-person play test + Blender-style components
+- [x] Map lighting presets + rendering settings
+- [x] Playable RPG Village Quest template + showreel video
 - [x] Multiplayer relay + arena template
 - [x] Avatar customizer + publish dialog
 - [x] Native build scripts (Linux / macOS / Chromebook)
@@ -247,7 +267,16 @@ Because `lapia_shim` mirrors the real engine API, your code is **portable**: dow
 
 ## 📄 License
 
-MIT — see [LICENSE](LICENSE). The Lapia engine has its own [MIT license](engine/LICENSE).
+**Modified MIT License (Lapia Studio Public License)** — see [LICENSE](LICENSE).
+
+In short:
+
+- ✅ **Free to use** — build, modify, and ship games with the engine, including commercial games. **Games you make are 100% yours.**
+- ✅ **Free to learn** — read the source, learn from it, contribute improvements back.
+- ❌ **No showcase / portfolio reuse** — you may **not** copy this code and present the engine (or a lightly-modified copy) as your own work in a portfolio, demo reel, school/job submission, or a rebranded "my own engine" project. Full clause in [LICENSE](LICENSE) → *Part 2, §1*.
+- 📌 **Attribution required** — public uses must credit: *"Powered by All In One Engine — github.com/gefrus112/all-in-onen-engine"*.
+
+The Lapia engine (`/engine`) ships under the same [license](engine/LICENSE).
 
 ## 🔗 Links
 

@@ -21,10 +21,11 @@ export const metadata: Metadata = {
   authors: [{ name: "All In One Engine Contributors" }],
   icons: {
     icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
       { url: "/favicon.svg", type: "image/svg+xml" },
     ],
     apple: [
-      { url: "/favicon.svg" },
+      { url: "/icon.svg" },
     ],
   },
   openGraph: {

@@ -1,741 +1,180 @@
 "use client";
 
-import { useRef, useState, useEffect, useCallback } from "react";
-import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { OrbitControls, Grid, GizmoHelper, GizmoViewport, Environment, Sky } from "@react-three/drei";
+import { useRef, useState, useEffect, useCallback, useMemo } from "react";
+import { Canvas } from "@react-three/fiber";
+import { OrbitControls, GizmoHelper, GizmoViewport } from "@react-three/drei";
 import * as THREE from "three";
 import {
-  Box, Circle, Cylinder, Cone, Torus, Plane, Lightbulb, Camera as CameraIcon,
-  Move, RotateCw, Scale, Hand, Mouse, Plus, Trash2, Copy, Play, Pause, Square,
-  Save, Upload, Music, Settings, PanelLeft, PanelRight, PanelBottom,
-  Box as BoxIcon, Layers, Search, ChevronDown, ChevronRight, User, Send,
-  Sun, Github, Home, Volume2, Eye, EyeOff, Lock, Unlock,
-  X, Sparkles, Rocket, Code2, Cpu, Box as CubeIcon, FileCode2, Palette,
-  Undo2, Redo2, Mountain, Waves, Bug, Terminal, MessageSquare, Menu,
-  Type, Square as SquareIcon, MousePointer2, Layout, Image as ImageIcon,
-  FolderOpen, History, ChevronLeft,
+  Box as BoxIcon, Circle, Cylinder, Cone, Torus, Plane, Lightbulb, Move, RotateCw, Scale,
+  Hand, Plus, Trash2, Copy, Play, Pause, Square, Search, User, Send, Sun, Github, Home,
+  Upload, Settings, Eye, EyeOff, Lock, Unlock, Rocket, Code2, Palette, Bug,
+  Boxes, Magnet, Camera as CameraIcon, Focus, Crosshair, Mountain, Layers, Gamepad2,
 } from "lucide-react";
 import { useStudio } from "../../lib/studio-store";
 import { toast } from "sonner";
-
-// 3D scene object types
-type SceneObjType = "box" | "sphere" | "cylinder" | "cone" | "torus" | "plane" | "light" | "camera" | "terrain" | "water" | "model";
-type LightSubtype = "directional" | "point" | "spot" | "ambient" | "hemisphere";
-type CameraMode = "orbit" | "first-person" | "third-person";
-type GUIElementType = "button" | "text" | "panel" | "image" | "input" | "slider" | "checkbox" | "healthbar" | "crosshair" | "menu";
-
-interface GUIElement {
-  id: string;
-  type: GUIElementType;
-  name: string;
-  x: number; y: number; width: number; height: number;
-  text: string;
-  color: string;
-  fontSize: number;
-  visible: boolean;
-}
-
-interface SceneObject3D {
-  id: string;
-  name: string;
-  type: SceneObjType;
-  lightSubtype?: LightSubtype;
-  position: [number, number, number];
-  rotation: [number, number, number];
-  scale: [number, number, number];
-  color: string;
-  intensity?: number;
-  visible: boolean;
-  locked: boolean;
-  // Extended properties (40+)
-  castShadow?: boolean;
-  receiveShadow?: boolean;
-  roughness?: number;
-  metalness?: number;
-  emissive?: string;
-  emissiveIntensity?: number;
-  opacity?: number;
-  transparent?: boolean;
-  wireframe?: boolean;
-  flatShading?: boolean;
-  // Physics 2
-  mass?: number;
-  friction?: number;
-  restitution?: number;
-  isTrigger?: boolean;
-  isKinematic?: boolean;
-  // Audio
-  audioClip?: string;
-  audioVolume?: number;
-  audioLoop?: boolean;
-  audioPlayOnAwake?: boolean;
-  // Network
-  networked?: boolean;
-  networkOwner?: string;
-  // Tag
-  tag?: string;
-  layer?: string;
-}
-
-interface DebugLogEntry {
-  id: string;
-  type: "info" | "warn" | "error" | "success";
-  text: string;
-  timestamp: number;
-}
-
-interface ProjectHistory {
-  name: string;
-  lastOpened: number;
-  deleted?: boolean;
-}
-
-const uid = () => Math.random().toString(36).slice(2, 10);
-
-// Physics properties component — renders 100 physics-related properties
-function PhysicsProperties({ obj, onUpdate }: { obj: SceneObject3D; onUpdate: (id: string, key: string, value: unknown) => void }) {
-  const physicsProps: [string, string][] = [
-    // Rigid body
-    ["Body Type", "Dynamic"],
-    ["Mass", "1.0"],
-    ["Density", "1.0"],
-    ["Volume", "1.0"],
-    ["Use Auto Mass", "False"],
-    // Linear
-    ["Linear Velocity X", "0.0"],
-    ["Linear Velocity Y", "0.0"],
-    ["Linear Velocity Z", "0.0"],
-    ["Linear Damping", "0.05"],
-    ["Linear Drag", "0.0"],
-    ["Max Linear Speed", "100.0"],
-    ["Max Linear Force", "100.0"],
-    // Angular
-    ["Angular Velocity X", "0.0"],
-    ["Angular Velocity Y", "0.0"],
-    ["Angular Velocity Z", "0.0"],
-    ["Angular Damping", "0.05"],
-    ["Angular Drag", "0.05"],
-    ["Max Angular Speed", "50.0"],
-    ["Max Angular Force", "50.0"],
-    ["Max Torque", "50.0"],
-    // Gravity
-    ["Gravity Scale", "1.0"],
-    ["Gravity X", "0.0"],
-    ["Gravity Y", "-9.81"],
-    ["Gravity Z", "0.0"],
-    ["Custom Gravity", "False"],
-    // Collision
-    ["Collision Detection", "Discrete"],
-    ["Collision Layer", "1"],
-    ["Collision Mask", "255"],
-    ["Collision Shape", "Box"],
-    ["Collision Radius", "0.5"],
-    ["Collision Height", "1.0"],
-    ["Collision Width", "1.0"],
-    ["Collision Depth", "1.0"],
-    ["Is Trigger", "False"],
-    ["Is Kinematic", "False"],
-    ["Use Full Contacts", "False"],
-    ["Center of Mass X", "0.0"],
-    ["Center of Mass Y", "0.0"],
-    ["Center of Mass Z", "0.0"],
-    ["Auto Center of Mass", "True"],
-    // Material
-    ["Friction", "0.4"],
-    ["Static Friction", "0.4"],
-    ["Dynamic Friction", "0.4"],
-    ["Bounciness", "0.0"],
-    ["Restitution", "0.0"],
-    ["Combine Friction", "Average"],
-    ["Combine Bounce", "Average"],
-    ["Friction Direction", "Auto"],
-    // Sleep
-    ["Sleep Mode", "Start Awake"],
-    ["Allow Sleep", "True"],
-    ["Sleep Threshold", "0.05"],
-    ["Sleep Velocity", "0.05"],
-    ["Sleep Angular Vel", "0.05"],
-    ["Sleep Time", "0.5"],
-    ["Awake", "True"],
-    // Constraints
-    ["Freeze Position X", "False"],
-    ["Freeze Position Y", "False"],
-    ["Freeze Position Z", "False"],
-    ["Freeze Rotation X", "False"],
-    ["Freeze Rotation Y", "False"],
-    ["Freeze Rotation Z", "False"],
-    ["Lock Position", "False"],
-    ["Lock Rotation", "False"],
-    ["Lock Scale", "False"],
-    // Interpolation
-    ["Interpolation", "None"],
-    ["Extrapolation", "False"],
-    ["Extrapolation Distance", "0.5"],
-    ["Snap Threshold", "1.0"],
-    // Forces
-    ["Constant Force X", "0.0"],
-    ["Constant Force Y", "0.0"],
-    ["Constant Force Z", "0.0"],
-    ["Constant Torque X", "0.0"],
-    ["Constant Torque Y", "0.0"],
-    ["Constant Torque Z", "0.0"],
-    ["Impulse Force", "0.0"],
-    ["Impulse Direction", "Up"],
-    ["Apply Force Mode", "Force"],
-    // Joints
-    ["Joint Type", "None"],
-    ["Joint Anchor X", "0.0"],
-    ["Joint Anchor Y", "0.0"],
-    ["Joint Anchor Z", "0.0"],
-    ["Joint Connected Body", ""],
-    ["Joint Break Force", "Infinity"],
-    ["Joint Break Torque", "Infinity"],
-    ["Joint Enable Collision", "False"],
-    ["Joint Enable Preprocessing", "True"],
-    ["Joint Mass Scale", "1.0"],
-    ["Joint Connected Mass Scale", "1.0"],
-    // Buoyancy
-    ["Buoyancy Density", "0.0"],
-    ["Buoyancy Force", "0.0"],
-    ["Buoyancy Drag", "0.0"],
-    ["Buoyancy Linear Drag", "0.0"],
-    ["Buoyancy Angular Drag", "0.0"],
-    // Advanced
-    ["Solver Iterations", "6"],
-    ["Solver Velocity Iterations", "1"],
-    ["Solver Position Iterations", "1"],
-    ["Contact Offset", "0.01"],
-    ["Rest Offset", "0.0"],
-    ["Min Penetration", "0.001"],
-    ["Bounce Threshold", "2.0"],
-    ["Sleep Tolerance", "0.1"],
-    ["Max Depenetration Velocity", "Infinity"],
-    ["Max Angular Speed Limit", "50.0"],
-    ["Continuous Collision Detection", "False"],
-    ["Speculative Contacts", "False"],
-    ["Always Active", "False"],
-  ];
-
-  return (
-    <div className="px-3 py-2 border-b border-white/5">
-      <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-2 flex items-center justify-between">
-        <span>Physics</span>
-        <span className="text-muted-foreground/60">{physicsProps.length} props</span>
-      </div>
-      <div className="max-h-48 overflow-y-auto pr-1">
-        {physicsProps.map(([label, val]) => (
-          <div key={label} className="flex items-center gap-2 mb-0.5">
-            <span className="text-[11px] text-muted-foreground w-28 truncate" title={label}>{label}</span>
-            <input
-              defaultValue={val}
-              className="flex-1 bg-black/30 px-2 py-0.5 text-[11px] outline-none border border-transparent focus:border-cyan-500 rounded"
-            />
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function Object3DMesh({ obj, selected, onSelect }: { obj: SceneObject3D; selected: boolean; onSelect: () => void }) {
-  const meshRef = useRef<THREE.Mesh>(null);
-  useFrame(() => {
-    if (meshRef.current && selected) {
-      // Pulsing outline effect
-      const mat = meshRef.current.material as THREE.MeshStandardMaterial;
-      mat.emissiveIntensity = 0.3 + Math.sin(Date.now() * 0.005) * 0.2;
-    }
-  });
-
-  if (!obj.visible) return null;
-
-  const renderGeometry = () => {
-    switch (obj.type) {
-      case "box": return <boxGeometry args={[1, 1, 1]} />;
-      case "sphere": return <sphereGeometry args={[0.5, 32, 32]} />;
-      case "cylinder": return <cylinderGeometry args={[0.5, 0.5, 1, 32]} />;
-      case "cone": return <coneGeometry args={[0.5, 1, 32]} />;
-      case "torus": return <torusGeometry args={[0.5, 0.2, 16, 100]} />;
-      case "plane": return <planeGeometry args={[1, 1]} />;
-      default: return <boxGeometry args={[1, 1, 1]} />;
-    }
-  };
-
-  if (obj.type === "light") {
-    if (obj.lightSubtype === "ambient") {
-      return <ambientLight intensity={obj.intensity ?? 0.5} color={obj.color} />;
-    }
-    if (obj.lightSubtype === "directional") {
-      return <directionalLight position={obj.position} intensity={obj.intensity ?? 1} color={obj.color} />;
-    }
-    if (obj.lightSubtype === "point") {
-      return <pointLight position={obj.position} intensity={obj.intensity ?? 1} color={obj.color} distance={10} />;
-    }
-    if (obj.lightSubtype === "spot") {
-      return <spotLight position={obj.position} angle={0.5} intensity={obj.intensity ?? 1} color={obj.color} distance={10} />;
-    }
-    if (obj.lightSubtype === "hemisphere") {
-      return <hemisphereLight intensity={obj.intensity ?? 0.5} color={obj.color} />;
-    }
-  }
-
-  return (
-    <mesh
-      ref={meshRef}
-      position={obj.position}
-      rotation={obj.rotation}
-      scale={obj.scale}
-      onClick={(e) => { e.stopPropagation(); onSelect(); }}
-      castShadow
-      receiveShadow
-    >
-      {renderGeometry()}
-      <meshStandardMaterial
-        color={obj.color}
-        emissive={selected ? obj.color : "#000000"}
-        emissiveIntensity={selected ? 0.5 : 0}
-        roughness={0.5}
-        metalness={0.1}
-      />
-    </mesh>
-  );
-}
-
-function Avatar3D({ position, color, preset, bodyType }: {
-  position: [number, number, number];
-  color: string;
-  preset: string;
-  bodyType: "slim" | "average" | "tall";
-}) {
-  const groupRef = useRef<THREE.Group>(null);
-  const heightScale = bodyType === "tall" ? 1.3 : bodyType === "slim" ? 0.85 : 1.0;
-  const widthScale = bodyType === "slim" ? 0.85 : bodyType === "tall" ? 0.95 : 1.0;
-
-  useFrame((state) => {
-    if (groupRef.current) {
-      // Idle animation
-      groupRef.current.position.y = position[1] + Math.sin(state.clock.elapsedTime * 2) * 0.05;
-      groupRef.current.rotation.y = Math.sin(state.clock.elapsedTime * 0.5) * 0.3;
-    }
-  });
-
-  const headColor = preset === "robot" ? "#999" : preset === "knight" ? "#fbbf24" : "#fde68a";
-  const bodyColor = color;
-  const accentColor = preset === "knight" ? "#3b82f6" : preset === "mage" ? "#8b5cf6" : preset === "archer" ? "#10b981" : preset === "rogue" ? "#1f2937" : preset === "wizard" ? "#1e3a8a" : "#06b6d4";
-
-  return (
-    <group ref={groupRef} position={position} scale={[widthScale, heightScale, widthScale]}>
-      {/* Head */}
-      <mesh position={[0, 1.2, 0]} castShadow>
-        <boxGeometry args={[0.5, 0.5, 0.5]} />
-        <meshStandardMaterial color={headColor} />
-      </mesh>
-      {/* Eyes */}
-      <mesh position={[-0.12, 1.25, 0.26]}>
-        <boxGeometry args={[0.08, 0.08, 0.02]} />
-        <meshStandardMaterial color="#000" />
-      </mesh>
-      <mesh position={[0.12, 1.25, 0.26]}>
-        <boxGeometry args={[0.08, 0.08, 0.02]} />
-        <meshStandardMaterial color="#000" />
-      </mesh>
-      {/* Body */}
-      <mesh position={[0, 0.5, 0]} castShadow>
-        <boxGeometry args={[0.7, 0.9, 0.4]} />
-        <meshStandardMaterial color={bodyColor} />
-      </mesh>
-      {/* Belt */}
-      <mesh position={[0, 0.15, 0.21]}>
-        <boxGeometry args={[0.72, 0.1, 0.02]} />
-        <meshStandardMaterial color={accentColor} />
-      </mesh>
-      {/* Arms */}
-      <mesh position={[-0.5, 0.5, 0]} castShadow>
-        <boxGeometry args={[0.25, 0.8, 0.3]} />
-        <meshStandardMaterial color={bodyColor} />
-      </mesh>
-      <mesh position={[0.5, 0.5, 0]} castShadow>
-        <boxGeometry args={[0.25, 0.8, 0.3]} />
-        <meshStandardMaterial color={bodyColor} />
-      </mesh>
-      {/* Legs */}
-      <mesh position={[-0.2, -0.3, 0]} castShadow>
-        <boxGeometry args={[0.3, 0.7, 0.3]} />
-        <meshStandardMaterial color="#1f2937" />
-      </mesh>
-      <mesh position={[0.2, -0.3, 0]} castShadow>
-        <boxGeometry args={[0.3, 0.7, 0.3]} />
-        <meshStandardMaterial color="#1f2937" />
-      </mesh>
-      {/* Accessory: hat for wizard, helmet for knight, etc. */}
-      {preset === "wizard" || preset === "mage" && (
-        <mesh position={[0, 1.6, 0]} castShadow>
-          <coneGeometry args={[0.3, 0.4, 8]} />
-          <meshStandardMaterial color={accentColor} />
-        </mesh>
-      )}
-      {preset === "knight" && (
-        <mesh position={[0, 1.5, 0]} castShadow>
-          <boxGeometry args={[0.55, 0.15, 0.55]} />
-          <meshStandardMaterial color="#fbbf24" metalness={0.8} roughness={0.2} />
-        </mesh>
-      )}
-    </group>
-  );
-}
-
-function Scene3D({
-  objects, selectedId, onSelect, showAvatar, avatarConfig, isPlaying,
-}: {
-  objects: SceneObject3D[];
-  selectedId: string | null;
-  onSelect: (id: string) => void;
-  showAvatar: boolean;
-  avatarConfig: { color: string; preset: string; bodyType: "slim" | "average" | "tall" };
-  isPlaying: boolean;
-}) {
-  return (
-    <>
-      <color attach="background" args={["#1a1d24"]} />
-      <fog attach="fog" args={["#1a1d24", 20, 60]} />
-
-      {/* Lights */}
-      <ambientLight intensity={0.3} />
-      <directionalLight
-        position={[10, 15, 10]}
-        intensity={1.2}
-        castShadow
-        shadow-mapSize-width={2048}
-        shadow-mapSize-height={2048}
-        shadow-camera-far={50}
-        shadow-camera-left={-15}
-        shadow-camera-right={15}
-        shadow-camera-top={15}
-        shadow-camera-bottom={-15}
-      />
-      <pointLight position={[-10, 5, -10]} intensity={0.5} color="#8b5cf6" />
-
-      {/* Environment */}
-      <Sky distance={450000} sunPosition={[10, 15, 10]} inclination={0.5} azimuth={0.25} />
-      <Environment preset="sunset" />
-
-      {/* Grid floor */}
-      <Grid
-        args={[40, 40]}
-        cellSize={1}
-        cellThickness={0.5}
-        cellColor="#3a3f4a"
-        sectionSize={5}
-        sectionThickness={1.5}
-        sectionColor="#3b82f6"
-        fadeDistance={40}
-        fadeStrength={1}
-        position={[0, -0.01, 0]}
-        infiniteGrid
-      />
-
-      {/* Ground plane for shadows */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.02, 0]} receiveShadow>
-        <planeGeometry args={[100, 100]} />
-        <meshStandardMaterial color="#0d0e12" transparent opacity={0.6} />
-      </mesh>
-
-      {/* Scene objects */}
-      {objects.map((obj) => (
-        <Object3DMesh
-          key={obj.id}
-          obj={obj}
-          selected={selectedId === obj.id}
-          onSelect={() => onSelect(obj.id)}
-        />
-      ))}
-
-      {/* Avatar (visible during play test) */}
-      {showAvatar && (
-        <Avatar3D
-          position={[0, 0.65, 0]}
-          color={avatarConfig.color}
-          preset={avatarConfig.preset}
-          bodyType={avatarConfig.bodyType}
-        />
-      )}
-
-      {/* Viewport helpers */}
-      <GizmoHelper alignment="bottom-right" margin={[80, 80]}>
-        <GizmoViewport axisColors={["#ef4444", "#10b981", "#3b82f6"]} labelColor="white" />
-      </GizmoHelper>
-    </>
-  );
-}
-
-function CameraController({ isPlaying }: { isPlaying: boolean }) {
-  const { camera } = useThree();
-  const keys = useRef<Record<string, boolean>>({});
-
-  useEffect(() => {
-    const down = (e: KeyboardEvent) => { keys.current[e.key.toLowerCase()] = true; };
-    const up = (e: KeyboardEvent) => { keys.current[e.key.toLowerCase()] = false; };
-    window.addEventListener("keydown", down);
-    window.addEventListener("keyup", up);
-    return () => {
-      window.removeEventListener("keydown", down);
-      window.removeEventListener("keyup", up);
-    };
-  }, []);
-
-  useFrame((_, dt) => {
-    if (!isPlaying) return;
-    const speed = 5 * dt;
-    const k = keys.current;
-    // WASD camera movement in play mode
-    const forward = new THREE.Vector3();
-    camera.getWorldDirection(forward);
-    forward.y = 0;
-    forward.normalize();
-    const right = new THREE.Vector3();
-    right.crossVectors(forward, camera.up).normalize();
-
-    if (k["w"]) camera.position.addScaledVector(forward, speed);
-    if (k["s"]) camera.position.addScaledVector(forward, -speed);
-    if (k["a"]) camera.position.addScaledVector(right, -speed);
-    if (k["d"]) camera.position.addScaledVector(right, speed);
-  });
-
-  return null;
-}
-
-const OBJECT_TYPES: { type: SceneObjType; name: string; icon: React.ReactNode; color: string }[] = [
-  { type: "box", name: "Box", icon: <BoxIcon className="w-4 h-4" />, color: "#3b82f6" },
-  { type: "sphere", name: "Sphere", icon: <Circle className="w-4 h-4" />, color: "#10b981" },
-  { type: "cylinder", name: "Cylinder", icon: <Cylinder className="w-4 h-4" />, color: "#fbbf24" },
-  { type: "cone", name: "Cone", icon: <Cone className="w-4 h-4" />, color: "#ef4444" },
-  { type: "torus", name: "Torus", icon: <Torus className="w-4 h-4" />, color: "#8b5cf6" },
-  { type: "plane", name: "Plane", icon: <Plane className="w-4 h-4" />, color: "#06b6d4" },
-];
-
-const LIGHT_TYPES: { type: LightSubtype; name: string; icon: React.ReactNode }[] = [
-  { type: "ambient", name: "Ambient", icon: <Sun className="w-4 h-4" /> },
-  { type: "directional", name: "Directional", icon: <Sun className="w-4 h-4" /> },
-  { type: "point", name: "Point", icon: <Lightbulb className="w-4 h-4" /> },
-  { type: "spot", name: "Spot", icon: <Lightbulb className="w-4 h-4" /> },
-  { type: "hemisphere", name: "Hemisphere", icon: <Sun className="w-4 h-4" /> },
-];
-
-const AVATAR_PRESETS = [
-  { id: "knight", name: "Knight", color: "#3b82f6" },
-  { id: "mage", name: "Mage", color: "#8b5cf6" },
-  { id: "archer", name: "Archer", color: "#10b981" },
-  { id: "rogue", name: "Rogue", color: "#1f2937" },
-  { id: "wizard", name: "Wizard", color: "#1e3a8a" },
-  { id: "robot", name: "Robot", color: "#06b6d4" },
-] as const;
-
-const ASSET_LIBRARY_3D = [
-  { name: "Wooden Crate", type: "box", color: "#92400e" },
-  { name: "Stone Block", type: "box", color: "#6b7280" },
-  { name: "Gold Bar", type: "box", color: "#fbbf24" },
-  { name: "Crystal", type: "octahedron" as SceneObjType, color: "#06b6d4" },
-  { name: "Apple", type: "sphere", color: "#ef4444" },
-  { name: "Boulder", type: "sphere", color: "#52525b" },
-  { name: "Tree Trunk", type: "cylinder", color: "#92400e" },
-  { name: "Pillar", type: "cylinder", color: "#d1d5db" },
-  { name: "Barrel", type: "cylinder", color: "#a16207" },
-  { name: "Wizard Hat", type: "cone", color: "#1e3a8a" },
-  { name: "Traffic Cone", type: "cone", color: "#f97316" },
-  { name: "Pyramid", type: "cone" as SceneObjType, color: "#fbbf24" },
-  { name: "Donut", type: "torus", color: "#ec4899" },
-  { name: "Ring", type: "torus", color: "#fbbf24" },
-  { name: "Platform", type: "plane", color: "#6b7280" },
-  { name: "Ground Tile", type: "plane", color: "#16a34a" },
-  { name: "Sky Light", type: "light" as SceneObjType, color: "#ffffff" },
-  { name: "Warm Glow", type: "light" as SceneObjType, color: "#fbbf24" },
-  { name: "Purple Lamp", type: "light" as SceneObjType, color: "#8b5cf6" },
-  { name: "Cyan Glow", type: "light" as SceneObjType, color: "#06b6d4" },
-];
+import {
+  ASSET_LIBRARY_3D, LIGHT_TYPES, PALETTE_SIZES, DEFAULT_WORLD, LIGHT_PRESETS, uid,
+  defaultComponentsFor, type SceneObject3D, type SceneObjType, type LightSubtype,
+  type CameraMode, type WorldSettings, type GUIElement, type DebugLogEntry, type PaletteSize,
+} from "./studio3d/types";
+import { Object3DMesh, Avatar3D } from "./studio3d/meshes";
+import { RpgRuntime, RpgHud, type RpgState, type PlayerRef } from "./studio3d/rpg";
+import { ComponentsPanel, WorldPanel } from "./studio3d/panels";
+import { WelcomeCard, CodePanel, GuiEditor, DebugConsole, TerrainEditor } from "./studio3d/overlays";
+import { TEMPLATE_3D_SCENES } from "./studio3d/templates";
+import {
+  WorldEnvironment, PipelineSettings, ScreenshotRegistrar, PlayerController,
+  GizmoProxy, FocusHandler, RigidBodySim, FollowGroup,
+} from "./studio3d/canvas";
 
 export function Studio3D({ onExit }: { onExit: () => void }) {
   const {
     avatar, avatarColor, avatarBodyType,
-    setAvatarPickerOpen, setAvatar,
-    setPublishDialogOpen, setInstructionsOpen,
-    user, setAuthOpen,
-    setSettingsOpen,
+    setAvatarPickerOpen, setPublishDialogOpen, setInstructionsOpen,
+    user, setAuthOpen, setSettingsOpen,
   } = useStudio();
 
-  const [objects, setObjects] = useState<SceneObject3D[]>([
-    {
-      id: uid(), name: "Floor", type: "plane",
-      position: [0, 0, 0], rotation: [-Math.PI / 2, 0, 0], scale: [10, 10, 1],
-      color: "#16a34a", visible: true, locked: false,
-    },
-    {
-      id: uid(), name: "Box 1", type: "box",
-      position: [2, 0.5, 0], rotation: [0, 0, 0], scale: [1, 1, 1],
-      color: "#3b82f6", visible: true, locked: false,
-    },
-    {
-      id: uid(), name: "Sphere 1", type: "sphere",
-      position: [-2, 0.5, 0], rotation: [0, 0, 0], scale: [1, 1, 1],
-      color: "#ef4444", visible: true, locked: false,
-    },
-    {
-      id: uid(), name: "Sun Light", type: "light", lightSubtype: "directional",
-      position: [5, 8, 5], rotation: [0, 0, 0], scale: [1, 1, 1],
-      color: "#fff5e0", intensity: 1.2, visible: true, locked: false,
-    },
+  // ---------- scene state ----------
+  const [objects, setObjects] = useState<SceneObject3D[]>(() => [
+    { id: uid(), name: "Floor", type: "plane", position: [0, 0, 0], rotation: [-Math.PI / 2, 0, 0], scale: [14, 14, 1], color: "#4c9a3f", visible: true, locked: false, components: defaultComponentsFor("plane") },
+    { id: uid(), name: "Box 1", type: "box", position: [3, 0.5, 2], rotation: [0, 0, 0], scale: [1, 1, 1], color: "#3b82f6", visible: true, locked: false, components: defaultComponentsFor("box") },
+    { id: uid(), name: "Sphere 1", type: "sphere", position: [-3, 0.5, 1], rotation: [0, 0, 0], scale: [1, 1, 1], color: "#ef4444", visible: true, locked: false, components: defaultComponentsFor("sphere") },
+    { id: uid(), name: "Castle Tower", type: "castle-tower", position: [-7, 0, -5], rotation: [0, 0, 0], scale: [1, 1, 1], color: "#9aa0ab", visible: true, locked: false, components: defaultComponentsFor("castle-tower") },
+    { id: uid(), name: "Sun Light", type: "light", lightSubtype: "directional", position: [5, 8, 5], rotation: [0, 0, 0], scale: [1, 1, 1], color: "#fff5e0", intensity: 1.2, visible: true, locked: false, components: defaultComponentsFor("light") },
   ]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [showAvatar, setShowAvatar] = useState(false);
+  const [gameMode, setGameMode] = useState<"sandbox" | "rpg">("sandbox");
+  const [cameraMode, setCameraMode] = useState<CameraMode>("first-person");
   const [activeTool, setActiveTool] = useState<"move" | "rotate" | "scale" | "pan">("move");
+  const [snapEnabled, setSnapEnabled] = useState(false);
+  const [focusCounter, setFocusCounter] = useState(0);
+  const [world, setWorldState] = useState<WorldSettings>(DEFAULT_WORLD);
+  const [rightTab, setRightTab] = useState<"components" | "world">("world");
   const [leftPanel, setLeftPanel] = useState<"explorer" | "assets" | "lights">("explorer");
+  const [paletteSize, setPaletteSize] = useState<PaletteSize>("medium");
   const [search, setSearch] = useState("");
-  const [expandedObjects, setExpandedObjects] = useState<Set<string>>(new Set());
   const [showWelcome, setShowWelcome] = useState(true);
-  const [welcomeTab, setWelcomeTab] = useState<"welcome" | "updates">("welcome");
+  const [showTemplates, setShowTemplates] = useState(false);
+
+  // undo / redo
+  const [undoStack, setUndoStack] = useState<SceneObject3D[][]>([]);
+  const [redoStack, setRedoStack] = useState<SceneObject3D[][]>([]);
+
+  // panels / overlays
   const [codePanelOpen, setCodePanelOpen] = useState(false);
   const [codeTab, setCodeTab] = useState<"script" | "css" | "js">("script");
   const [scriptCode, setScriptCode] = useState(`// Zhitlow 3D Engine Script
 // This code runs every frame during play-test
 
 function update(dt) {
-  // Access the player avatar
   const player = engine.getPlayer();
   if (player) {
-    // Move with WASD
     if (input.keyDown('w')) player.moveForward(5 * dt);
     if (input.keyDown('s')) player.moveBackward(5 * dt);
-    if (input.keyDown('a')) player.strafeLeft(5 * dt);
-    if (input.keyDown('d')) player.strafeRight(5 * dt);
-    // Look with mouse
-    player.lookAt(input.mouseX, input.mouseY);
   }
-}
-
-function onCollision(other) {
-  console.log('Collided with:', other.name);
 }
 `);
   const [cssCode, setCssCode] = useState(`/* Zhitlow 3D Engine — UI styles */
-.hud {
-  position: absolute;
-  top: 20px;
-  left: 20px;
-  color: #fff;
-  font-family: monospace;
-  font-size: 14px;
-  text-shadow: 0 0 4px #000;
-}
-.crosshair {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 20px;
-  height: 20px;
-  margin: -10px 0 0 -10px;
-  border: 2px solid #fff;
-  border-radius: 50%;
-}
+.hud { position: absolute; top: 20px; left: 20px; color: #fff; font-family: monospace; }
+.crosshair { position: absolute; top: 50%; left: 50%; border: 2px solid #fff; border-radius: 50%; }
 `);
   const [jsCode, setJsCode] = useState(`// Zhitlow 3D Engine — JavaScript logic
-// Run on game start
-
 class PlayerController {
-  constructor() {
-    this.health = 100;
-    this.maxHealth = 100;
-    this.speed = 5;
-    this.jumpForce = 10;
-  }
-
-  takeDamage(amount) {
-    this.health = Math.max(0, this.health - amount);
-    if (this.health === 0) this.die();
-  }
-
-  heal(amount) {
-    this.health = Math.min(this.maxHealth, this.health + amount);
-  }
-
-  die() {
-    console.log('Player died');
-    engine.respawn();
-  }
+  constructor() { this.health = 100; this.speed = 5; }
+  takeDamage(n) { this.health = Math.max(0, this.health - n); }
 }
-
 const player = new PlayerController();
 engine.setPlayerController(player);
 `);
-  const [fpsTemplate, setFpsTemplate] = useState(false);
   const [showGuiEditor, setShowGuiEditor] = useState(false);
-  // New state for v5 improvements
-  const [cameraMode, setCameraMode] = useState<CameraMode>("orbit");
-  const [undoStack, setUndoStack] = useState<SceneObject3D[][]>([]);
-  const [redoStack, setRedoStack] = useState<SceneObject3D[][]>([]);
-  const [showDebugConsole, setShowDebugConsole] = useState(false);
-  const [debugLogs, setDebugLogs] = useState<DebugLogEntry[]>([
-    { id: uid(), type: "info", text: "Zhitlow 3D Engine v0.9.0 — debug console ready", timestamp: Date.now() },
-  ]);
   const [guiElements, setGuiElements] = useState<GUIElement[]>([]);
   const [selectedGuiId, setSelectedGuiId] = useState<string | null>(null);
   const [guiTool, setGuiTool] = useState<"select" | "button" | "text" | "panel" | "image" | "input" | "menu">("select");
+  const [showDebugConsole, setShowDebugConsole] = useState(false);
+  const [debugLogs, setDebugLogs] = useState<DebugLogEntry[]>([
+    { id: uid(), type: "info", text: "All In One 3D Studio v3.1 — debug console ready", timestamp: Date.now() },
+  ]);
   const [showTerrainEditor, setShowTerrainEditor] = useState(false);
   const [terrainSize, setTerrainSize] = useState({ width: 40, depth: 40, height: 2 });
   const [waterLevel, setWaterLevel] = useState(0);
-  const [showProjectHistory, setShowProjectHistory] = useState(false);
-  const [projectHistory, setProjectHistory] = useState<ProjectHistory[]>([]);
-  const [saveFolder, setSaveFolder] = useState<string>("~/Documents/AllInOneEngine");
 
-  const selectedObj = objects.find(o => o.id === selectedId);
+  // play-time runtime
+  const containerRef = useRef<HTMLDivElement>(null);
+  const keysRef = useRef<Record<string, boolean>>({});
+  const interactRef = useRef(0);
+  const attackRef = useRef(0);
+  const pointerLockedRef = useRef(false);
+  const [pointerLocked, setPointerLocked] = useState(false);
+  const [lockLost, setLockLost] = useState(false);
+  const camBackupRef = useRef<{ pos: THREE.Vector3; quat: THREE.Quaternion; target: THREE.Vector3 | null } | null>(null);
 
-  // Undo/redo — push current state to undo stack before any change
+  const [rpgState, setRpgState] = useState<RpgState | null>(null);
+
+  const selectedObj = objects.find((o) => o.id === selectedId) ?? null;
+  const rpgEntities = useMemo(() => objects.filter((o) => o.rpgKind), [objects]);
+  const staticObjects = useMemo(() => objects.filter((o) => !o.rpgKind), [objects]);
+
+  // player runtime state — a real THREE.Vector3 so RPG logic can use distanceTo
+  const playerStateRef = useRef<PlayerRef>({
+    pos: new THREE.Vector3(0, 0, 15.5),
+    yaw: 0, pitch: 0, vy: 0, onGround: true, moving: false,
+  });
+
+  const logDebug = useCallback((type: DebugLogEntry["type"], text: string) => {
+    setDebugLogs((logs) => [...logs.slice(-99), { id: uid(), type, text, timestamp: Date.now() }]);
+  }, []);
+
+  // ---------- undo / redo ----------
   const pushUndo = useCallback(() => {
-    setUndoStack(s => [...s.slice(-19), [...objects]]);
+    setUndoStack((s) => [...s.slice(-19), [...objects]]);
     setRedoStack([]);
   }, [objects]);
 
   const undo = useCallback(() => {
-    setUndoStack(s => {
+    setUndoStack((s) => {
       if (s.length === 0) return s;
       const prev = s[s.length - 1];
-      setRedoStack(r => [...r, [...objects]]);
+      setRedoStack((r) => [...r, [...objects]]);
       setObjects(prev);
       return s.slice(0, -1);
     });
   }, [objects]);
 
   const redo = useCallback(() => {
-    setRedoStack(s => {
+    setRedoStack((s) => {
       if (s.length === 0) return s;
       const next = s[s.length - 1];
-      setUndoStack(u => [...u, [...objects]]);
+      setUndoStack((u) => [...u, [...objects]]);
       setObjects(next);
       return s.slice(0, -1);
     });
   }, [objects]);
 
-  const logDebug = useCallback((type: DebugLogEntry["type"], text: string) => {
-    setDebugLogs(logs => [...logs.slice(-99), { id: uid(), type, text, timestamp: Date.now() }]);
+  // ---------- object ops ----------
+  const updateProp = useCallback((id: string, key: string, value: unknown) => {
+    setObjects((os) => os.map((o) => (o.id === id ? { ...o, [key]: value } : o)));
   }, []);
 
   const addObject = (type: SceneObjType, color = "#3b82f6", name?: string) => {
+    const compound = ["castle-tower", "fountain", "treasure-chest", "oak-tree", "cottage", "lamp-post", "npc-villager"].includes(type);
     const newObj: SceneObject3D = {
       id: uid(),
       name: name || `${type.charAt(0).toUpperCase() + type.slice(1)} ${objects.length + 1}`,
       type,
-      position: [0, type === "plane" ? 0 : 0.5, 0],
+      position: [0, compound ? 0 : type === "plane" ? 0 : 0.5, 0],
       rotation: type === "plane" ? [-Math.PI / 2, 0, 0] : [0, 0, 0],
       scale: [1, 1, 1],
       color,
       visible: true,
       locked: false,
+      components: defaultComponentsFor(type),
     };
-    if (type === "light") {
-      newObj.lightSubtype = "point";
-      newObj.intensity = 1;
-    }
-    setObjects([...objects, newObj]);
+    if (type === "light") { newObj.lightSubtype = "point"; newObj.intensity = 1; }
+    pushUndo();
+    setObjects((os) => [...os, newObj]);
     setSelectedId(newObj.id);
+    setRightTab("components");
     toast.success(`Added ${newObj.name}`);
   };
 
@@ -743,108 +182,247 @@ engine.setPlayerController(player);
     const newObj: SceneObject3D = {
       id: uid(),
       name: `${subtype.charAt(0).toUpperCase() + subtype.slice(1)} Light`,
-      type: "light",
-      lightSubtype: subtype,
-      position: [0, 5, 0],
-      rotation: [0, 0, 0],
-      scale: [1, 1, 1],
-      color: "#ffffff",
-      intensity: 1,
-      visible: true,
-      locked: false,
+      type: "light", lightSubtype: subtype,
+      position: [0, 5, 0], rotation: [0, 0, 0], scale: [1, 1, 1],
+      color: "#ffffff", intensity: 1, visible: true, locked: false,
+      components: defaultComponentsFor("light"),
     };
-    setObjects([...objects, newObj]);
+    pushUndo();
+    setObjects((os) => [...os, newObj]);
     setSelectedId(newObj.id);
+    setRightTab("components");
     toast.success(`Added ${newObj.name}`);
   };
 
   const deleteObject = (id: string) => {
-    setObjects(objects.filter(o => o.id !== id));
+    pushUndo();
+    setObjects((os) => os.filter((o) => o.id !== id));
     if (selectedId === id) setSelectedId(null);
   };
 
   const duplicateObject = (id: string) => {
-    const orig = objects.find(o => o.id === id);
+    const orig = objects.find((o) => o.id === id);
     if (!orig) return;
-    const copy = { ...orig, id: uid(), name: `${orig.name} Copy`, position: [orig.position[0] + 1, orig.position[1], orig.position[2] + 1] as [number, number, number] };
-    setObjects([...objects, copy]);
+    pushUndo();
+    const copy: SceneObject3D = { ...orig, id: uid(), name: `${orig.name} Copy`, position: [orig.position[0] + 1.2, orig.position[1], orig.position[2] + 1.2] };
+    setObjects((os) => [...os, copy]);
     setSelectedId(copy.id);
   };
 
-  const toggleVisible = (id: string) => {
-    setObjects(objects.map(o => o.id === id ? { ...o, visible: !o.visible } : o));
+  const toggleVisible = (id: string) => setObjects((os) => os.map((o) => (o.id === id ? { ...o, visible: !o.visible } : o)));
+  const toggleLock = (id: string) => setObjects((os) => os.map((o) => (o.id === id ? { ...o, locked: !o.locked } : o)));
+
+  const setWorld = (patch: Partial<WorldSettings>) => setWorldState((w) => ({ ...w, ...patch }));
+
+  const onSelectObj = (id: string) => {
+    if (isPlaying) return;
+    setSelectedId(id);
+    setRightTab("components");
   };
 
-  const toggleLock = (id: string) => {
-    setObjects(objects.map(o => o.id === id ? { ...o, locked: !o.locked } : o));
-  };
+  // ---------- templates ----------
+  const loadSceneJson = useCallback((json: string, name?: string) => {
+    try {
+      const data = JSON.parse(json) as { type?: string; gameMode?: string; objects?: Partial<SceneObject3D>[] };
+      if (data.type !== "3d-scene" || !Array.isArray(data.objects)) throw new Error("bad format");
+      pushUndo();
+      const objs: SceneObject3D[] = data.objects.map((o) => ({
+        id: typeof o.id === "string" && o.id ? o.id : uid(),
+        name: o.name || "Object",
+        type: o.type as SceneObjType,
+        lightSubtype: o.lightSubtype,
+        position: o.position ?? [0, 0.5, 0],
+        rotation: o.rotation ?? [0, 0, 0],
+        scale: o.scale ?? [1, 1, 1],
+        color: o.color ?? "#3b82f6",
+        intensity: o.intensity,
+        visible: o.visible ?? true,
+        locked: o.locked ?? false,
+        rpgKind: o.rpgKind,
+        components: defaultComponentsFor(o.type as SceneObjType),
+      }));
+      setObjects(objs);
+      setSelectedId(null);
+      setGameMode(data.gameMode === "rpg" ? "rpg" : "sandbox");
+      setShowTemplates(false);
+      toast.success(`Loaded ${name || "template"}`, { description: data.gameMode === "rpg" ? "Press Play — the RPG quest goes live" : "Press Play to test in first person" });
+      logDebug("success", `Scene loaded: ${name || "template"} (${objs.length} objects · mode ${data.gameMode})`);
+    } catch {
+      toast.error("Failed to load scene");
+    }
+  }, [pushUndo, logDebug]);
 
-  const updateProp = (id: string, key: string, value: unknown) => {
-    setObjects(objects.map(o => o.id === id ? { ...o, [key]: value } : o));
-  };
-
-  // Keyboard shortcuts for undo/redo
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === "z" && !e.shiftKey) {
-        e.preventDefault(); undo();
-      } else if ((e.ctrlKey || e.metaKey) && (e.key === "y" || (e.key === "z" && e.shiftKey))) {
-        e.preventDefault(); redo();
+    const onLoad = (e: Event) => {
+      const detail = (e as CustomEvent).detail as { json?: string; name?: string } | undefined;
+      if (detail?.json) loadSceneJson(detail.json, detail.name);
+    };
+    window.addEventListener("aioe-load-3d", onLoad);
+    return () => window.removeEventListener("aioe-load-3d", onLoad);
+  }, [loadSceneJson]);
+
+  // ---------- play orchestration ----------
+  const isPlayingRef = useRef(false);
+  useEffect(() => { isPlayingRef.current = isPlaying; }, [isPlaying]);
+
+  const requestLock = () => {
+    const el = containerRef.current;
+    if (el && el.requestPointerLock) el.requestPointerLock();
+  };
+
+  const startPlay = () => {
+    if (isPlaying) return;
+    playerStateRef.current.pos.set(0, 0, gameMode === "rpg" ? 15.5 : 10);
+    playerStateRef.current.yaw = 0;
+    playerStateRef.current.pitch = 0;
+    playerStateRef.current.vy = 0;
+    playerStateRef.current.onGround = true;
+    setIsPlaying(true);
+    setLockLost(false);
+    setRpgState(null);
+    logDebug("success", `Play test started — ${cameraMode} camera · mode: ${gameMode}`);
+    toast.success(gameMode === "rpg" ? "RPG quest started — collect 8 coins!" : `Play test — ${cameraMode}`);
+    if (cameraMode !== "orbit") requestLock();
+  };
+
+  const stopPlay = useCallback(() => {
+    if (document.pointerLockElement) document.exitPointerLock();
+    setIsPlaying(false);
+    setLockLost(false);
+    setRpgState(null);
+    logDebug("info", "Play test stopped — back to editing");
+  }, [logDebug]);
+
+  useEffect(() => {
+    const onChange = () => {
+      const locked = document.pointerLockElement === containerRef.current;
+      setPointerLocked(locked);
+      pointerLockedRef.current = locked;
+      if (!locked && isPlayingRef.current && cameraMode !== "orbit") setLockLost(true);
+      if (locked) setLockLost(false);
+    };
+    const onMove = (e: MouseEvent) => {
+      if (!document.pointerLockElement) return;
+      if (cameraMode === "orbit") return;
+      const p = playerStateRef.current;
+      p.yaw -= e.movementX * 0.0024;
+      p.pitch = Math.max(-1.5, Math.min(1.5, p.pitch - e.movementY * 0.0024));
+    };
+    const onDown = (e: MouseEvent) => {
+      if (isPlayingRef.current && document.pointerLockElement) {
+        if (e.button === 0) attackRef.current += 1;
       }
     };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [undo, redo]);
+    document.addEventListener("pointerlockchange", onChange);
+    document.addEventListener("mousemove", onMove);
+    window.addEventListener("mousedown", onDown);
+    return () => {
+      document.removeEventListener("pointerlockchange", onChange);
+      document.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mousedown", onDown);
+    };
+  }, [cameraMode]);
 
-  const filteredAssets = ASSET_LIBRARY_3D.filter(a =>
-    a.name.toLowerCase().includes(search.toLowerCase()) || a.type.toLowerCase().includes(search.toLowerCase())
-  );
+  // ---------- keyboard ----------
+  useEffect(() => {
+    const down = (e: KeyboardEvent) => {
+      const tag = (e.target as HTMLElement)?.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+      const k = e.key.toLowerCase();
+      keysRef.current[k] = true;
+      if (k === "shift") keysRef.current["shift"] = true;
+      if ((e.ctrlKey || e.metaKey) && k === "z" && !e.shiftKey) { e.preventDefault(); undo(); }
+      else if ((e.ctrlKey || e.metaKey) && (k === "y" || (k === "z" && e.shiftKey))) { e.preventDefault(); redo(); }
+      else if (isPlayingRef.current && k === "e") interactRef.current += 1;
+      else if (!isPlayingRef.current && k === "f") setFocusCounter((c) => c + 1);
+      else if (k === "escape" && isPlayingRef.current && !pointerLockedRef.current) stopPlay();
+    };
+    const up = (e: KeyboardEvent) => { keysRef.current[e.key.toLowerCase()] = false; };
+    window.addEventListener("keydown", down);
+    window.addEventListener("keyup", up);
+    return () => { window.removeEventListener("keydown", down); window.removeEventListener("keyup", up); };
+  }, [undo, redo, stopPlay]);
+
+  // playerRef handed to the canvas controller
+  const canvasPlayerRef = playerStateRef;
+
+  // ---------- asset filtering ----------
+  const filteredAssets = ASSET_LIBRARY_3D.filter((a) =>
+    a.name.toLowerCase().includes(search.toLowerCase()) || a.type.toLowerCase().includes(search.toLowerCase()));
+  const palCols = PALETTE_SIZES.find((p) => p.id === paletteSize)!;
+  const palIcon = palCols.icon;
+
+  // ---------- screenshot ----------
+  const takeScreenshot = () => {
+    const shot = (window as unknown as { __aioeShot?: () => void }).__aioeShot;
+    if (shot) { shot(); toast.success("Screenshot saved"); logDebug("success", "Viewport screenshot saved (PNG)"); }
+    else toast.error("Screenshot not ready yet");
+  };
+
+  // ---------- run script (debug) ----------
+  const runScript = () => {
+    const code = codeTab === "script" ? scriptCode : codeTab === "js" ? jsCode : "";
+    logDebug("info", `Executing ${codeTab} (${code.length} chars)...`);
+    try {
+      if (codeTab === "js" && code) {
+        // eslint-disable-next-line no-eval
+        eval(code);
+        logDebug("success", "Script executed successfully");
+      } else {
+        logDebug("warn", "Script execution requires the Zhitlow runtime (simulated in browser preview)");
+      }
+    } catch (e) {
+      logDebug("error", `Runtime error: ${(e as Error).message}`);
+    }
+  };
+
+  const statusLine = gameMode === "rpg" && rpgState ? `Quest stage ${Math.min(rpgState.stage + 1, 4)}/4` : gameMode === "rpg" ? "RPG quest ready" : "Sandbox";
 
   return (
     <div className="flex flex-col h-screen w-screen bg-[#0a0b0e] text-white overflow-hidden">
-      {/* Top bar */}
-      <div className="flex items-center h-12 bg-[#1a1d24] border-b border-white/5 px-3 gap-2">
+      {/* ================= TOP BAR ================= */}
+      <div className="flex items-center h-12 bg-[#14171e] border-b border-white/5 px-3 gap-2 shadow-[0_1px_0_rgba(34,211,238,0.15)]">
         {/* Logo + name */}
         <div className="flex items-center gap-2 pr-3 border-r border-white/5">
-          <img src="/logo.svg" alt="All In One Engine" className="w-8 h-8" />
+          <img src="/icon.svg" alt="All In One Engine" className="w-8 h-8 ae-drop-shadow" />
           <div>
-            <div className="text-sm font-bold leading-tight">3D Studio</div>
+            <div className="text-sm font-bold leading-tight bg-gradient-to-r from-cyan-400 to-violet-400 bg-clip-text text-transparent">3D Studio</div>
             <div className="text-[10px] text-muted-foreground leading-tight">All In One Engine</div>
           </div>
         </div>
 
-        {/* GROUP 1: History (Undo/Redo) */}
+        {/* History */}
         <div className="flex items-center gap-0.5 px-1">
-          <button onClick={undo} disabled={undoStack.length === 0} className="tool-btn" title="Undo (Ctrl+Z)">
-            <Undo2 className="w-3.5 h-3.5" />
-          </button>
-          <button onClick={redo} disabled={redoStack.length === 0} className="tool-btn" title="Redo (Ctrl+Y)">
-            <Redo2 className="w-3.5 h-3.5" />
-          </button>
+          <button onClick={undo} disabled={undoStack.length === 0} className="tool-btn" title="Undo (Ctrl+Z)">↶</button>
+          <button onClick={redo} disabled={redoStack.length === 0} className="tool-btn" title="Redo (Ctrl+Y)">↷</button>
         </div>
 
         <div className="w-px h-5 bg-white/10" />
 
-        {/* GROUP 2: Transform tools */}
+        {/* Transform tools (wired gizmos) */}
         <div className="flex items-center gap-0.5 px-1">
           {(["move", "rotate", "scale", "pan"] as const).map((tool) => (
-            <button
-              key={tool}
-              onClick={() => setActiveTool(tool)}
-              className={`tool-btn ${activeTool === tool ? "active" : ""}`}
-              title={tool.charAt(0).toUpperCase() + tool.slice(1)}
-            >
+            <button key={tool} onClick={() => setActiveTool(tool)} className={`tool-btn ${activeTool === tool ? "active" : ""}`} title={`${tool.charAt(0).toUpperCase() + tool.slice(1)} (gizmo)`}>
               {tool === "move" && <Move className="w-3.5 h-3.5" />}
               {tool === "rotate" && <RotateCw className="w-3.5 h-3.5" />}
               {tool === "scale" && <Scale className="w-3.5 h-3.5" />}
               {tool === "pan" && <Hand className="w-3.5 h-3.5" />}
             </button>
           ))}
+          <button onClick={() => setSnapEnabled(!snapEnabled)} className={`tool-btn ${snapEnabled ? "active" : ""}`} title="Snap to grid (0.5 m)">
+            <Magnet className="w-3.5 h-3.5" />
+          </button>
+          <button onClick={() => setFocusCounter((c) => c + 1)} className="tool-btn" title="Focus selection (F)">
+            <Focus className="w-3.5 h-3.5" />
+          </button>
+          <button onClick={takeScreenshot} className="tool-btn" title="Screenshot viewport (PNG)">
+            <CameraIcon className="w-3.5 h-3.5" />
+          </button>
         </div>
 
         <div className="w-px h-5 bg-white/10" />
 
-        {/* GROUP 3: Add objects */}
+        {/* Add objects */}
         <div className="flex items-center gap-0.5 px-1">
           <button className="tool-btn" onClick={() => addObject("box")} title="Add Box"><Plus className="w-3.5 h-3.5" /></button>
           <button className="tool-btn" onClick={() => addObject("sphere")} title="Add Sphere"><Circle className="w-3.5 h-3.5" /></button>
@@ -857,179 +435,141 @@ engine.setPlayerController(player);
 
         <div className="w-px h-5 bg-white/10" />
 
-        {/* GROUP 4: Play controls */}
+        {/* Play controls */}
         <div className="flex items-center gap-0.5 px-1">
-          <button
-            onClick={() => {
-              setIsPlaying(true); setShowAvatar(true);
-              logDebug("success", "Play test started — camera mode: " + cameraMode);
-              toast.success(`Play test started — ${cameraMode} camera`);
-            }}
-            disabled={isPlaying}
-            className={`tool-btn ${!isPlaying ? "active" : ""}`}
-            title="Play test"
-          >
+          <button onClick={startPlay} disabled={isPlaying} className={`tool-btn ${!isPlaying ? "active" : ""}`} title="Play test — locks first-person mouse look">
             <Play className="w-3.5 h-3.5 fill-current" />
           </button>
-          <button onClick={() => setIsPlaying(false)} disabled={!isPlaying} className="tool-btn" title="Pause">
-            <Pause className="w-3.5 h-3.5" />
-          </button>
-          <button onClick={() => { setIsPlaying(false); setShowAvatar(false); }} className="tool-btn" title="Stop">
-            <Square className="w-3.5 h-3.5 fill-current" />
-          </button>
-          {/* Camera mode selector */}
+          <button onClick={() => setIsPlaying(false)} disabled={!isPlaying} className="tool-btn" title="Pause"><Pause className="w-3.5 h-3.5" /></button>
+          <button onClick={stopPlay} className="tool-btn" title="Stop"><Square className="w-3.5 h-3.5 fill-current" /></button>
           <select
             value={cameraMode}
             onChange={(e) => setCameraMode(e.target.value as CameraMode)}
-            className="bg-[#1a1d24] text-white text-[11px] px-1.5 py-1 rounded border border-white/10 outline-none ml-1"
-            title="Camera mode"
+            className="bg-[#14171e] text-white text-[11px] px-1.5 py-1 rounded border border-white/10 outline-none ml-1"
+            title="Play camera mode"
           >
-            <option value="orbit">Orbit</option>
             <option value="first-person">1st Person</option>
             <option value="third-person">3rd Person</option>
+            <option value="orbit">Orbit</option>
           </select>
+          {gameMode === "rpg" && (
+            <span className="ml-1 flex items-center gap-1 px-2 py-1 rounded-md bg-amber-500/15 border border-amber-500/40 text-[10px] text-amber-300 font-semibold" title="RPG quest mode active">
+              <Gamepad2 className="w-3 h-3" /> RPG
+            </span>
+          )}
         </div>
 
         <div className="flex-1" />
 
-        {/* GROUP 5: Editors (Code, GUI, Debug, Terrain) */}
+        {/* Editors */}
         <div className="flex items-center gap-0.5 px-1">
-          <button onClick={() => setCodePanelOpen(!codePanelOpen)} className={`tool-btn ${codePanelOpen ? "active" : ""}`} title="Script/CSS/JS editor">
-            <Code2 className="w-3.5 h-3.5" />
-            Code
+          <button onClick={() => setRightTab("world")} className={`tool-btn ${rightTab === "world" ? "active" : ""}`} title="World: lighting & rendering">
+            <Sun className="w-3.5 h-3.5" /> World
           </button>
-          <button onClick={() => setShowGuiEditor(!showGuiEditor)} className={`tool-btn ${showGuiEditor ? "active" : ""}`} title="GUI editor">
-            <Palette className="w-3.5 h-3.5" />
-            GUI
-          </button>
-          <button onClick={() => setShowDebugConsole(!showDebugConsole)} className={`tool-btn ${showDebugConsole ? "active" : ""}`} title="Debug console">
-            <Bug className="w-3.5 h-3.5" />
-            Debug
-          </button>
-          <button onClick={() => toast.success("Templates available in 2D Studio Templates panel")} className="tool-btn" title="Templates">
-            <Rocket className="w-3.5 h-3.5" />
-          </button>
+          <button onClick={() => setCodePanelOpen(!codePanelOpen)} className={`tool-btn ${codePanelOpen ? "active" : ""}`} title="Script/CSS/JS editor"><Code2 className="w-3.5 h-3.5" /> Code</button>
+          <button onClick={() => setShowGuiEditor(!showGuiEditor)} className={`tool-btn ${showGuiEditor ? "active" : ""}`} title="GUI editor"><Palette className="w-3.5 h-3.5" /> GUI</button>
+          <button onClick={() => setShowDebugConsole(!showDebugConsole)} className={`tool-btn ${showDebugConsole ? "active" : ""}`} title="Debug console"><Bug className="w-3.5 h-3.5" /> Debug</button>
+          <div className="relative">
+            <button onClick={() => setShowTemplates(!showTemplates)} className={`tool-btn ${showTemplates ? "active" : ""}`} title="Templates"><Rocket className="w-3.5 h-3.5" /></button>
+            {showTemplates && (
+              <div className="absolute right-0 top-full mt-1 w-72 rounded-lg bg-[#181c24] border border-white/10 shadow-xl z-50 overflow-hidden">
+                <div className="px-3 py-2 text-[10px] uppercase tracking-wider text-muted-foreground border-b border-white/5">3D Templates</div>
+                {TEMPLATE_3D_SCENES.map((t) => (
+                  <button key={t.id} onClick={() => loadSceneJson(t.json, t.name)} className="w-full text-left px-3 py-2 hover:bg-cyan-500/15">
+                    <div className="text-xs font-medium flex items-center gap-1.5">
+                      {t.name}
+                      {t.gameMode === "rpg" && <span className="text-[8px] px-1 py-0.5 rounded bg-amber-500/20 text-amber-300">RPG</span>}
+                    </div>
+                    <div className="text-[10px] text-muted-foreground leading-tight mt-0.5">{t.description}</div>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="w-px h-5 bg-white/10" />
 
-        {/* GROUP 6: Avatar, Upload, Publish, Settings, Account */}
+        {/* Right group */}
         <div className="flex items-center gap-0.5 px-1">
-          <button onClick={() => setAvatarPickerOpen(true)} className="tool-btn" title="Pick avatar">
-            <User className="w-3.5 h-3.5" />
-          </button>
+          <button onClick={() => setAvatarPickerOpen(true)} className="tool-btn" title="Pick avatar"><User className="w-3.5 h-3.5" /></button>
           <button
             onClick={() => {
               const input = document.createElement("input");
-              input.type = "file";
-              input.accept = ".glb,.gltf,.png,.jpg,.wav,.mp3";
-              input.multiple = true;
+              input.type = "file"; input.accept = ".glb,.gltf,.png,.jpg,.wav,.mp3"; input.multiple = true;
               input.onchange = (e) => {
                 const files = (e.target as HTMLInputElement).files;
-                if (files) {
-                  for (const f of Array.from(files)) {
-                    logDebug("success", `Imported: ${f.name} (${(f.size/1024).toFixed(1)}KB)`);
-                    toast.success(`Imported ${f.name}`);
-                  }
-                }
+                if (files) for (const f of Array.from(files)) { logDebug("success", `Imported: ${f.name} (${(f.size / 1024).toFixed(1)}KB)`); toast.success(`Imported ${f.name}`); }
               };
               input.click();
             }}
-            className="tool-btn"
-            title="Upload assets (.glb, .gltf, .png, .wav)"
+            className="tool-btn" title="Upload assets (.glb, .gltf, .png, .wav)"
           >
             <Upload className="w-3.5 h-3.5" />
           </button>
-          <button onClick={() => setPublishDialogOpen(true)} className="tool-btn" title="Publish">
-            <Send className="w-3.5 h-3.5" />
-          </button>
-          <button onClick={() => setInstructionsOpen(true)} className="tool-btn" title="Help">
-            <SquareIcon className="w-3.5 h-3.5" />
-          </button>
-          <button onClick={() => setSettingsOpen(true)} className="tool-btn" title="Settings">
-            <Settings className="w-3.5 h-3.5" />
-          </button>
+          <button onClick={() => setPublishDialogOpen(true)} className="tool-btn" title="Publish"><Send className="w-3.5 h-3.5" /></button>
+          <button onClick={() => setInstructionsOpen(true)} className="tool-btn" title="Help"><Crosshair className="w-3.5 h-3.5" /></button>
+          <button onClick={() => setSettingsOpen(true)} className="tool-btn" title="Settings"><Settings className="w-3.5 h-3.5" /></button>
           <div className="w-px h-5 bg-white/10 mx-1" />
           <button onClick={() => setAuthOpen(true)} className="tool-btn" title={user ? `Signed in as @${user.githubLogin}` : "Sign in with GitHub"}>
             {user ? <img src={user.avatar} alt={user.name} className="w-5 h-5 rounded-full" /> : <Github className="w-3.5 h-3.5" />}
           </button>
-          <button onClick={onExit} className="tool-btn" title="Back to website">
-            <Home className="w-3.5 h-3.5" />
-          </button>
+          <button onClick={onExit} className="tool-btn" title="Back to website"><Home className="w-3.5 h-3.5" /></button>
         </div>
       </div>
 
-      {/* Main 3-pane layout */}
+      {/* ================= MAIN 3-PANE ================= */}
       <div className="flex-1 flex min-h-0">
-        {/* LEFT: Explorer / Assets / Lights tabs */}
-        <div className="w-64 bg-[#13161c] border-r border-white/5 flex flex-col">
+        {/* LEFT */}
+        <div className="w-64 bg-[#12151b] border-r border-white/5 flex flex-col">
           <div className="flex border-b border-white/5">
-            <button
-              onClick={() => setLeftPanel("explorer")}
-              className={`flex-1 px-3 py-2 text-xs font-medium ${leftPanel === "explorer" ? "text-white bg-white/5 border-b-2 border-cyan-500" : "text-muted-foreground hover:text-white"}`}
-            >
-              Explorer
-            </button>
-            <button
-              onClick={() => setLeftPanel("assets")}
-              className={`flex-1 px-3 py-2 text-xs font-medium ${leftPanel === "assets" ? "text-white bg-white/5 border-b-2 border-cyan-500" : "text-muted-foreground hover:text-white"}`}
-            >
-              Assets
-            </button>
-            <button
-              onClick={() => setLeftPanel("lights")}
-              className={`flex-1 px-3 py-2 text-xs font-medium ${leftPanel === "lights" ? "text-white bg-white/5 border-b-2 border-cyan-500" : "text-muted-foreground hover:text-white"}`}
-            >
-              Lights
-            </button>
+            {(["explorer", "assets", "lights"] as const).map((p) => (
+              <button key={p} onClick={() => setLeftPanel(p)}
+                className={`flex-1 px-3 py-2 text-xs font-medium capitalize ${leftPanel === p ? "text-white bg-white/5 border-b-2 border-cyan-500" : "text-muted-foreground hover:text-white"}`}>
+                {p}
+              </button>
+            ))}
           </div>
 
           <div className="p-2 border-b border-white/5">
             <div className="flex items-center gap-2 px-2 py-1 rounded bg-black/30">
               <Search className="w-3 h-3 text-muted-foreground" />
-              <input
-                className="flex-1 bg-transparent text-xs outline-none placeholder:text-muted-foreground"
-                placeholder="Search…"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
+              <input className="flex-1 bg-transparent text-xs outline-none placeholder:text-muted-foreground" placeholder="Search…" value={search} onChange={(e) => setSearch(e.target.value)} />
             </div>
           </div>
 
           <div className="flex-1 overflow-y-auto py-1">
             {leftPanel === "explorer" && (
               <>
-                <div className="px-2 py-1 text-[10px] uppercase tracking-wider text-muted-foreground">
-                  Scene ({objects.length})
-                </div>
+                <div className="px-2 py-1 text-[10px] uppercase tracking-wider text-muted-foreground">Scene ({objects.length})</div>
                 {objects.map((obj) => (
-                  <div
-                    key={obj.id}
+                  <div key={obj.id}
                     className={`flex items-center gap-1 px-2 py-1 text-xs cursor-pointer ${selectedId === obj.id ? "bg-cyan-500/20 text-white" : "hover:bg-white/5"}`}
-                    onClick={() => setSelectedId(obj.id)}
-                  >
+                    onClick={() => onSelectObj(obj.id)}>
                     <span className="w-4 flex justify-center">
-                      {obj.type === "light" ? <Lightbulb className="w-3 h-3 text-yellow-400" /> :
+                      {obj.rpgKind === "coin" ? <span className="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block" /> :
+                       obj.rpgKind === "slime" ? <span className="w-2.5 h-2.5 rounded-full bg-green-400 inline-block" /> :
+                       obj.rpgKind === "npc" ? <User className="w-3 h-3 text-purple-400" /> :
+                       obj.rpgKind === "chest" ? <Boxes className="w-3 h-3 text-amber-500" /> :
+                       obj.type === "light" ? <Lightbulb className="w-3 h-3 text-yellow-400" /> :
                        obj.type === "box" ? <BoxIcon className="w-3 h-3 text-blue-400" /> :
                        obj.type === "sphere" ? <Circle className="w-3 h-3 text-green-400" /> :
                        obj.type === "cylinder" ? <Cylinder className="w-3 h-3 text-yellow-400" /> :
                        obj.type === "cone" ? <Cone className="w-3 h-3 text-red-400" /> :
                        obj.type === "torus" ? <Torus className="w-3 h-3 text-purple-400" /> :
+                       ["castle-tower", "fountain", "treasure-chest", "oak-tree", "cottage", "lamp-post", "npc-villager"].includes(obj.type) ? <Boxes className="w-3 h-3 text-cyan-300" /> :
                        <Plane className="w-3 h-3 text-cyan-400" />}
                     </span>
                     <span className="flex-1 truncate">{obj.name}</span>
+                    {obj.rpgKind && <span className="text-[8px] px-1 rounded bg-white/10 text-white/50 uppercase">{obj.rpgKind}</span>}
                     <button onClick={(e) => { e.stopPropagation(); toggleVisible(obj.id); }} className="opacity-50 hover:opacity-100">
                       {obj.visible ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
                     </button>
                     <button onClick={(e) => { e.stopPropagation(); toggleLock(obj.id); }} className="opacity-50 hover:opacity-100">
                       {obj.locked ? <Lock className="w-3 h-3" /> : <Unlock className="w-3 h-3" />}
                     </button>
-                    <button onClick={(e) => { e.stopPropagation(); duplicateObject(obj.id); }} className="opacity-50 hover:opacity-100">
-                      <Copy className="w-3 h-3" />
-                    </button>
-                    <button onClick={(e) => { e.stopPropagation(); deleteObject(obj.id); }} className="opacity-50 hover:opacity-100 hover:text-red-400">
-                      <Trash2 className="w-3 h-3" />
-                    </button>
+                    <button onClick={(e) => { e.stopPropagation(); duplicateObject(obj.id); }} className="opacity-50 hover:opacity-100"><Copy className="w-3 h-3" /></button>
+                    <button onClick={(e) => { e.stopPropagation(); deleteObject(obj.id); }} className="opacity-50 hover:opacity-100 hover:text-red-400"><Trash2 className="w-3 h-3" /></button>
                   </div>
                 ))}
               </>
@@ -1037,35 +577,40 @@ engine.setPlayerController(player);
 
             {leftPanel === "assets" && (
               <>
-                <div className="px-2 py-1 text-[10px] uppercase tracking-wider text-muted-foreground">
-                  3D Asset Library
+                <div className="px-2 py-1 flex items-center justify-between">
+                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground">Asset Library</span>
+                  <div className="flex gap-0.5" title="Palette size">
+                    {PALETTE_SIZES.map((p) => (
+                      <button key={p.id} onClick={() => setPaletteSize(p.id)}
+                        className={`w-6 h-5 rounded text-[9px] font-bold ${paletteSize === p.id ? "bg-cyan-500 text-white" : "bg-white/5 text-muted-foreground hover:text-white"}`}>
+                        {p.label}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-                <div className="grid grid-cols-2 gap-1 p-2">
+                <div className={`grid gap-1 p-2 ${palCols.cols === 4 ? "grid-cols-4" : palCols.cols === 3 ? "grid-cols-3" : "grid-cols-2"}`}>
                   {filteredAssets.map((asset) => (
-                    <button
-                      key={asset.name}
-                      onClick={() => addObject(asset.type as SceneObjType, asset.color, asset.name)}
-                      className="aspect-square p-2 rounded border border-white/5 hover:border-cyan-500/50 hover:bg-white/5 transition-all flex flex-col items-center justify-center gap-1"
-                    >
-                      {asset.type === "box" && <BoxIcon className="w-6 h-6" style={{ color: asset.color }} />}
-                      {asset.type === "sphere" && <Circle className="w-6 h-6" style={{ color: asset.color }} />}
-                      {asset.type === "cylinder" && <Cylinder className="w-6 h-6" style={{ color: asset.color }} />}
-                      {asset.type === "cone" && <Cone className="w-6 h-6" style={{ color: asset.color }} />}
-                      {asset.type === "torus" && <Torus className="w-6 h-6" style={{ color: asset.color }} />}
-                      {asset.type === "plane" && <Plane className="w-6 h-6" style={{ color: asset.color }} />}
-                      {asset.type === "light" && <Lightbulb className="w-6 h-6" style={{ color: asset.color }} />}
-                      {asset.type === "octahedron" && <BoxIcon className="w-6 h-6 rotate-45" style={{ color: asset.color }} />}
-                      <span className="text-[9px] text-center leading-tight">{asset.name}</span>
+                    <button key={asset.name}
+                      onClick={() => addObject(asset.type, asset.color, asset.name)}
+                      className="aspect-square p-1.5 rounded border border-white/5 hover:border-cyan-500/50 hover:bg-white/5 transition-all flex flex-col items-center justify-center gap-1"
+                      title={asset.name}>
+                      {asset.compound ? <Boxes className={palIcon} style={{ color: asset.color }} /> :
+                       asset.type === "box" ? <BoxIcon className={palIcon} style={{ color: asset.color }} /> :
+                       asset.type === "sphere" ? <Circle className={palIcon} style={{ color: asset.color }} /> :
+                       asset.type === "cylinder" ? <Cylinder className={palIcon} style={{ color: asset.color }} /> :
+                       asset.type === "cone" ? <Cone className={palIcon} style={{ color: asset.color }} /> :
+                       asset.type === "torus" ? <Torus className={palIcon} style={{ color: asset.color }} /> :
+                       asset.type === "plane" ? <Plane className={palIcon} style={{ color: asset.color }} /> :
+                       asset.type === "light" ? <Lightbulb className={palIcon} style={{ color: asset.color }} /> :
+                       <BoxIcon className={`${palIcon} rotate-45`} style={{ color: asset.color }} />}
+                      {paletteSize !== "small" && <span className="text-[8px] text-center leading-tight truncate w-full">{asset.name}</span>}
                     </button>
                   ))}
                 </div>
                 <div className="p-2 mt-2 border-t border-white/5">
-                  <button
-                    onClick={() => toast.info("Drag .glb/.gltf files here to import 3D models")}
-                    className="w-full p-3 rounded border border-dashed border-white/10 hover:border-cyan-500/50 text-xs text-muted-foreground hover:text-white transition-all flex flex-col items-center gap-1"
-                  >
-                    <Upload className="w-4 h-4" />
-                    Upload .glb / .gltf
+                  <button onClick={() => toast.info("Drag .glb/.gltf files here to import 3D models")}
+                    className="w-full p-3 rounded border border-dashed border-white/10 hover:border-cyan-500/50 text-xs text-muted-foreground hover:text-white transition-all flex flex-col items-center gap-1">
+                    <Upload className="w-4 h-4" /> Upload .glb / .gltf
                   </button>
                 </div>
               </>
@@ -1073,319 +618,179 @@ engine.setPlayerController(player);
 
             {leftPanel === "lights" && (
               <>
-                <div className="px-2 py-1 text-[10px] uppercase tracking-wider text-muted-foreground">
-                  Add Lights
-                </div>
-                {LIGHT_TYPES.map((light) => (
-                  <button
-                    key={light.type}
-                    onClick={() => addLight(light.type)}
-                    className="w-full flex items-center gap-2 px-3 py-2 text-xs hover:bg-white/5 transition-colors"
-                  >
-                    {light.icon}
-                    {light.name}
+                <div className="px-2 py-1 text-[10px] uppercase tracking-wider text-muted-foreground">Add Lights</div>
+                {LIGHT_TYPES.map((lt) => (
+                  <button key={lt} onClick={() => addLight(lt)} className="w-full flex items-center gap-2 px-3 py-2 text-xs capitalize hover:bg-white/5 transition-colors">
+                    <Lightbulb className="w-3.5 h-3.5 text-yellow-400" /> {lt}
                   </button>
                 ))}
+                <div className="px-3 py-3">
+                  <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-2">Quick map lighting</div>
+                  {LIGHT_PRESETS.map((p) => (
+                    <button key={p.id} onClick={() => { setWorld({ ...p.apply, lightPreset: p.id }); setRightTab("world"); }}
+                      className="w-full flex items-center gap-2 px-2 py-1.5 rounded hover:bg-white/5 text-left">
+                      <span className="w-5 h-4 rounded border border-white/10" style={{ background: `linear-gradient(135deg, ${p.swatch[0]}, ${p.swatch[1]})` }} />
+                      <span className="text-[11px]">{p.label}</span>
+                    </button>
+                  ))}
+                </div>
               </>
             )}
           </div>
         </div>
 
-        {/* CENTER: 3D Viewport */}
-        <div className="flex-1 relative bg-[#0d0e12]">
+        {/* CENTER — viewport */}
+        <div ref={containerRef} className="flex-1 relative bg-[#0d0e12]" style={{ cursor: isPlaying && pointerLocked ? "none" : "default" }}>
           <Canvas
-            shadows
-            camera={{ position: [6, 5, 8], fov: 50 }}
-            onClick={() => setSelectedId(null)}
+            shadows={world.shadows}
+            gl={{ preserveDrawingBuffer: true, antialias: true }}
+            camera={{ position: [8, 6, 10], fov: world.fov }}
+            dpr={[1, 2]}
+            onClick={() => { if (!isPlaying) setSelectedId(null); }}
           >
-            <Scene3D
-              objects={objects}
-              selectedId={selectedId}
-              onSelect={setSelectedId}
-              showAvatar={showAvatar}
-              avatarConfig={{ color: avatarColor, preset: avatar, bodyType: avatarBodyType }}
-              isPlaying={isPlaying}
+            <PipelineSettings world={world} />
+            <WorldEnvironment world={world} hideGrid={!world.showGrid || (isPlaying && gameMode === "rpg")} />
+
+            {staticObjects.map((obj) => (
+              <Object3DMesh key={obj.id} obj={obj} selected={selectedId === obj.id && !isPlaying} onSelect={() => onSelectObj(obj.id)} />
+            ))}
+
+            <RpgRuntime
+              entities={rpgEntities}
+              playerRef={canvasPlayerRef}
+              interactRef={interactRef}
+              attackRef={attackRef}
+              active={isPlaying && gameMode === "rpg"}
+              onState={setRpgState}
             />
-            <CameraController isPlaying={isPlaying} />
+
+            {isPlaying && cameraMode === "third-person" && (
+              <FollowGroup playerRef={canvasPlayerRef}>
+                <Avatar3D position={[0, 0, 0]} color={avatarColor} preset={avatar} bodyType={avatarBodyType} />
+              </FollowGroup>
+            )}
+
+            <PlayerController
+              isPlaying={isPlaying}
+              cameraMode={cameraMode}
+              playerRef={canvasPlayerRef}
+              keysRef={keysRef}
+              backupRef={camBackupRef}
+            />
+            <GizmoProxy obj={selectedObj} tool={activeTool} snap={snapEnabled} enabled={!isPlaying} onUpdate={updateProp} onPushUndo={pushUndo} />
+            <FocusHandler focusCounter={focusCounter} objects={objects} selectedId={selectedId} />
+            <RigidBodySim objects={objects} active={isPlaying} />
+            <ScreenshotRegistrar />
+
+            {world.showGizmo && !isPlaying && (
+              <GizmoHelper alignment="bottom-right" margin={[80, 80]}>
+                <GizmoViewport axisColors={["#ef4444", "#10b981", "#3b82f6"]} labelColor="white" />
+              </GizmoHelper>
+            )}
             <OrbitControls makeDefault enabled={!isPlaying} />
           </Canvas>
 
-          {/* Overlay: stats top-left */}
+          {/* viewport glow frame */}
+          <div className="absolute inset-0 pointer-events-none rounded-[4px] shadow-[inset_0_0_0_1px_rgba(34,211,238,0.12),inset_0_0_60px_rgba(34,211,238,0.05)]" />
+
+          {/* stats */}
           <div className="absolute top-2 left-2 px-3 py-1.5 rounded-md bg-black/60 backdrop-blur-sm text-xs flex items-center gap-2">
             <span className="text-cyan-400">●</span>
             <span>{objects.length} objects</span>
             <span className="text-muted-foreground">|</span>
             <span>{isPlaying ? "Playing" : "Editing"}</span>
-            {showAvatar && <span className="text-green-400">| Avatar: {avatar}</span>}
+            {gameMode === "rpg" && <span className="text-amber-400">| RPG</span>}
+            {snapEnabled && <span className="text-violet-400">| SNAP</span>}
           </div>
 
-          {/* Overlay: tool tips bottom-center */}
-          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 px-3 py-1.5 rounded-md bg-black/60 backdrop-blur-sm text-[10px] text-muted-foreground">
+          {/* tips */}
+          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 px-3 py-1.5 rounded-md bg-black/60 backdrop-blur-sm text-[10px] text-muted-foreground whitespace-nowrap">
             {isPlaying
-              ? "WASD to move · Mouse to look · Click Stop to exit play test"
-              : "Click to select · Drag to orbit · Scroll to zoom · Right-drag to pan"}
+              ? cameraMode === "orbit"
+                ? "WASD to glide · Click Stop to exit"
+                : "WASD move · Shift run · Space jump · E interact · Click attack · Esc releases the mouse"
+              : "Click to select · Gizmo to move/rotate/scale · F focus · Play = first-person mouse look"}
           </div>
 
-          {/* Play mode indicator */}
+          {/* play badge */}
           {isPlaying && (
             <div className="absolute top-2 right-2 px-3 py-1.5 rounded-md bg-red-500/20 border border-red-500/50 text-xs flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-red-500 rec-dot" />
-              PLAY TESTING
+              <span className={`w-2 h-2 rounded-full bg-red-500 ${pointerLocked ? "rec-dot" : ""}`} />
+              {gameMode === "rpg" ? "RPG PLAYING" : "PLAY TESTING"}
             </div>
+          )}
+
+          {/* resume overlay */}
+          {isPlaying && lockLost && cameraMode !== "orbit" && (
+            <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px] flex flex-col items-center justify-center gap-3 z-10" onClick={requestLock}>
+              <div className="text-lg font-bold">Paused</div>
+              <div className="text-xs text-white/60">Click anywhere to resume first-person play</div>
+              <button onClick={(e) => { e.stopPropagation(); stopPlay(); }} className="mt-2 px-4 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-xs">
+                Stop play test
+              </button>
+            </div>
+          )}
+
+          {/* GUI elements preview during play */}
+          {isPlaying && guiElements.filter((g) => g.visible).map((el) => (
+            <div key={el.id} className="absolute pointer-events-none"
+              style={{
+                left: `${el.x}%`, top: `${el.y}%`,
+                width: el.type === "text" ? "auto" : el.width, height: el.type === "text" ? "auto" : el.height,
+                background: el.type === "button" ? el.color : el.type === "panel" ? `${el.color}40` : "transparent",
+                color: el.type === "text" ? el.color : "#fff", fontSize: el.fontSize,
+                padding: "2px 8px", borderRadius: 4, display: "flex", alignItems: "center", justifyContent: "center",
+              }}>
+              {el.text || el.type}
+            </div>
+          ))}
+
+          {/* RPG HUD */}
+          {isPlaying && gameMode === "rpg" && rpgState && (
+            <RpgHud state={rpgState} avatarName={avatar} />
           )}
         </div>
 
-        {/* RIGHT: Properties */}
-        <div className="w-72 bg-[#13161c] border-l border-white/5 flex flex-col">
-          <div className="px-3 py-2 border-b border-white/5 flex items-center justify-between">
-            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Properties</span>
-            {selectedObj && (
-              <span className="text-[10px] text-muted-foreground">{selectedObj.type}</span>
-            )}
+        {/* RIGHT — Components / World */}
+        <div className="w-80 bg-[#12151b] border-l border-white/5 flex flex-col">
+          <div className="flex border-b border-white/5">
+            <button onClick={() => setRightTab("components")}
+              className={`flex-1 px-3 py-2 text-xs font-medium ${rightTab === "components" ? "text-white bg-white/5 border-b-2 border-cyan-500" : "text-muted-foreground hover:text-white"}`}>
+              Components
+            </button>
+            <button onClick={() => setRightTab("world")}
+              className={`flex-1 px-3 py-2 text-xs font-medium ${rightTab === "world" ? "text-white bg-white/5 border-b-2 border-cyan-500" : "text-muted-foreground hover:text-white"}`}>
+              World · Lighting
+            </button>
           </div>
 
-          {selectedObj ? (
-            <div className="flex-1 overflow-y-auto">
-              <div className="p-3 border-b border-white/5">
-                <div className="text-xs text-muted-foreground mb-1">Selected</div>
-                <input
-                  className="w-full bg-transparent text-sm font-medium outline-none border-b border-transparent focus:border-cyan-500"
-                  value={selectedObj.name}
-                  onChange={(e) => updateProp(selectedObj.id, "name", e.target.value)}
-                />
-              </div>
-
-              {/* Transform */}
-              <div className="px-3 py-2 border-b border-white/5">
-                <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-2">Transform</div>
-                {(["x", "y", "z"] as const).map((axis, i) => (
-                  <div key={axis} className="flex items-center gap-2 mb-1">
-                    <span className="text-xs text-muted-foreground w-4">{axis.toUpperCase()}</span>
-                    <span className="text-[10px] text-muted-foreground w-12">Pos</span>
-                    <input
-                      type="number"
-                      step="0.1"
-                      value={selectedObj.position[i]}
-                      onChange={(e) => {
-                        const newPos = [...selectedObj.position] as [number, number, number];
-                        newPos[i] = parseFloat(e.target.value) || 0;
-                        updateProp(selectedObj.id, "position", newPos);
-                      }}
-                      className="flex-1 bg-black/30 px-2 py-0.5 text-xs outline-none border border-transparent focus:border-cyan-500 rounded"
-                    />
-                    <span className="text-[10px] text-muted-foreground w-10">Rot</span>
-                    <input
-                      type="number"
-                      step="0.1"
-                      value={selectedObj.rotation[i].toFixed(2)}
-                      onChange={(e) => {
-                        const newRot = [...selectedObj.rotation] as [number, number, number];
-                        newRot[i] = parseFloat(e.target.value) || 0;
-                        updateProp(selectedObj.id, "rotation", newRot);
-                      }}
-                      className="w-14 bg-black/30 px-2 py-0.5 text-xs outline-none border border-transparent focus:border-cyan-500 rounded"
-                    />
-                    <span className="text-[10px] text-muted-foreground w-10">Scale</span>
-                    <input
-                      type="number"
-                      step="0.1"
-                      value={selectedObj.scale[i].toFixed(2)}
-                      onChange={(e) => {
-                        const newScale = [...selectedObj.scale] as [number, number, number];
-                        newScale[i] = parseFloat(e.target.value) || 0.1;
-                        updateProp(selectedObj.id, "scale", newScale);
-                      }}
-                      className="w-14 bg-black/30 px-2 py-0.5 text-xs outline-none border border-transparent focus:border-cyan-500 rounded"
-                    />
-                  </div>
-                ))}
-              </div>
-
-              {/* Appearance */}
-              <div className="px-3 py-2 border-b border-white/5">
-                <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-2">Appearance</div>
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-xs text-muted-foreground w-16">Color</span>
-                  <input
-                    type="color"
-                    value={selectedObj.color}
-                    onChange={(e) => updateProp(selectedObj.id, "color", e.target.value)}
-                    className="w-8 h-8 rounded border border-white/10 cursor-pointer"
-                  />
-                  <input
-                    value={selectedObj.color}
-                    onChange={(e) => updateProp(selectedObj.id, "color", e.target.value)}
-                    className="flex-1 bg-black/30 px-2 py-0.5 text-xs outline-none border border-transparent focus:border-cyan-500 rounded"
-                  />
-                </div>
-                {selectedObj.type === "light" && (
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs text-muted-foreground w-16">Intensity</span>
-                    <input
-                      type="range"
-                      min="0"
-                      max="5"
-                      step="0.1"
-                      value={selectedObj.intensity ?? 1}
-                      onChange={(e) => updateProp(selectedObj.id, "intensity", parseFloat(e.target.value))}
-                      className="flex-1"
-                    />
-                    <span className="text-xs text-muted-foreground w-10">{(selectedObj.intensity ?? 1).toFixed(1)}</span>
-                  </div>
-                )}
-              </div>
-
-              {/* Visibility */}
-              <div className="px-3 py-2 border-b border-white/5">
-                <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-2">State</div>
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-xs">Visible</span>
-                  <button
-                    onClick={() => toggleVisible(selectedObj.id)}
-                    className={`px-2 py-0.5 rounded text-[10px] ${selectedObj.visible ? "bg-cyan-500 text-white" : "bg-white/10 text-muted-foreground"}`}
-                  >
-                    {selectedObj.visible ? "True" : "False"}
-                  </button>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs">Locked</span>
-                  <button
-                    onClick={() => toggleLock(selectedObj.id)}
-                    className={`px-2 py-0.5 rounded text-[10px] ${selectedObj.locked ? "bg-cyan-500 text-white" : "bg-white/10 text-muted-foreground"}`}
-                  >
-                    {selectedObj.locked ? "True" : "False"}
-                  </button>
-                </div>
-              </div>
-
-              {/* Physics — 100 properties */}
-              <PhysicsProperties obj={selectedObj} onUpdate={updateProp} />
-
-              {/* Material — PBR properties */}
-              <div className="px-3 py-2 border-b border-white/5">
-                <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-2">Material (PBR) — 20 props</div>
-                {[
-                  ["Roughness", "0.5"],
-                  ["Metalness", "0.1"],
-                  ["Emissive Intensity", "0.0"],
-                  ["Emissive Color", "#000000"],
-                  ["Normal Map", ""],
-                  ["Roughness Map", ""],
-                  ["Metalness Map", ""],
-                  ["Emissive Map", ""],
-                  ["AO Map", ""],
-                  ["Displacement Map", ""],
-                  ["Alpha Map", ""],
-                  ["Clearcoat", "0.0"],
-                  ["Clearcoat Roughness", "0.0"],
-                  ["Transmission", "0.0"],
-                  ["Thickness", "0.0"],
-                  ["IOR", "1.5"],
-                  ["Reflectivity", "0.5"],
-                  ["Sheen", "0.0"],
-                  ["Sheen Color", "#ffffff"],
-                  ["Sheen Roughness", "0.0"],
-                ].map(([label, val]) => (
-                  <div key={label} className="flex items-center gap-2 mb-1">
-                    <span className="text-[11px] text-muted-foreground w-28 truncate">{label}</span>
-                    <input
-                      defaultValue={val}
-                      className="flex-1 bg-black/30 px-2 py-0.5 text-[11px] outline-none border border-transparent focus:border-cyan-500 rounded"
-                    />
-                  </div>
-                ))}
-              </div>
-
-              {/* Camera properties — 20 props */}
-              <div className="px-3 py-2 border-b border-white/5">
-                <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-2">Camera Settings — 20 props</div>
-                {[
-                  ["Field of View", "50"],
-                  ["Near Clip", "0.1"],
-                  ["Far Clip", "1000"],
-                  ["Aspect Ratio", "1.78"],
-                  ["Orthographic Size", "5"],
-                  ["Viewport X", "0"],
-                  ["Viewport Y", "0"],
-                  ["Viewport W", "1"],
-                  ["Viewport H", "1"],
-                  ["Depth", "-1"],
-                  ["Background", "#1a1d24"],
-                  ["Clear Flags", "Solid Color"],
-                  ["Allow HDR", "True"],
-                  ["Allow MSAA", "True"],
-                  ["Occlusion Culling", "True"],
-                  ["Min Zoom", "0.5"],
-                  ["Max Zoom", "3.0"],
-                  ["Follow Lerp", "0.15"],
-                  ["Deadzone X", "80"],
-                  ["Deadzone Y", "60"],
-                ].map(([label, val]) => (
-                  <div key={label} className="flex items-center gap-2 mb-0.5">
-                    <span className="text-[11px] text-muted-foreground w-28 truncate" title={label}>{label}</span>
-                    <input defaultValue={val} className="flex-1 bg-black/30 px-2 py-0.5 text-[11px] outline-none border border-transparent focus:border-cyan-500 rounded" />
-                  </div>
-                ))}
-              </div>
-
-              {/* Rendering — 20 props */}
-              <div className="px-3 py-2 border-b border-white/5">
-                <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-2">Rendering — 20 props</div>
-                {[
-                  ["Cast Shadows", "True"],
-                  ["Receive Shadows", "True"],
-                  ["Wireframe", "False"],
-                  ["Flat Shading", "False"],
-                  ["Render Queue", "2000"],
-                  ["Sorting Layer", "Default"],
-                  ["Order in Layer", "0"],
-                  ["Material", "Standard"],
-                  ["Shader", "PBR"],
-                  ["Cull Mode", "Back"],
-                  ["Z-Write", "True"],
-                  ["Z-Test", "LEqual"],
-                  ["Color Mask", "RGBA"],
-                  ["Blend Src", "SrcAlpha"],
-                  ["Blend Dst", "OneMinusSrcAlpha"],
-                  ["LOD Bias", "1.0"],
-                  ["Dynamic Occlusion", "True"],
-                  ["Motion Vectors", "True"],
-                  ["Light Probe Usage", "Blend"],
-                  ["Reflection Probes", "Blend"],
-                ].map(([label, val]) => (
-                  <div key={label} className="flex items-center gap-2 mb-0.5">
-                    <span className="text-[11px] text-muted-foreground w-28 truncate" title={label}>{label}</span>
-                    <input defaultValue={val} className="flex-1 bg-black/30 px-2 py-0.5 text-[11px] outline-none border border-transparent focus:border-cyan-500 rounded" />
-                  </div>
-                ))}
-              </div>
-
-              {/* Actions */}
-              <div className="px-3 py-2 flex gap-2">
-                <button
-                  onClick={() => duplicateObject(selectedObj.id)}
-                  className="flex-1 px-2 py-1 rounded bg-white/5 hover:bg-white/10 text-xs flex items-center justify-center gap-1"
-                >
-                  <Copy className="w-3 h-3" /> Duplicate
-                </button>
-                <button
-                  onClick={() => deleteObject(selectedObj.id)}
-                  className="flex-1 px-2 py-1 rounded bg-red-500/20 hover:bg-red-500/30 text-xs text-red-300 flex items-center justify-center gap-1"
-                >
-                  <Trash2 className="w-3 h-3" /> Delete
+          {rightTab === "components" ? (
+            selectedObj ? (
+              <ComponentsPanel
+                obj={selectedObj}
+                onUpdate={updateProp}
+                onPushUndo={pushUndo}
+                onDeleteObject={deleteObject}
+                onDuplicate={duplicateObject}
+              />
+            ) : (
+              <div className="flex-1 flex flex-col items-center justify-center text-xs text-muted-foreground p-6 text-center gap-3">
+                <Layers className="w-8 h-8 opacity-30" />
+                <div>Click an object in the viewport or Explorer to edit its components.</div>
+                <div className="text-[10px] opacity-70">Blender-style: add Rigid Body, Script, Audio Source and more per object.</div>
+                <button onClick={() => setRightTab("world")} className="mt-1 px-3 py-1.5 rounded-lg bg-cyan-500/15 border border-cyan-500/40 text-cyan-300 text-[11px]">
+                  Open World settings instead
                 </button>
               </div>
-            </div>
+            )
           ) : (
-            <div className="flex-1 flex items-center justify-center text-xs text-muted-foreground p-4 text-center">
-              Click an object in the viewport or Explorer to edit its properties.
-            </div>
+            <WorldPanel world={world} setWorld={setWorld} />
           )}
         </div>
       </div>
 
-      {/* Bottom: Animation Timeline */}
-      <div className="h-20 bg-[#13161c] border-t border-white/5 flex items-center px-3 gap-2">
+      {/* ================= TIMELINE ================= */}
+      <div className="h-20 bg-[#12151b] border-t border-white/5 flex items-center px-3 gap-2">
         <div className="flex items-center gap-1">
           <button className="tool-btn h-7 w-7 p-0" title="Play animation"><Play className="w-3 h-3" /></button>
           <button className="tool-btn h-7 w-7 p-0" title="Pause"><Pause className="w-3 h-3" /></button>
@@ -1393,444 +798,102 @@ engine.setPlayerController(player);
         </div>
         <div className="text-xs text-muted-foreground">Timeline</div>
         <div className="flex-1 relative h-10 bg-black/30 rounded">
-          {/* Timeline tracks */}
           <div className="absolute inset-0 flex flex-col">
-            {["Position", "Rotation", "Scale", "Color"].map((track, i) => (
+            {["Position", "Rotation", "Scale", "Color"].map((track) => (
               <div key={track} className="flex-1 border-b border-white/5 last:border-b-0 flex items-center px-2">
                 <span className="text-[9px] text-muted-foreground w-16">{track}</span>
                 <div className="flex-1 relative h-3 bg-white/5 rounded">
-                  {/* Keyframes */}
                   {[0.1, 0.3, 0.5, 0.7, 0.9].map((pos, j) => (
-                    <div
-                      key={j}
-                      className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-2 h-2 bg-cyan-500 rounded-sm"
-                      style={{ left: `${pos * 100}%` }}
-                    />
+                    <div key={j} className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-2 h-2 bg-cyan-500 rounded-sm" style={{ left: `${pos * 100}%` }} />
                   ))}
                 </div>
               </div>
             ))}
           </div>
-          {/* Playhead */}
           <div className="absolute top-0 bottom-0 w-px bg-red-500" style={{ left: "30%" }} />
         </div>
         <div className="text-xs text-muted-foreground">0:00 / 5:00</div>
       </div>
 
-      {/* Status bar */}
-      <div className="h-6 bg-cyan-600 text-white text-[11px] flex items-center px-3 gap-4">
+      {/* ================= STATUS BAR ================= */}
+      <div className="h-6 bg-gradient-to-r from-cyan-600 via-cyan-700 to-violet-700 text-white text-[11px] flex items-center px-3 gap-4">
         <div className="flex items-center gap-1.5">
           <div className={`w-2 h-2 rounded-full ${isPlaying ? "bg-green-300" : "bg-white/60"}`} />
-          <span>{isPlaying ? "Playing" : "Editing"}</span>
+          <span>{isPlaying ? (gameMode === "rpg" ? "Playing RPG quest" : "Playing") : "Editing"}</span>
         </div>
         <span>|</span>
         <span>{objects.length} objects</span>
         <span>|</span>
         <span>Selected: {selectedObj?.name ?? "None"}</span>
         <span>|</span>
-        <span>Tool: {activeTool}</span>
-        <div className="flex-1" />
-        <span>Three.js r186</span>
+        <span>Tool: {activeTool}{snapEnabled ? " + snap" : ""}</span>
         <span>|</span>
-        <span>WebGL 2.0</span>
+        <span>{cameraMode}</span>
+        <span>|</span>
+        <span>{statusLine}</span>
+        <div className="flex-1" />
+        <span>Lighting: {LIGHT_PRESETS.find((p) => p.id === world.lightPreset)?.label ?? "Custom"}</span>
+        <span>|</span>
+        <span>Three.js r186 · WebGL 2.0</span>
       </div>
 
-      {/* Welcome Card overlay (closable, with Welcome + Updates tabs) */}
-      {showWelcome && (
-        <div
-          className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-          onClick={() => setShowWelcome(false)}
-        >
-          <div
-            className="glass rounded-2xl p-6 max-w-lg w-full relative"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button
-              onClick={() => setShowWelcome(false)}
-              className="absolute top-3 right-3 p-1 rounded hover:bg-white/10"
-            >
-              <X className="w-4 h-4" />
-            </button>
+      {/* ================= OVERLAYS ================= */}
+      {showWelcome && <WelcomeCard onClose={() => setShowWelcome(false)} />}
 
-            {/* Header with Zhitlow icon */}
-            <div className="flex items-center gap-3 mb-5">
-              <img src="/engine-zhitlow.svg" alt="Zhitlow 3D" className="w-14 h-14" />
-              <div>
-                <h2 className="text-xl font-bold leading-tight">Zhitlow 3D Studio</h2>
-                <p className="text-xs text-cyan-400">v0.9.0 (beta) · Updated 2026-09-27</p>
-              </div>
-            </div>
-
-            {/* Tabs */}
-            <div className="flex border-b border-white/10 mb-4">
-              <button
-                onClick={() => setWelcomeTab("welcome")}
-                className={`px-4 py-2 text-xs font-medium ${welcomeTab === "welcome" ? "text-white border-b-2 border-cyan-500" : "text-muted-foreground hover:text-white"}`}
-              >
-                Welcome
-              </button>
-              <button
-                onClick={() => setWelcomeTab("updates")}
-                className={`px-4 py-2 text-xs font-medium ${welcomeTab === "updates" ? "text-white border-b-2 border-cyan-500" : "text-muted-foreground hover:text-white"}`}
-              >
-                What's New
-              </button>
-            </div>
-
-            {/* Welcome tab */}
-            {welcomeTab === "welcome" && (
-              <div className="space-y-2 mb-6">
-                <div className="flex items-center gap-2 text-xs">
-                  <Rocket className="w-3.5 h-3.5 text-cyan-400" />
-                  <span>Click objects to select, drag gizmo to move</span>
-                </div>
-                <div className="flex items-center gap-2 text-xs">
-                  <Code2 className="w-3.5 h-3.5 text-purple-400" />
-                  <span>Press the Code button to add Script/CSS/JS</span>
-                </div>
-                <div className="flex items-center gap-2 text-xs">
-                  <Palette className="w-3.5 h-3.5 text-pink-400" />
-                  <span>Open GUI editor for HUD, buttons, crosshair</span>
-                </div>
-                <div className="flex items-center gap-2 text-xs">
-                  <User className="w-3.5 h-3.5 text-blue-400" />
-                  <span>Pick your avatar in the toolbar</span>
-                </div>
-                <div className="flex items-center gap-2 text-xs">
-                  <Play className="w-3.5 h-3.5 text-green-400" />
-                  <span>Press Play to test in first-person (WASD)</span>
-                </div>
-                <div className="flex items-center gap-2 text-xs">
-                  <Send className="w-3.5 h-3.5 text-orange-400" />
-                  <span>Click Publish when ready to ship</span>
-                </div>
-              </div>
-            )}
-
-            {/* Updates tab */}
-            {welcomeTab === "updates" && (
-              <div className="mb-6">
-                <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-2 flex items-center gap-1">
-                  <Sparkles className="w-3 h-3 text-yellow-400" />
-                  Latest updates in v0.9.0
-                </div>
-                <ul className="space-y-1.5">
-                  {[
-                    "100 physics properties per object (joints, buoyancy, CCD)",
-                    "20 PBR material properties (clearcoat, transmission, IOR, sheen)",
-                    "Script/CSS/JS code editor with Zhitlow Script language",
-                    "GUI editor overlay (HUD, crosshair, health bar)",
-                    "Welcome card with tabbed updates (you're looking at it)",
-                    "Real SVG icons everywhere — no emojis",
-                    "3D Castle, 3D FPS Arena, 3D Multiplayer Arena templates",
-                  ].map((u, i) => (
-                    <li key={i} className="text-xs text-muted-foreground flex items-start gap-1.5">
-                      <span className="w-1 h-1 rounded-full bg-cyan-400 mt-1.5 flex-shrink-0" />
-                      <span>{u}</span>
-                    </li>
-                  ))}
-                </ul>
-                <div className="mt-4 p-2 rounded-md bg-cyan-500/10 border border-cyan-500/20">
-                  <div className="text-[10px] text-cyan-300">
-                    Full changelog at github.com/gefrus112/lapia-ai-agent/releases
-                  </div>
-                </div>
-              </div>
-            )}
-
-            <button
-              onClick={() => setShowWelcome(false)}
-              className="w-full px-4 py-2 rounded-lg bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-400 hover:to-purple-500 text-sm font-medium transition-all"
-            >
-              Get Started
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Code panel overlay (Script / CSS / JS tabs) */}
       {codePanelOpen && (
-        <div className="fixed bottom-24 right-72 w-[480px] h-[400px] glass rounded-lg z-40 flex flex-col overflow-hidden">
-          <div className="flex border-b border-white/5">
-            <button
-              onClick={() => setCodeTab("script")}
-              className={`flex items-center gap-1 px-3 py-2 text-xs ${codeTab === "script" ? "bg-white/5 text-white border-b-2 border-cyan-500" : "text-muted-foreground hover:text-white"}`}
-            >
-              <Code2 className="w-3 h-3" /> Script.zs
-            </button>
-            <button
-              onClick={() => setCodeTab("css")}
-              className={`flex items-center gap-1 px-3 py-2 text-xs ${codeTab === "css" ? "bg-white/5 text-white border-b-2 border-cyan-500" : "text-muted-foreground hover:text-white"}`}
-            >
-              <Palette className="w-3 h-3" /> Styles.css
-            </button>
-            <button
-              onClick={() => setCodeTab("js")}
-              className={`flex items-center gap-1 px-3 py-2 text-xs ${codeTab === "js" ? "bg-white/5 text-white border-b-2 border-cyan-500" : "text-muted-foreground hover:text-white"}`}
-            >
-              <FileCode2 className="w-3 h-3" /> Logic.js
-            </button>
-            <div className="flex-1" />
-            <button
-              onClick={() => setCodePanelOpen(false)}
-              className="px-3 py-2 text-muted-foreground hover:text-white"
-            >
-              <X className="w-3.5 h-3.5" />
-            </button>
-          </div>
-          <textarea
-            className="flex-1 bg-transparent p-3 text-xs font-mono text-white outline-none resize-none"
-            value={codeTab === "script" ? scriptCode : codeTab === "css" ? cssCode : jsCode}
-            onChange={(e) => {
-              if (codeTab === "script") setScriptCode(e.target.value);
-              else if (codeTab === "css") setCssCode(e.target.value);
-              else setJsCode(e.target.value);
-            }}
-            spellCheck={false}
-          />
-          <div className="px-3 py-1.5 border-t border-white/5 text-[10px] text-muted-foreground flex items-center justify-between">
-            <span>Line 1, Col 1 — UTF-8</span>
-            <span>{codeTab === "script" ? "Zhitlow Script" : codeTab === "css" ? "CSS" : "JavaScript"}</span>
-          </div>
-        </div>
+        <CodePanel
+          codeTab={codeTab} setCodeTab={setCodeTab}
+          scriptCode={scriptCode} cssCode={cssCode} jsCode={jsCode}
+          setScriptCode={setScriptCode} setCssCode={setCssCode} setJsCode={setJsCode}
+          onClose={() => setCodePanelOpen(false)}
+        />
       )}
 
-      {/* GUI Editor overlay — improved with 5 tools, properties, screen placement */}
       {showGuiEditor && (
-        <div className="fixed bottom-24 left-64 w-[420px] glass rounded-lg z-40 flex flex-col max-h-[70vh]">
-          <div className="flex items-center justify-between p-3 border-b border-white/5">
-            <h3 className="text-sm font-semibold flex items-center gap-1">
-              <Palette className="w-3.5 h-3.5" />
-              GUI Editor
-            </h3>
-            <button onClick={() => setShowGuiEditor(false)} className="text-muted-foreground hover:text-white">
-              <X className="w-3.5 h-3.5" />
-            </button>
-          </div>
-
-          {/* Tool palette — 5 tools */}
-          <div className="flex gap-1 p-2 border-b border-white/5">
-            {([
-              { id: "select" as const, icon: <MousePointer2 className="w-3.5 h-3.5" />, label: "Select" },
-              { id: "button" as const, icon: <SquareIcon className="w-3.5 h-3.5" />, label: "Button" },
-              { id: "text" as const, icon: <Type className="w-3.5 h-3.5" />, label: "Text" },
-              { id: "panel" as const, icon: <Layout className="w-3.5 h-3.5" />, label: "Panel" },
-              { id: "menu" as const, icon: <Menu className="w-3.5 h-3.5" />, label: "Menu" },
-            ]).map((t) => (
-              <button
-                key={t.id}
-                onClick={() => {
-                  setGuiTool(t.id);
-                  if (t.id !== "select") {
-                    const newEl: GUIElement = {
-                      id: uid(), type: t.id === "menu" ? "menu" : t.id as GUIElementType,
-                      name: `${t.label} ${guiElements.length + 1}`,
-                      x: 50, y: 50, width: t.id === "text" ? 100 : 120, height: t.id === "text" ? 20 : 30,
-                      text: t.id === "button" ? "Click Me" : t.id === "text" ? "Label" : t.id === "menu" ? "Menu" : "",
-                      color: "#3b82f6", fontSize: 14, visible: true,
-                    };
-                    setGuiElements([...guiElements, newEl]);
-                    setSelectedGuiId(newEl.id);
-                    logDebug("info", `GUI ${t.label} added at (50, 50)`);
-                    toast.success(`${t.label} added — drag to position`);
-                  }
-                }}
-                className={`tool-btn ${guiTool === t.id ? "active" : ""}`}
-                title={t.label}
-              >
-                {t.icon}
-              </button>
-            ))}
-          </div>
-
-          {/* Screen preview with GUI elements */}
-          <div className="relative bg-black/40 m-2 rounded overflow-hidden" style={{ aspectRatio: "4/3" }}>
-            {/* Grid background */}
-            <div className="absolute inset-0 opacity-20" style={{
-              backgroundImage: "linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)",
-              backgroundSize: "20px 20px",
-            }} />
-            {guiElements.filter(e => e.visible).map((el) => (
-              <div
-                key={el.id}
-                onClick={() => setSelectedGuiId(el.id)}
-                className={`absolute cursor-move border-2 ${selectedGuiId === el.id ? "border-cyan-500" : "border-transparent"}`}
-                style={{
-                  left: `${el.x}%`, top: `${el.y}%`,
-                  width: el.type === "text" ? "auto" : `${el.width}px`,
-                  height: el.type === "text" ? "auto" : `${el.height}px`,
-                  background: el.type === "button" ? el.color : el.type === "panel" ? `${el.color}40` : "transparent",
-                  color: el.type === "text" ? el.color : "#fff",
-                  fontSize: `${el.fontSize}px`,
-                  padding: el.type === "text" ? "2px 4px" : "4px 8px",
-                  borderRadius: "4px",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                }}
-              >
-                {el.text || (el.type === "panel" ? "Panel" : "")}
-              </div>
-            ))}
-            {guiElements.length === 0 && (
-              <div className="absolute inset-0 flex items-center justify-center text-xs text-muted-foreground">
-                Pick a tool above to add GUI elements
-              </div>
-            )}
-          </div>
-
-          {/* Properties for selected GUI element */}
-          {selectedGuiId && (() => {
-            const el = guiElements.find(e => e.id === selectedGuiId);
-            if (!el) return null;
-            return (
-              <div className="p-2 border-t border-white/5 max-h-32 overflow-y-auto">
-                <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">GUI Properties</div>
-                <div className="grid grid-cols-2 gap-1 text-[11px]">
-                  <label className="flex items-center gap-1">X: <input type="number" value={el.x} onChange={(e) => setGuiElements(gs => gs.map(g => g.id === el.id ? { ...g, x: +e.target.value } : g))} className="w-12 bg-black/30 px-1 rounded" /></label>
-                  <label className="flex items-center gap-1">Y: <input type="number" value={el.y} onChange={(e) => setGuiElements(gs => gs.map(g => g.id === el.id ? { ...g, y: +e.target.value } : g))} className="w-12 bg-black/30 px-1 rounded" /></label>
-                  <label className="flex items-center gap-1">W: <input type="number" value={el.width} onChange={(e) => setGuiElements(gs => gs.map(g => g.id === el.id ? { ...g, width: +e.target.value } : g))} className="w-12 bg-black/30 px-1 rounded" /></label>
-                  <label className="flex items-center gap-1">H: <input type="number" value={el.height} onChange={(e) => setGuiElements(gs => gs.map(g => g.id === el.id ? { ...g, height: +e.target.value } : g))} className="w-12 bg-black/30 px-1 rounded" /></label>
-                  <label className="flex items-center gap-1 col-span-2">Text: <input value={el.text} onChange={(e) => setGuiElements(gs => gs.map(g => g.id === el.id ? { ...g, text: e.target.value } : g))} className="flex-1 bg-black/30 px-1 rounded" /></label>
-                  <label className="flex items-center gap-1">Color: <input type="color" value={el.color} onChange={(e) => setGuiElements(gs => gs.map(g => g.id === el.id ? { ...g, color: e.target.value } : g))} className="w-6 h-6" /></label>
-                  <label className="flex items-center gap-1">Size: <input type="number" value={el.fontSize} onChange={(e) => setGuiElements(gs => gs.map(g => g.id === el.id ? { ...g, fontSize: +e.target.value } : g))} className="w-12 bg-black/30 px-1 rounded" /></label>
-                </div>
-                <button
-                  onClick={() => { setGuiElements(gs => gs.filter(g => g.id !== el.id)); setSelectedGuiId(null); }}
-                  className="mt-1 w-full p-1 rounded bg-red-500/20 text-red-300 text-[10px] hover:bg-red-500/30"
-                >
-                  Delete element
-                </button>
-              </div>
-            );
-          })()}
-        </div>
+        <GuiEditor
+          guiElements={guiElements} setGuiElements={setGuiElements as (fn: (gs: GUIElement[]) => GUIElement[]) => void}
+          selectedGuiId={selectedGuiId} setSelectedGuiId={setSelectedGuiId}
+          guiTool={guiTool} setGuiTool={setGuiTool}
+          logDebug={logDebug} onClose={() => setShowGuiEditor(false)}
+        />
       )}
 
-      {/* Debug Console overlay */}
       {showDebugConsole && (
-        <div className="fixed bottom-24 right-72 w-[500px] h-[300px] glass rounded-lg z-40 flex flex-col">
-          <div className="flex items-center justify-between p-2 border-b border-white/5">
-            <h3 className="text-xs font-semibold flex items-center gap-1">
-              <Terminal className="w-3.5 h-3.5 text-green-400" />
-              Debug Console
-            </h3>
-            <div className="flex items-center gap-1">
-              <button
-                onClick={() => {
-                  // Run script
-                  const code = codeTab === "script" ? scriptCode : codeTab === "js" ? jsCode : "";
-                  logDebug("info", `Executing ${codeTab} (${code.length} chars)...`);
-                  try {
-                    if (codeTab === "js" && code) {
-                      // eslint-disable-next-line no-eval
-                      eval(code);
-                      logDebug("success", "Script executed successfully");
-                    } else {
-                      logDebug("warn", "Python script execution requires Pyodide (use 2D Studio)");
-                    }
-                  } catch (e: any) {
-                    logDebug("error", `Runtime error: ${e.message}`);
-                  }
-                }}
-                className="tool-btn h-6 text-[10px] px-2"
-                title="Run current script"
-              >
-                <Play className="w-3 h-3 fill-current" /> Run
-              </button>
-              <button onClick={() => setDebugLogs([])} className="tool-btn h-6 w-6 p-0" title="Clear">
-                <Trash2 className="w-3 h-3" />
-              </button>
-              <button onClick={() => setShowDebugConsole(false)} className="text-muted-foreground hover:text-white">
-                <X className="w-3.5 h-3.5" />
-              </button>
-            </div>
-          </div>
-          <div className="flex-1 overflow-y-auto p-2 font-mono text-[11px] space-y-0.5">
-            {debugLogs.map((log) => (
-              <div key={log.id} className={`console-line ${log.type === "error" ? "text-red-400" : log.type === "warn" ? "text-yellow-400" : log.type === "success" ? "text-green-400" : "text-cyan-300"}`}>
-                <span className="opacity-50 mr-1">[{new Date(log.timestamp).toLocaleTimeString(undefined, { hour12: false })}]</span>
-                {log.text}
-              </div>
-            ))}
-          </div>
-          <div className="p-2 border-t border-white/5">
-            <input
-              placeholder="Type a command and press Enter..."
-              className="w-full bg-black/30 px-2 py-1 text-xs outline-none border border-white/5 focus:border-cyan-500 rounded"
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  const val = (e.target as HTMLInputElement).value;
-                  logDebug("info", `> ${val}`);
-                  (e.target as HTMLInputElement).value = "";
-                }
-              }}
-            />
-          </div>
-        </div>
+        <DebugConsole
+          debugLogs={debugLogs}
+          onRun={runScript}
+          onClear={() => setDebugLogs([])}
+          onClose={() => setShowDebugConsole(false)}
+          onCommand={(cmd) => logDebug("info", `> ${cmd}`)}
+        />
       )}
 
-      {/* Terrain Editor overlay */}
       {showTerrainEditor && (
-        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 w-[440px] glass rounded-lg z-40 p-4">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-semibold flex items-center gap-1">
-              <Mountain className="w-3.5 h-3.5 text-green-400" />
-              Terrain Editor
-            </h3>
-            <button onClick={() => setShowTerrainEditor(false)} className="text-muted-foreground hover:text-white">
-              <X className="w-3.5 h-3.5" />
-            </button>
-          </div>
-          <div className="space-y-2">
-            <div>
-              <label className="text-[10px] text-muted-foreground">Terrain Width: {terrainSize.width}</label>
-              <input type="range" min="10" max="100" value={terrainSize.width} onChange={(e) => setTerrainSize({ ...terrainSize, width: +e.target.value })} className="w-full" />
-            </div>
-            <div>
-              <label className="text-[10px] text-muted-foreground">Terrain Depth: {terrainSize.depth}</label>
-              <input type="range" min="10" max="100" value={terrainSize.depth} onChange={(e) => setTerrainSize({ ...terrainSize, depth: +e.target.value })} className="w-full" />
-            </div>
-            <div>
-              <label className="text-[10px] text-muted-foreground">Max Height: {terrainSize.height}</label>
-              <input type="range" min="0.5" max="10" step="0.5" value={terrainSize.height} onChange={(e) => setTerrainSize({ ...terrainSize, height: +e.target.value })} className="w-full" />
-            </div>
-            <div>
-              <label className="text-[10px] text-muted-foreground">Water Level: {waterLevel.toFixed(1)}</label>
-              <input type="range" min="-2" max="5" step="0.1" value={waterLevel} onChange={(e) => setWaterLevel(+e.target.value)} className="w-full" />
-            </div>
-            <div className="flex gap-1 pt-2">
-              <button
-                onClick={() => {
-                  pushUndo();
-                  setObjects([...objects, {
-                    id: uid(), name: "Terrain", type: "terrain",
-                    position: [0, 0, 0], rotation: [0, 0, 0], scale: [terrainSize.width, 1, terrainSize.depth],
-                    color: "#4a7c3a", visible: true, locked: false,
-                  }]);
-                  logDebug("success", `Terrain added (${terrainSize.width}x${terrainSize.depth})`);
-                  toast.success("Terrain added to scene");
-                }}
-                className="flex-1 p-2 rounded bg-green-500/20 text-green-300 text-xs hover:bg-green-500/30"
-              >
-                <Mountain className="w-3 h-3 inline mr-1" /> Add Terrain
-              </button>
-              <button
-                onClick={() => {
-                  pushUndo();
-                  setObjects([...objects, {
-                    id: uid(), name: "Water", type: "water",
-                    position: [0, waterLevel, 0], rotation: [-Math.PI / 2, 0, 0], scale: [terrainSize.width, terrainSize.depth, 1],
-                    color: "#3b82f6", visible: true, locked: false, opacity: 0.6, transparent: true,
-                  }]);
-                  logDebug("info", `Water plane added at y=${waterLevel}`);
-                  toast.success("Water added");
-                }}
-                className="flex-1 p-2 rounded bg-blue-500/20 text-blue-300 text-xs hover:bg-blue-500/30"
-              >
-                <Waves className="w-3 h-3 inline mr-1" /> Add Water
-              </button>
-            </div>
-          </div>
-        </div>
+        <TerrainEditor
+          terrainSize={terrainSize} setTerrainSize={setTerrainSize}
+          waterLevel={waterLevel} setWaterLevel={setWaterLevel}
+          onAddTerrain={() => {
+            pushUndo();
+            setObjects((os) => [...os, {
+              id: uid(), name: "Terrain", type: "terrain",
+              position: [0, 0, 0], rotation: [0, 0, 0], scale: [terrainSize.width, terrainSize.height, terrainSize.depth],
+              color: "#4c9a3f", visible: true, locked: false, components: defaultComponentsFor("terrain"),
+            }]);
+            logDebug("success", `Terrain added (${terrainSize.width}x${terrainSize.depth})`);
+            toast.success("Terrain added to scene");
+          }}
+          onAddWater={() => {
+            pushUndo();
+            setObjects((os) => [...os, {
+              id: uid(), name: "Water", type: "water",
+              position: [0, waterLevel, 0], rotation: [-Math.PI / 2, 0, 0], scale: [terrainSize.width, terrainSize.depth, 1],
+              color: "#3b82f6", visible: true, locked: false, opacity: 0.6, transparent: true, components: defaultComponentsFor("water"),
+            }]);
+            logDebug("info", `Water plane added at y=${waterLevel}`);
+            toast.success("Water added");
+          }}
+          onClose={() => setShowTerrainEditor(false)}
+        />
       )}
     </div>
   );

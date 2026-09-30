@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>All In One Engine — Building an RPG</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html,body { width:1280px; height:720px; overflow:hidden; background:#0a0b0e; font-family:'Segoe UI',system-ui,-apple-system,sans-serif; }
+  #stage { position:relative; width:1280px; height:720px; }
+  canvas { display:block; }
+
+  /* ===== EDITOR CHROME ===== */
+  .chrome { position:absolute; inset:0; pointer-events:none; opacity:1; transition:opacity .4s; }
+  .chrome.hidden { opacity:0; }
+  #topbar { position:absolute; top:0; left:0; right:0; height:44px; background:rgba(13,15,20,.92); border-bottom:1px solid rgba(255,255,255,.08); display:flex; align-items:center; padding:0 14px; gap:12px; }
+  #topbar img { width:26px; height:26px; }
+  #topbar .brand { color:#fff; font-size:13px; font-weight:700; }
+  #topbar .brand span { background:linear-gradient(90deg,#22d3ee,#a855f7); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  #topbar .menu { color:rgba(255,255,255,.45); font-size:11px; margin-left:8px; }
+  #topbar .scene { margin-left:auto; color:rgba(255,255,255,.55); font-size:11px; font-family:ui-monospace,monospace; background:rgba(255,255,255,.06); padding:4px 10px; border-radius:6px; border:1px solid rgba(255,255,255,.08); }
+  #topbar .dot { width:7px; height:7px; border-radius:50%; background:#22c55e; display:inline-block; margin-right:6px; }
+
+  #palette { position:absolute; left:0; top:44px; bottom:0; width:150px; background:rgba(13,15,20,.88); border-right:1px solid rgba(255,255,255,.08); padding:10px; }
+  #palette h4 { color:rgba(255,255,255,.4); font-size:9px; letter-spacing:.14em; text-transform:uppercase; margin-bottom:8px; font-weight:600; }
+  .pal-item { display:flex; align-items:center; gap:8px; padding:6px 7px; border-radius:7px; margin-bottom:2px; color:rgba(255,255,255,.55); font-size:11px; border:1px solid transparent; }
+  .pal-item .sw { width:14px; height:14px; border-radius:4px; flex-shrink:0; }
+  .pal-item.hot { background:rgba(34,211,238,.15); border-color:rgba(34,211,238,.5); color:#fff; }
+  .pal-item.done .sw::after { content:''; }
+
+  #inspector { position:absolute; right:0; top:44px; width:190px; background:rgba(13,15,20,.88); border-left:1px solid rgba(255,255,255,.08); padding:12px; }
+  #inspector h4 { color:rgba(255,255,255,.4); font-size:9px; letter-spacing:.14em; text-transform:uppercase; margin-bottom:8px; }
+  #inspector .obj { color:#fff; font-size:12px; font-weight:600; margin-bottom:8px; }
+  .prop-row { display:flex; justify-content:space-between; margin-bottom:5px; font-size:10px; }
+  .prop-row .k { color:rgba(255,255,255,.35); } .prop-row .v { color:rgba(255,255,255,.75); font-family:ui-monospace,monospace; }
+
+  #status { position:absolute; bottom:56px; left:50%; transform:translateX(-50%); background:rgba(13,15,20,.9); border:1px solid rgba(34,211,238,.4); color:#22d3ee; font-size:12px; padding:7px 16px; border-radius:20px; font-family:ui-monospace,monospace; white-space:nowrap; }
+  #playbar { position:absolute; bottom:0; left:150px; right:190px; height:44px; background:rgba(13,15,20,.92); border-top:1px solid rgba(255,255,255,.08); display:flex; align-items:center; justify-content:center; gap:10px; }
+  #playbtn { display:flex; align-items:center; gap:7px; background:linear-gradient(90deg,#22c55e,#16a34a); color:#fff; font-size:12px; font-weight:700; padding:6px 18px; border-radius:8px; }
+  #playbtn .tri { width:0; height:0; border-left:8px solid #fff; border-top:5px solid transparent; border-bottom:5px solid transparent; }
+  #playbar .hint { color:rgba(255,255,255,.3); font-size:10px; }
+
+  /* ===== GAME HUD ===== */
+  .hud { position:absolute; inset:0; pointer-events:none; opacity:0; transition:opacity .5s; }
+  .hud.on { opacity:1; }
+  #quest { position:absolute; top:18px; left:18px; background:rgba(10,12,16,.78); border:1px solid rgba(251,191,36,.35); border-radius:12px; padding:10px 16px; backdrop-filter:blur(4px); }
+  #quest .qt { color:#fbbf24; font-size:9px; letter-spacing:.16em; font-weight:700; }
+  #quest .qd { color:#fff; font-size:13px; font-weight:600; margin-top:2px; }
+  #coins { position:absolute; top:18px; right:18px; background:rgba(10,12,16,.78); border:1px solid rgba(251,191,36,.35); border-radius:12px; padding:9px 16px; display:flex; align-items:center; gap:8px; }
+  #coins .coin-icon { width:16px; height:16px; border-radius:50%; background:radial-gradient(circle at 35% 30%, #fde68a, #f59e0b); box-shadow:0 0 10px rgba(251,191,36,.6); }
+  #coins .cv { color:#fde68a; font-size:16px; font-weight:800; font-family:ui-monospace,monospace; transition:transform .15s; }
+  #health { position:absolute; bottom:26px; left:18px; width:210px; }
+  #health .hl { color:rgba(255,255,255,.7); font-size:9px; letter-spacing:.16em; font-weight:700; margin-bottom:4px; }
+  #health .bar { height:12px; background:rgba(0,0,0,.55); border-radius:6px; border:1px solid rgba(255,255,255,.2); overflow:hidden; }
+  #health .fill { height:100%; width:100%; background:linear-gradient(90deg,#22c55e,#84cc16); border-radius:6px; }
+  #crosshair { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:6px; height:6px; border-radius:50%; background:rgba(255,255,255,.85); box-shadow:0 0 6px rgba(0,0,0,.8); }
+  #dialog { position:absolute; bottom:80px; left:50%; transform:translateX(-50%) translateY(8px); width:520px; background:rgba(10,12,16,.88); border:1px solid rgba(168,85,247,.4); border-radius:14px; padding:14px 18px; opacity:0; transition:opacity .35s, transform .35s; backdrop-filter:blur(6px); }
+  #dialog.on { opacity:1; transform:translateX(-50%) translateY(0); }
+  #dialog .dn { color:#c084fc; font-size:10px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; margin-bottom:4px; }
+  #dialog .dt { color:#fff; font-size:14px; line-height:1.45; }
+  #dialog .dk { color:rgba(255,255,255,.4); font-size:10px; margin-top:6px; font-family:ui-monospace,monospace; }
+  #plusone { position:absolute; top:64px; right:22px; color:#fde68a; font-weight:800; font-size:14px; opacity:0; }
+
+  /* ===== TITLE CARD ===== */
+  #fade { position:absolute; inset:0; background:#000; pointer-events:none; }
+  #title { position:absolute; inset:0; background:radial-gradient(ellipse at 50% 40%, #141826 0%, #0a0b0e 70%); display:flex; flex-direction:column; align-items:center; justify-content:center; opacity:0; pointer-events:none; }
+  #title img { width:88px; height:88px; margin-bottom:22px; }
+  #title h1 { color:#fff; font-size:38px; font-weight:800; letter-spacing:-.02em; }
+  #title h1 span { background:linear-gradient(90deg,#22d3ee,#a855f7); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  #title p { color:rgba(255,255,255,.55); font-size:15px; margin-top:12px; }
+  #title .url { margin-top:26px; color:#22d3ee; font-size:13px; font-family:ui-monospace,monospace; background:rgba(34,211,238,.08); border:1px solid rgba(34,211,238,.3); padding:8px 20px; border-radius:20px; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="chrome" id="chrome">
+    <div id="topbar">
+      <img src="/icon.svg" alt="">
+      <div class="brand">All In One <span>Engine</span></div>
+      <div class="menu">File&nbsp;&nbsp;Edit&nbsp;&nbsp;Scene&nbsp;&nbsp;Build</div>
+      <div class="scene"><span class="dot"></span>rpg_village.scene</div>
+    </div>
+    <div id="palette">
+      <h4>Asset Palette</h4>
+      <div class="pal-item" data-k="terrain"><div class="sw" style="background:#4c9a3f"></div>Terrain</div>
+      <div class="pal-item" data-k="path"><div class="sw" style="background:#c9b489"></div>Cobble Path</div>
+      <div class="pal-item" data-k="tree"><div class="sw" style="background:#2d7a2d"></div>Oak Tree</div>
+      <div class="pal-item" data-k="house"><div class="sw" style="background:#e8dcc0"></div>Cottage</div>
+      <div class="pal-item" data-k="tower"><div class="sw" style="background:#8b8f98"></div>Castle Tower</div>
+      <div class="pal-item" data-k="fountain"><div class="sw" style="background:#38bdf8"></div>Fountain</div>
+      <div class="pal-item" data-k="lamp"><div class="sw" style="background:#fbbf24"></div>Lamp Post</div>
+      <div class="pal-item" data-k="chest"><div class="sw" style="background:#92400e"></div>Treasure Chest</div>
+      <div class="pal-item" data-k="npc"><div class="sw" style="background:#a855f7"></div>NPC</div>
+      <div class="pal-item" data-k="slime"><div class="sw" style="background:#4ade80"></div>Slime</div>
+      <div class="pal-item" data-k="coin"><div class="sw" style="background:#f59e0b"></div>Gold Coin</div>
+    </div>
+    <div id="inspector">
+      <h4>Inspector</h4>
+      <div class="obj" id="insp-name">Castle Tower</div>
+      <div class="prop-row"><span class="k">Position</span><span class="v" id="insp-pos">11, 0, -6</span></div>
+      <div class="prop-row"><span class="k">Rotation</span><span class="v">0, 0, 0</span></div>
+      <div class="prop-row"><span class="k">Scale</span><span class="v">1, 1, 1</span></div>
+      <div class="prop-row"><span class="k">Component</span><span class="v">Mesh</span></div>
+      <div class="prop-row"><span class="k">Cast Shadows</span><span class="v">True</span></div>
+      <div class="prop-row"><span class="k">Script</span><span class="v">quest.giver</span></div>
+      <div class="prop-row"><span class="k">Lighting</span><span class="v">Golden Hour</span></div>
+      <div class="prop-row"><span class="k">Rendering</span><span class="v">Shadows + Fog</span></div>
+    </div>
+    <div id="status">Terrain tool — drag to sculpt</div>
+    <div id="playbar">
+      <div id="playbtn"><div class="tri"></div><span id="playlabel">Play</span></div>
+      <div class="hint">WASD + mouse look · first-person play test</div>
+    </div>
+  </div>
+
+  <div class="hud" id="hud">
+    <div id="quest"><div class="qt">QUEST · LOST COINS</div><div class="qd">Collect 8 gold coins for the village</div></div>
+    <div id="coins"><div class="coin-icon"></div><div class="cv" id="coin-count">0 / 8</div></div>
+    <div id="plusone">+1</div>
+    <div id="health"><div class="hl">HEALTH</div><div class="bar"><div class="fill" id="hpfill"></div></div></div>
+    <div id="crosshair"></div>
+    <div id="dialog"><div class="dn">Elder Rowan</div><div class="dt">The slimes scattered our gold across the village! Bring back the 8 coins and the fountain will shine again.</div><div class="dk">Press E to continue</div></div>
+  </div>
+
+  <div id="fade"></div>
+  <div id="title">
+    <img src="/icon.svg" alt="">
+    <h1>Made with <span>All In One Engine</span></h1>
+    <p>This whole RPG was built from the RPG Village template — you can play it in the browser.</p>
+    <div class="url">3D Studio → Templates → RPG Village Quest</div>
+  </div>
+</div>
+
+<script type="module">
+import * as THREE from '/demo/vendor/three.module.js';
+
+// ---------- deterministic helpers ----------
+const clamp01 = x => Math.max(0, Math.min(1, x));
+const lerp = (a,b,t) => a + (b-a)*t;
+const smooth = t => { t = clamp01(t); return t*t*(3-2*t); };
+const easeOutBack = t => { const c=1.70158; t=clamp01(t); return 1 + (c+1)*Math.pow(t-1,3) + c*Math.pow(t-1,2); };
+function mulberry32(a){ return function(){ a|=0; a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+const rng = mulberry32(1337);
+
+// ---------- renderer / scene ----------
+const renderer = new THREE.WebGLRenderer({ antialias:true, preserveDrawingBuffer:true });
+renderer.setSize(1280, 720);
+renderer.setPixelRatio(1);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.05;
+document.getElementById('stage').prepend(renderer.domElement);
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color('#8fc4ea');
+scene.fog = new THREE.Fog('#a8cfe8', 34, 95);
+
+const camera = new THREE.PerspectiveCamera(58, 1280/720, 0.1, 300);
+
+// ---------- lights (Golden Hour preset) ----------
+const sun = new THREE.DirectionalLight('#ffd9a0', 2.6);
+sun.position.set(24, 30, 14);
+sun.castShadow = true;
+sun.shadow.mapSize.set(1024, 1024);
+sun.shadow.camera.left = -34; sun.shadow.camera.right = 34;
+sun.shadow.camera.top = 34; sun.shadow.camera.bottom = -34;
+sun.shadow.camera.far = 110;
+sun.shadow.bias = -0.0004;
+scene.add(sun);
+scene.add(new THREE.HemisphereLight('#bfd9ff', '#4c7a3a', 0.85));
+const lampGlow = new THREE.PointLight('#ffbf66', 0, 9); // lit during play
+
+// ---------- material helper ----------
+const M = (color, opts={}) => new THREE.MeshStandardMaterial({ color, roughness: opts.r ?? .85, metalness: opts.m ?? 0, emissive: opts.e ?? '#000000', emissiveIntensity: opts.ei ?? 0, transparent: !!opts.t, opacity: opts.o ?? 1 });
+
+function mesh(geo, mat, x,y,z, cast=true, recv=true){ const m = new THREE.Mesh(geo, mat); m.position.set(x,y,z); m.castShadow=cast; m.receiveShadow=recv; return m; }
+
+// ---------- world ----------
+const world = new THREE.Group(); scene.add(world);
+const grassGeo = new THREE.CircleGeometry(30, 48);
+const ground = mesh(grassGeo, M('#5aa64a'), 0, 0, 0, false, true);
+ground.rotation.x = -Math.PI/2; world.add(ground);
+const groundDirt = mesh(new THREE.CircleGeometry(9.5, 40), M('#7fb35c'), 0, 0.01, 2, false, true);
+groundDirt.rotation.x = -Math.PI/2; world.add(groundDirt);
+
+// cobble path
+const path = new THREE.Group();
+for(let i=0;i<26;i++){ const s = 0.55 + rng()*0.35; const p = mesh(new THREE.BoxGeometry(s, .08, s*.8), M(i%2? '#c9b489':'#bba87f', {r:.95}), (rng()-.5)*1.7, .03, 17.6 - i*0.72, false, true); p.rotation.y = rng()*.6; path.add(p); }
+world.add(path);
+
+// clouds
+const clouds = new THREE.Group();
+for(let i=0;i<6;i++){ const c = new THREE.Group(); const n = 3+Math.floor(rng()*2);
+  for(let j=0;j<n;j++){ const r = 1.6+rng()*1.6; c.add(mesh(new THREE.SphereGeometry(r, 12, 10), M('#ffffff',{r:1,e:'#ffffff',ei:.32}), (j-n/2)*r*1.1, rng()*.7, rng()*1.4, false, false)); }
+  c.position.set((rng()-.5)*70, 19+rng()*7, -30-rng()*30); clouds.add(c); }
+world.add(clouds);
+
+// ---------- asset builders (same shapes the real engine's assets use) ----------
+function buildTree(scale=1){ const g = new THREE.Group();
+  g.add(mesh(new THREE.CylinderGeometry(.22,.3,1.6,8), M('#7a4a21'), 0,.8,0));
+  g.add(mesh(new THREE.SphereGeometry(1.15,14,12), M('#3f8f3a'), 0,2.1,0));
+  g.add(mesh(new THREE.SphereGeometry(.8,12,10), M('#4da344'), .55,2.7,.2));
+  g.add(mesh(new THREE.SphereGeometry(.7,12,10), M('#35802f'), -.5,2.6,-.25));
+  g.scale.setScalar(scale); return g; }
+
+function buildHouse(){ const g = new THREE.Group();
+  g.add(mesh(new THREE.BoxGeometry(3.4,2.2,2.8), M('#e8dcc0'), 0,1.1,0));
+  const roof = mesh(new THREE.ConeGeometry(2.75,1.7,4), M('#a3502e', {r:.9}), 0,3.05,0); roof.rotation.y = Math.PI/4; g.add(roof);
+  g.add(mesh(new THREE.BoxGeometry(.9,1.4,.12), M('#6b4423'), 0,.7,1.42));
+  g.add(mesh(new THREE.BoxGeometry(.62,.62,.1), M('#ffe9a8',{e:'#ffdf8a',ei:.7}), -1.05,1.35,1.42));
+  g.add(mesh(new THREE.BoxGeometry(.62,.62,.1), M('#ffe9a8',{e:'#ffdf8a',ei:.7}), 1.05,1.35,1.42));
+  g.add(mesh(new THREE.BoxGeometry(3.55,.25,2.95), M('#9c9585'), 0,.12,0)); return g; }
+
+function buildTower(){ const g = new THREE.Group();
+  g.add(mesh(new THREE.CylinderGeometry(1.5,1.8,7.2,14), M('#9aa0ab', {r:.9}), 0,3.6,0));
+  g.add(mesh(new THREE.CylinderGeometry(1.85,1.85,.5,14), M('#7d838f'), 0,7.35,0));
+  for(let i=0;i<8;i++){ const a = i/8*Math.PI*2; g.add(mesh(new THREE.BoxGeometry(.5,.55,.5), M('#8b8f98'), Math.cos(a)*1.55,7.85,Math.sin(a)*1.55, true,false)); }
+  g.add(mesh(new THREE.CylinderGeometry(.09,.09,2.2,6), M('#5d4426'), 0,9,0));
+  const flag = mesh(new THREE.BoxGeometry(.95,.55,.05), M('#dc2626'), .55,9.75,0); g.add(flag);
+  g.add(mesh(new THREE.BoxGeometry(1.1,1.8,.3), M('#5d4426'), 0,.9,1.68)); return g; }
+
+function buildFountain(){ const g = new THREE.Group();
+  g.add(mesh(new THREE.CylinderGeometry(2.1,2.3,.55,20), M('#9aa0ab'), 0,.27,0));
+  g.add(mesh(new THREE.CylinderGeometry(1.8,1.8,.3,20), M('#38bdf8',{e:'#38bdf8',ei:.45,t:true,o:.85}), 0,.6,0, false,false));
+  g.add(mesh(new THREE.CylinderGeometry(.22,.3,1.5,10), M('#8b8f98'), 0,1.2,0));
+  g.add(mesh(new THREE.CylinderGeometry(.75,.9,.28,14), M('#9aa0ab'), 0,2,0));
+  g.add(mesh(new THREE.SphereGeometry(.24,10,8), M('#7dd3fc',{e:'#7dd3fc',ei:.6,t:true,o:.9}), 0,2.35,0, false,false)); return g; }
+
+function buildLamp(){ const g = new THREE.Group();
+  g.add(mesh(new THREE.CylinderGeometry(.08,.12,2.6,8), M('#2f3439'), 0,1.3,0));
+  g.add(mesh(new THREE.BoxGeometry(.42,.5,.42), M('#2f3439'), 0,2.75,0));
+  g.add(mesh(new THREE.SphereGeometry(.17,10,8), M('#ffd27a',{e:'#ffc247',ei:1.4}), 0,2.72,0, false,false)); return g; }
+
+function buildChest(open=0.9){ const g = new THREE.Group();
+  g.add(mesh(new THREE.BoxGeometry(1.1,.62,.75), M('#7c4a1e'), 0,.31,0));
+  const lid = mesh(new THREE.BoxGeometry(1.12,.3,.78), M('#8f5622'), 0,.62+.14,-.36); lid.geometry.translate(0,0,0); lid.rotation.x = -open; lid.position.set(0,.72,-.34+.3*Math.sin(open)); g.add(lid);
+  g.add(mesh(new THREE.BoxGeometry(1.14,.1,.1), M('#fbbf24',{m:.7,r:.35}), 0,.42,.39));
+  g.add(mesh(new THREE.CylinderGeometry(.16,.16,.1,10), M('#fbbf24',{m:.75,r:.3,e:'#fbbf24',ei:.25}), 0,.68,.05)); return g; }
+
+function buildNpc(robe, accent, elder=false){ const g = new THREE.Group();
+  g.add(mesh(new THREE.BoxGeometry(.52,.52,.52), M(elder? '#f3d8b8':'#fde68a'), 0,1.62,0));
+  g.add(mesh(new THREE.BoxGeometry(.09,.09,.03), M('#1a1a1a'), -.12,1.68,.27));
+  g.add(mesh(new THREE.BoxGeometry(.09,.09,.03), M('#1a1a1a'), .12,1.68,.27));
+  if(elder) g.add(mesh(new THREE.BoxGeometry(.3,.34,.08), M('#e5e7eb'), 0,1.38,.26));
+  g.add(mesh(new THREE.BoxGeometry(.74,1.05,.44), M(robe), 0,.78,0));
+  g.add(mesh(new THREE.BoxGeometry(.78,.12,.48), M(accent), 0,.32,0));
+  g.add(mesh(new THREE.BoxGeometry(.24,.72,.26), M(robe), -.4,.75,0));
+  g.add(mesh(new THREE.BoxGeometry(.24,.72,.26), M(robe), .4,.75,0));
+  g.add(mesh(new THREE.BoxGeometry(.26,.5,.26), M('#3f3a36'), -.16,.25,0));
+  g.add(mesh(new THREE.BoxGeometry(.26,.5,.26), M('#3f3a36'), .16,.25,0));
+  if(elder){ g.add(mesh(new THREE.CylinderGeometry(.05,.05,1.5,6), M('#6b4423'), .62,1.1,.1)); g.add(mesh(new THREE.BoxGeometry(.34,.5,.05), M('#8a6d3b'), .62,1.85,.1)); }
+  return g; }
+
+function buildSlime(){ const g = new THREE.Group();
+  const body = mesh(new THREE.SphereGeometry(.55,14,12), M('#4ade80',{r:.4,e:'#22c55e',ei:.18}), 0,.42,0); body.scale.y = .78; g.add(body);
+  g.add(mesh(new THREE.BoxGeometry(.1,.14,.05), M('#111'), -.17,.5,.46));
+  g.add(mesh(new THREE.BoxGeometry(.1,.14,.05), M('#111'), .17,.5,.46));
+  return g; }
+
+function buildCoin(){ const g = new THREE.Group();
+  const c = mesh(new THREE.CylinderGeometry(.3,.3,.07,18), M('#fbbf24',{m:.8,r:.25,e:'#f59e0b',ei:.35}), 0,.9,0); c.rotation.x = Math.PI/2; g.add(c);
+  const s = mesh(new THREE.TorusGeometry(.3,.035,8,18), M('#fde68a',{m:.85,r:.2}), 0,.9,0); g.add(s);
+  return g; }
+
+// ---------- spawn schedule ----------
+const SPAWNS = [
+  { t:1.35, k:'terrain', name:'Terrain — sculpt village ground', pos:[0,0,0], build:()=>ground },
+  { t:2.05, k:'path', name:'Cobble Path — stamp chunks', pos:[0,0,8], build:()=>path },
+  { t:2.75, k:'tree', name:'Oak Tree', pos:[-12,0,10], build:()=>buildTree(1.15) },
+  { t:3.15, k:'tree', name:'Oak Tree', pos:[13,0,9], build:()=>buildTree(.95) },
+  { t:3.55, k:'tree', name:'Oak Tree', pos:[-14,0,-5], build:()=>buildTree(1.25) },
+  { t:3.95, k:'tree', name:'Oak Tree', pos:[10.5,0,13], build:()=>buildTree(1.05) },
+  { t:4.35, k:'tree', name:'Oak Tree', pos:[-6.5,0,14], build:()=>buildTree(.9) },
+  { t:4.85, k:'house', name:'Cottage', pos:[-8,0,6.5], build:buildHouse },
+  { t:5.25, k:'house', name:'Cottage', pos:[8,0,4.5], build:buildHouse },
+  { t:5.65, k:'house', name:'Cottage', pos:[-7.5,0,-2.5], build:buildHouse },
+  { t:6.15, k:'tower', name:'Castle Tower', pos:[11.5,0,-6.5], build:buildTower },
+  { t:6.75, k:'fountain', name:'Fountain', pos:[0,0,1.5], build:buildFountain },
+  { t:7.25, k:'lamp', name:'Lamp Post', pos:[-3.2,0,9.5], build:buildLamp },
+  { t:7.6, k:'lamp', name:'Lamp Post', pos:[3.4,0,6.5], build:buildLamp },
+  { t:8.0, k:'chest', name:'Treasure Chest', pos:[-4.2,0,3.2], build:buildChest },
+  { t:8.35, k:'chest', name:'Treasure Chest', pos:[4.6,0,-.5], build:buildChest },
+  { t:8.8, k:'npc', name:'NPC — Elder Rowan', pos:[2.3,0,-1.2], build:()=>buildNpc('#7c5cbf','#fbbf24', true) },
+  { t:9.2, k:'npc', name:'NPC — Villager', pos:[-2.6,0,-3.4], build:()=>buildNpc('#4f7e4f','#c9b489', false) },
+  { t:9.6, k:'slime', name:'Slime (enemy)', pos:[6.2,0,-4.5], build:buildSlime },
+  { t:9.95, k:'slime', name:'Slime (enemy)', pos:[-7.2,0,-6.8], build:buildSlime },
+];
+const COIN_POS = [[-1.2,12.5],[1.1,10.2],[-.9,7.8],[1.3,5.6],[-1.4,2.6],[1.5,-.8],[-1.1,-2.2],[2.4,-3.6]];
+COIN_POS.forEach((p,i)=>{ const s = { t:10.35+i*.22, k:'coin', name:'Gold Coin', pos:[p[0],0,p[1]], build:buildCoin, coin:true }; SPAWNS.push(s); });
+
+const spawned = [];
+for(const s of SPAWNS){ const obj = s.build(); obj.position.set(s.pos[0], s.pos[1], s.pos[2]); if(s.k==='npc') obj.rotation.y = 2.6; if(s.k==='chest') obj.rotation.y = -.5; if(s.k==='house') obj.rotation.y = (s.pos[0]<0? .55 : -.6); obj.scale.setScalar(0.0001); obj.visible = false; world.add(obj); spawned.push({ ...s, obj }); }
+const rings = spawned.map(s => { const r = mesh(new THREE.TorusGeometry(1,.06,8,32), M('#22d3ee',{e:'#22d3ee',ei:1,t:true,o:0}), s.pos[0],.06,s.pos[2], false,false); r.rotation.x = -Math.PI/2; world.add(r); return r; });
+
+// lamp glow lights
+const lampLights = [];
+spawned.filter(s=>s.k==='lamp').forEach(s=>{ const L = new THREE.PointLight('#ffbf66', 0, 8); L.position.set(s.pos[0], 2.6, s.pos[2]); world.add(L); lampLights.push(L); });
+
+// ---------- DOM refs ----------
+const $ = id => document.getElementById(id);
+const chrome = $('chrome'), hud = $('hud'), fade = $('fade'), titleCard = $('title');
+const status = $('status'), playLabel = $('playlabel'), dialog = $('dialog');
+const coinCount = $('coin-count'), coinsBox = $('coins'), plusone = $('plusone'), hpfill = $('hpfill');
+const inspName = $('insp-name'), inspPos = $('insp-pos');
+const palItems = {}; document.querySelectorAll('.pal-item').forEach(el => palItems[el.dataset.k] = el);
+
+// ---------- timeline constants ----------
+const T_BUILD_END = 12.2, T_PLAY_IN = 13.8, T_WALK_END = 21.6, T_OUT = 26.0;
+const FP_START = [0, 1.72, 17.6];
+
+// precompute coin collect times from the deterministic camera path
+function walkPos(t){ const p = clamp01((t - T_PLAY_IN) / (T_WALK_END - T_PLAY_IN)); const z = lerp(FP_START[2], 3.0, smooth(p)); const x = Math.sin(p*Math.PI*2.2)*.55*(1-p*.4); const y = FP_START[1] + Math.sin(t*7.2)*.045*Math.min(1,p*3); return [x, y, z]; }
+function camAt(t){
+  if(t < T_BUILD_END){ const p = clamp01(t/T_BUILD_END); const a = .55 + p*1.5; const r = lerp(31, 22.5, smooth(p)); const h = lerp(17, 11.5, smooth(p)); return { pos:[Math.sin(a)*r, h, Math.cos(a)*r], look:[0,1.2,0] }; }
+  if(t < T_PLAY_IN){ const p = smooth((t-T_BUILD_END)/(T_PLAY_IN-T_BUILD_END));
+    const a0 = .55 + 1.5, r = 22.5, h = 11.5;
+    const from = [Math.sin(a0)*r, h, Math.cos(a0)*r];
+    return { pos:[lerp(from[0],FP_START[0],p), lerp(from[1],FP_START[1],p), lerp(from[2],FP_START[2],p)], look:[lerp(0,0,p), lerp(1.2,1.55,p), lerp(0,9,p)] }; }
+  const [x,y,z] = walkPos(t);
+  let lx = x*.4, ly = 1.5, lz = z - 7;
+  if(z < 3.4){ const b = smooth((3.4-z)/2.2); lx = lerp(lx, 2.3, b*.5); ly = lerp(ly, 1.5, b); lz = lerp(lz, -1.2, b*.45); }
+  return { pos:[x,y,z], look:[lx,ly,lz] };
+}
+let coinCollectT = [];
+{ for(let i=0;i<COIN_POS.length;i++){ let tt = -1; for(let t=T_PLAY_IN; t<T_WALK_END+2; t+=1/60){ const c = camAt(t); const dx = c.pos[0]-COIN_POS[i][0], dz = c.pos[2]-COIN_POS[i][1]; if(dx*dx+dz*dz < 1.7*1.7){ tt = t; break; } } coinCollectT.push(tt); } }
+
+// ---------- master render function (pure in t) ----------
+window.renderAt = function(t){
+  t = ((t % T_OUT) + T_OUT) % T_OUT;
+  const inPlay = t >= T_PLAY_IN - .35;
+  const inBuild = t < T_BUILD_END;
+  chrome.classList.toggle('hidden', t >= T_BUILD_END + .6);
+  hud.classList.toggle('on', inPlay && t < T_WALK_END);
+  playLabel.textContent = t >= T_BUILD_END ? 'Playing' : 'Play';
+
+  // spawn pops
+  for(let i=0;i<spawned.length;i++){ const s = spawned[i];
+    if(t < s.t){ s.obj.visible = false; rings[i].material.opacity = 0; continue; }
+    s.obj.visible = true;
+    const p = clamp01((t - s.t)/.55);
+    s.obj.scale.setScalar(Math.max(.0001, easeOutBack(p)));
+    const rp = clamp01((t - s.t)/.8);
+    rings[i].material.opacity = rp>=1? 0 : (1-rp)*.9;
+    rings[i].scale.setScalar(.2 + rp*3.2);
+  }
+
+  // palette highlight + status text + inspector
+  let hot = null, name = 'Terrain tool — drag to sculpt';
+  for(const s of spawned){ if(t >= s.t - .12 && t <= s.t + .9){ hot = s.k; name = (s.coin? 'Placing: Gold Coin' : 'Placing: ' + s.name); inspName.textContent = s.coin? 'Gold Coin' : s.name.split('—')[0].trim(); inspPos.textContent = s.pos.join(', '); } }
+  if(t > 11.2 && inBuild){ name = 'Scene ready — press Play to test'; }
+  Object.values(palItems).forEach(el => el.classList.remove('hot'));
+  if(hot && palItems[hot] && t < T_BUILD_END) palItems[hot].classList.add('hot');
+  status.textContent = inBuild? name : '▶ Running rpg_village.scene — quest: Lost Coins';
+
+  // coins state (pure from t)
+  let got = 0; let lastGet = -10;
+  for(let i=0;i<spawned.length;i++){ const s = spawned[i]; if(!s.coin) continue; const ct = coinCollectT[i - (spawned.length - COIN_POS.length)];
+    if(ct > 0 && t > ct){ got++; if(t - ct < .5){ lastGet = t - ct; const k = t - ct; s.obj.position.y = .9 + k*1.6; s.obj.scale.setScalar(Math.max(.0001, 1-k*1.6)); s.obj.rotation.y += .3; } else s.obj.visible = false; }
+    else if(s.obj.visible){ s.obj.rotation.y = t*2.4 + s.pos[0]; s.obj.position.y = .9 + Math.sin(t*2 + s.pos[2])*0.08; }
+  }
+  coinCount.textContent = `${got} / 8`;
+  const bump = (t - lastGet < .3 && lastGet >= 0)? 1 + .45*(1-(t-lastGet)/.3) : 1;
+  coinsBox.style.transform = `scale(${bump.toFixed(3)})`;
+  plusone.style.opacity = (t - lastGet < .6 && lastGet >= 0)? String((1-(t-lastGet)/.6)) : '0';
+  hpfill.style.width = (inPlay && t > T_WALK_END - 2 ? '85%' : '100%');
+
+  // dialogue
+  const dz = camAt(t).pos[2];
+  dialog.classList.toggle('on', t > 17.6 && t < 21.2);
+
+  // slimes hop
+  for(const s of spawned){ if(s.k==='slime' && s.obj.visible){ s.obj.position.y = Math.abs(Math.sin(t*3.1 + s.pos[0]))*.42; } }
+  // elder greets (slight sway)
+  for(const s of spawned){ if(s.k==='npc' && s.obj.visible){ s.obj.rotation.y = 2.6 + Math.sin(t*.8 + s.pos[0])*.12; } }
+  // lamp glow during play
+  const lampI = inPlay? 1.4 : 0;
+  lampLights.forEach(L => L.intensity = lampI);
+
+  // camera
+  const c = camAt(t);
+  camera.position.set(...c.pos);
+  camera.lookAt(c.look[0], c.look[1], c.look[2]);
+
+  // fades
+  let f = 0;
+  if(t < 1.1) f = 1 - smooth(t/1.1);
+  else if(t > T_WALK_END && t < T_WALK_END + .55) f = smooth((t-T_WALK_END)/.55);
+  else if(t >= T_WALK_END + .55 && t < 24.2) f = 1;
+  else if(t >= 24.2 && t < T_OUT) f = 1 - smooth((t-24.2)/1.4);
+  fade.style.background = t > T_WALK_END ? '#0a0b0e' : '#000';
+  fade.style.opacity = f.toFixed(3);
+
+  // title card
+  const tp = t >= T_WALK_END + .5 ? smooth((t - T_WALK_END - .5)/1.2) * (t > T_OUT - 1.6 ? clamp01((T_OUT - t)/1.6) : 1) : 0;
+  titleCard.style.opacity = tp.toFixed(3);
+
+  renderer.render(scene, camera);
+  window.__ready = true;
+};
+window.DURATION = T_OUT;
+window.renderAt(0);
+</script>
+</body>
+</html>

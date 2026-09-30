@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="aioeGrad" x1="6" y1="4" x2="58" y2="60" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#22d3ee"/>
+      <stop offset="48%" stop-color="#3b82f6"/>
+      <stop offset="100%" stop-color="#a855f7"/>
+    </linearGradient>
+    <linearGradient id="aioeSheen" x1="12" y1="8" x2="52" y2="56" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.35"/>
+      <stop offset="45%" stop-color="#ffffff" stop-opacity="0.05"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0.12"/>
+    </linearGradient>
+    <mask id="aioeHole">
+      <rect x="0" y="0" width="64" height="64" fill="#ffffff"/>
+      <rect x="25.4" y="25.4" width="13.2" height="13.2" rx="3" fill="#000000"/>
+    </mask>
+  </defs>
+  <!-- Roblox-style tilted rounded square with a square hole -->
+  <g transform="rotate(-14 32 32)">
+    <rect x="11" y="11" width="42" height="42" rx="10" fill="url(#aioeGrad)" mask="url(#aioeHole)"/>
+    <rect x="11" y="11" width="42" height="42" rx="10" fill="url(#aioeSheen)" mask="url(#aioeHole)"/>
+    <rect x="11.75" y="11.75" width="40.5" height="40.5" rx="9.25" fill="none" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1.5"/>
+  </g>
+</svg>
