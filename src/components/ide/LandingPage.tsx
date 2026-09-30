@@ -2,27 +2,31 @@
 
 import { useState, useEffect, useRef } from "react";
 import {
-  ArrowRight, Download, Github, Sparkles, Code2, Gamepad2, Users,
-  Zap, Palette, Play, ChevronDown, Star, Boxes, Terminal,
-  Layers, MousePointerClick, Wand2, Rocket, Check, Image as ImageIcon,
+  ArrowRight, ArrowUpRight, Download, Github, Sparkles, Code2, Gamepad2, Users,
+  Zap, Palette, Play, ChevronDown, Star, Boxes,
+  Layers, MousePointerClick, Wand2, Rocket, Check, Package,
   Box, Monitor, Apple, Chrome, BookOpen, Upload, Music, Send,
-  Cpu, Globe, TrendingUp, Heart,
+  Cpu, Globe, TrendingUp,
 } from "lucide-react";
 import { useStudio, EngineKind } from "../../lib/studio-store";
 import { toast } from "sonner";
 
+const GITHUB_URL = "https://github.com/gefrus112/all-in-onen-engine";
+const LIVE_URL = "https://gefrus112.github.io/all-in-onen-engine/";
+
 const ENGINES: {
   id: EngineKind; name: string; tagline: string; description: string;
-  iconSrc: string; gradient: string; tags: string[];
+  iconSrc: string; gradient: string; glow: string; tags: string[];
   version: string; lastUpdate: string; updates: string[];
 }[] = [
   {
     id: "pygame2d",
-    name: "Pygame 2D Engine",
+    name: "Pygame 2D",
     tagline: "Python in your browser",
-    description: "Write Python, see it run live in the browser via Pyodide at 60 FPS. Sprite-based 2D games with full physics, ECS, AI, multiplayer.",
+    description: "Write Python, see it run live in the browser via Pyodide at 60 FPS. Sprite-based 2D games with full physics, ECS, AI and multiplayer.",
     iconSrc: "/engine-pygame.svg",
     gradient: "linear-gradient(135deg, #3b82f6, #1e40af)",
+    glow: "59,130,246",
     tags: ["Python", "Pyodide", "2D", "Sprite-based"],
     version: "v1.0.0",
     lastUpdate: "2026-09-27",
@@ -36,11 +40,12 @@ const ENGINES: {
   },
   {
     id: "threejs3d",
-    name: "Three.js 3D Engine",
+    name: "Three.js 3D",
     tagline: "Real 3D in the browser",
-    description: "Build 3D games with a live Three.js viewport. Place meshes, lights, cameras. Full Roblox Studio-style editor with explorer, properties, timeline.",
+    description: "Build 3D games with a live Three.js viewport. Place meshes, lights, cameras. Full Roblox Studio-style editor with explorer, properties and timeline.",
     iconSrc: "/engine-threejs.svg",
     gradient: "linear-gradient(135deg, #8b5cf6, #4c1d95)",
+    glow: "139,92,246",
     tags: ["Three.js", "WebGL", "3D", "Real-time"],
     version: "v1.0.0",
     lastUpdate: "2026-09-27",
@@ -54,11 +59,12 @@ const ENGINES: {
   },
   {
     id: "zhitlow3d",
-    name: "Zhitlow 3D Engine",
+    name: "Zhitlow 3D",
     tagline: "Experimental high-perf 3D",
-    description: "Our experimental custom 3D engine with deferred rendering, PBR materials, and built-in networking. Optimized for large open-world games.",
+    description: "Our experimental custom 3D engine with deferred rendering, PBR materials and built-in networking. Optimized for large open-world games.",
     iconSrc: "/engine-zhitlow.svg",
     gradient: "linear-gradient(135deg, #06b6d4, #0e7490)",
+    glow: "6,182,212",
     tags: ["Experimental", "PBR", "Deferred", "Open-world"],
     version: "v0.9.0 (beta)",
     lastUpdate: "2026-09-27",
@@ -76,56 +82,65 @@ const FEATURES = [
   {
     icon: Code2,
     title: "Monaco Code Editor",
-    description: "Full Python + JavaScript syntax highlighting, multi-tab editing, autosave, Ctrl+S/F5 hotkeys. Same editor that powers VS Code.",
+    description: "Full Python + JavaScript syntax highlighting, multi-tab editing, autosave, Ctrl+S / F5 hotkeys. The same editor that powers VS Code.",
     tags: ["Python", "JavaScript", "Multi-tab", "Autosave"],
+    span: "big",
   },
   {
     icon: Box,
     title: "3D Studio with Three.js",
     description: "Real interactive 3D viewport. Place cubes, spheres, lights, cameras. Orbit, pan, zoom. Full scene hierarchy with drag-and-drop.",
-    tags: ["Three.js", "WebGL", "Real-time 3D", "Orbit camera"],
+    tags: ["Three.js", "WebGL", "Orbit camera"],
+    span: "tall",
   },
   {
     icon: Users,
     title: "Multiplayer via Socket.io",
-    description: "Built-in relay server (Bun + socket.io). Multiplayer Arena template included — 2-4 players, real-time position sync.",
-    tags: ["Socket.io", "Real-time", "Up to 4 players", "Bun"],
+    description: "Built-in relay server. Arena template included — 2-4 players, real-time position sync.",
+    tags: ["Socket.io", "Up to 4 players"],
+    span: "normal",
   },
   {
     icon: Boxes,
-    title: "134+ Sprite Asset Library",
-    description: "Players, enemies, tiles, structures, nature, props, food, weapons, vehicles — all pixel-art, all free, all MIT-licensed.",
-    tags: ["Pixel art", "15 categories", "Drag to copy", "MIT"],
+    title: "134+ Sprite Library",
+    description: "Players, enemies, tiles, weapons, vehicles — all pixel art, all free, all MIT-licensed.",
+    tags: ["Pixel art", "15 categories"],
+    span: "normal",
   },
   {
     icon: Upload,
     title: "Upload Your Own Assets",
-    description: "Drag-and-drop 3D models (.glb, .gltf), audio (.wav, .mp3), images (.png, .jpg). Auto-imported into your project's asset library.",
-    tags: [".glb", ".gltf", ".wav", ".mp3", ".png"],
+    description: "Drag-and-drop 3D models, audio and images. Auto-imported into your project.",
+    tags: [".glb", ".wav", ".png"],
+    span: "normal",
   },
   {
     icon: Music,
     title: "Built-in Audio Editor",
-    description: "Visual waveform editor with multi-track support. Trim, fade, loop, mix. Export to your game's audio mixer.",
-    tags: ["Waveform", "Multi-track", "Trim", "Fade"],
+    description: "Visual waveform editor with multi-track support. Trim, fade, loop, mix.",
+    tags: ["Waveform", "Multi-track"],
+    span: "normal",
   },
   {
     icon: Palette,
     title: "Custom Play-Test Avatar",
-    description: "Pick from 6 preset avatars (knight, mage, archer, rogue, wizard, robot) or build your own with body type, color, accessories.",
-    tags: ["6 presets", "Customizer", "Body type", "Color"],
+    description: "6 presets or build your own with body type, color and accessories.",
+    tags: ["6 presets", "Customizer"],
+    span: "normal",
   },
   {
     icon: Send,
     title: "Publish Everywhere",
-    description: "One-click publish to itch.io, Crazy Games, GitHub Pages, or HTML5 web export. Step-by-step instructions included.",
-    tags: ["itch.io", "Crazy Games", "GitHub Pages", "HTML5"],
+    description: "One-click publish to itch.io, Crazy Games, GitHub Pages, or HTML5 web export.",
+    tags: ["itch.io", "Crazy Games", "GitHub Pages"],
+    span: "normal",
   },
   {
     icon: Layers,
     title: "666+ Properties Panel",
-    description: "Massive Roblox Studio-style inspector with 666+ properties per entity. Collapsible groups, searchable, type-aware editors.",
-    tags: ["666+ props", "Collapsible", "Searchable", "Type-aware"],
+    description: "Massive Roblox Studio-style inspector. Collapsible groups, searchable, type-aware editors.",
+    tags: ["666+ props", "Searchable", "Type-aware"],
+    span: "wide",
   },
 ];
 
@@ -140,7 +155,6 @@ const DOWNLOAD_TARGETS = [
   {
     id: "linux", name: "Linux", icon: Monitor, color: "#fbbf24",
     description: "Universal .AppImage + .deb + .tar.gz",
-    filename: "all-in-one-engine-linux.AppImage",
     instructions: `# Build All In One Engine for Linux
 # Run on a Linux machine (Ubuntu 20.04+ recommended)
 
@@ -149,8 +163,8 @@ sudo apt update
 sudo apt install -y python3 python3-pip nodejs npm
 
 # 2. Clone the repo
-git clone https://github.com/gefrus112/lapia-ai-agent.git
-cd lapia-ai-agent
+git clone ${GITHUB_URL}.git
+cd all-in-onen-engine
 
 # 3. Build the AppImage
 chmod +x build_linux.sh
@@ -162,7 +176,6 @@ chmod +x build_linux.sh
   {
     id: "mac", name: "macOS", icon: Apple, color: "#94a3b8",
     description: "Universal .dmg for Intel + Apple Silicon",
-    filename: "all-in-one-engine-mac.dmg",
     instructions: `# Build All In One Engine for macOS
 # Run on a Mac (macOS 11+ recommended)
 
@@ -171,8 +184,8 @@ chmod +x build_linux.sh
 brew install python@3.12 node bun
 
 # 2. Clone the repo
-git clone https://github.com/gefrus112/lapia-ai-agent.git
-cd lapia-ai-agent
+git clone ${GITHUB_URL}.git
+cd all-in-onen-engine
 
 # 3. Build the .dmg
 chmod +x build_mac.sh
@@ -185,7 +198,6 @@ open dist/AllInOneEngine.dmg
   {
     id: "chromebook", name: "Chromebook", icon: Chrome, color: "#22c55e",
     description: "Linux container (.deb) for Chrome OS",
-    filename: "all-in-one-engine-chromebook.deb",
     instructions: `# Build All In One Engine for Chromebook
 # Run on a Chromebook with Linux (Crostini) enabled
 
@@ -197,8 +209,8 @@ sudo apt update
 sudo apt install -y python3 python3-pip nodejs npm git
 
 # 4. Clone the repo
-git clone https://github.com/gefrus112/lapia-ai-agent.git
-cd lapia-ai-agent
+git clone ${GITHUB_URL}.git
+cd all-in-onen-engine
 
 # 5. Build the .deb
 chmod +x build_chromebook.sh
@@ -220,7 +232,7 @@ const PUBLISH_TARGETS = [
       "Download the resulting .zip file",
       "Go to itch.io and click 'Upload new project'",
       "Set kind to 'HTML' and upload your .zip",
-      "Configure viewport dimensions and click 'Save & view'"
+      "Configure viewport dimensions and click 'Save & view'",
     ],
     url: "https://itch.io/upload",
   },
@@ -232,7 +244,7 @@ const PUBLISH_TARGETS = [
       "Go to developer.crazygames.com and sign up",
       "Click 'Submit a Game' and fill in details",
       "Upload your .zip and add screenshots",
-      "Wait for review (typically 2-5 business days)"
+      "Wait for review (typically 2-5 business days)",
     ],
     url: "https://developer.crazygames.com",
   },
@@ -244,9 +256,9 @@ const PUBLISH_TARGETS = [
       "Commit the build/ folder to a gh-pages branch in your repo",
       "Go to repo Settings > Pages",
       "Set source to 'gh-pages branch'",
-      "Your game is live at username.github.io/repo-name"
+      "Your game is live at username.github.io/repo-name",
     ],
-    url: "https://github.com/gefrus112/lapia-ai-agent/settings/pages",
+    url: `${GITHUB_URL}/settings/pages`,
   },
   {
     id: "html5", name: "HTML5 Standalone", icon: Globe, color: "#3b82f6",
@@ -256,58 +268,22 @@ const PUBLISH_TARGETS = [
       "A single index.html + game files are generated",
       "Test locally by opening index.html in a browser",
       "Upload the folder to any static host (Netlify, Vercel, S3, etc.)",
-      "Share the URL with players"
+      "Share the URL with players",
     ],
     url: "#",
   },
 ];
 
-const INSTRUCTIONS = [
-  {
-    title: "1. Launch the Studio",
-    icon: Rocket,
-    content: "Click 'Launch Studio' on the homepage. You'll be asked to pick an engine: Pygame 2D, Three.js 3D, or Zhitlow 3D. Pick the one that matches your game idea.",
-  },
-  {
-    title: "2. Pick a Template",
-    icon: Wand2,
-    content: "On the Templates panel (bottom-left), click one of the 4 starter templates: Platformer, Top-Down Shooter, Multiplayer Arena, or 3D Sandbox. The code is loaded into your editor.",
-  },
-  {
-    title: "3. Edit Your Game",
-    icon: Code2,
-    content: "Modify the Python or JavaScript code in the Monaco editor. Press Ctrl+S to save. Press F5 or click Play to compile and run your game in the live preview pane at 60 FPS.",
-  },
-  {
-    title: "4. Add Assets",
-    icon: Upload,
-    content: "Drag sprites from the Toolbox (left panel) — they auto-copy as Python code to your clipboard. Or click Upload in the asset panel to bring your own .glb / .wav / .png files.",
-  },
-  {
-    title: "5. Pick Your Avatar",
-    icon: Users,
-    content: "Click the avatar button in the toolbar. Pick from 6 presets or use the customizer to choose body type, color, and accessories. Your avatar appears in play-test mode.",
-  },
-  {
-    title: "6. Test with Multiplayer",
-    icon: Users,
-    content: "Run ./start-multiplayer.sh in a terminal to start the socket.io relay. Open the IDE in 2 browser tabs, load the Multiplayer Arena template in each, hit Play — both avatars will appear in real-time.",
-  },
-  {
-    title: "7. Publish Your Game",
-    icon: Send,
-    content: "When your game is ready, click the Publish button. Pick a platform: itch.io, Crazy Games, GitHub Pages, or standalone HTML5. Follow the step-by-step instructions in the dialog.",
-  },
-  {
-    title: "8. Build an .exe (Optional)",
-    icon: Package,
-    content: "Want a Windows .exe, Linux AppImage, or macOS .dmg? Run the build scripts in /build_exe.sh, /build_linux.sh, /build_mac.sh, or /build_chromebook.sh. Outputs go to dist/.",
-  },
+const STEPS = [
+  { title: "Launch the Studio", icon: Rocket, content: "Click 'Launch Studio' and pick an engine: Pygame 2D, Three.js 3D, or Zhitlow 3D." },
+  { title: "Pick a Template", icon: Wand2, content: "Load one of 4 starter templates — Platformer, Shooter, Arena or 3D Sandbox — with one click." },
+  { title: "Edit Your Game", icon: Code2, content: "Modify the code in Monaco. Ctrl+S to save, F5 to run at 60 FPS in the live preview." },
+  { title: "Add Assets", icon: Upload, content: "Drag sprites from the Toolbox, or upload your own .glb / .wav / .png files." },
+  { title: "Pick Your Avatar", icon: Palette, content: "Choose from 6 presets or customize body, color and accessories for play-test mode." },
+  { title: "Test Multiplayer", icon: Users, content: "Run ./start-multiplayer.sh, open 2 tabs, load the Arena template — both avatars sync live." },
+  { title: "Publish Your Game", icon: Send, content: "Hit Publish and choose itch.io, Crazy Games, GitHub Pages, or standalone HTML5." },
+  { title: "Build an .exe", icon: Package, content: "Optionally run the build scripts for Windows, Linux, macOS or Chromebook installers." },
 ];
-
-function Package({ className }: { className?: string }) {
-  return <Boxes className={className} />;
-}
 
 const SPRITE_LIST = [
   "/sprites/player/knight.png", "/sprites/player/mage.png", "/sprites/player/archer.png",
@@ -323,6 +299,15 @@ const SPRITE_LIST = [
   "/sprites/powerups/heart.png", "/sprites/powerups/shield.png",
 ];
 
+const NAV_SECTIONS = [
+  { id: "home", label: "Home" },
+  { id: "engines", label: "Engines" },
+  { id: "features", label: "Features" },
+  { id: "how", label: "How it works" },
+  { id: "download", label: "Download" },
+  { id: "publish", label: "Publish" },
+];
+
 export function LandingPage({
   onLaunchIDE,
   onLaunch3DStudio,
@@ -330,21 +315,48 @@ export function LandingPage({
   onLaunchIDE: () => void;
   onLaunch3DStudio: () => void;
 }) {
-  const [activeFeature, setActiveFeature] = useState(0);
   const [scrolled, setScrolled] = useState(false);
-  const [activeTab, setActiveTab] = useState<"home" | "features" | "download" | "instructions" | "publish">("home");
+  const [activeSection, setActiveSection] = useState("home");
   const [showEnginePicker, setShowEnginePicker] = useState(false);
+  const heroRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 50);
-    window.addEventListener("scroll", onScroll);
+    const onScroll = () => {
+      setScrolled(window.scrollY > 40);
+      const ids = NAV_SECTIONS.map((s) => s.id);
+      let current = "home";
+      for (const id of ids) {
+        const el = document.getElementById(id);
+        if (el && el.getBoundingClientRect().top <= 140) current = id;
+      }
+      setActiveSection(current);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  // Reveal-on-scroll
   useEffect(() => {
-    const i = setInterval(() => setActiveFeature((f) => (f + 1) % FEATURES.length), 4000);
-    return () => clearInterval(i);
+    const els = Array.from(document.querySelectorAll(".reveal"));
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) {
+            (e.target as HTMLElement).classList.add("is-visible");
+            io.unobserve(e.target);
+          }
+        });
+      },
+      { threshold: 0.12 }
+    );
+    els.forEach((el) => io.observe(el));
+    return () => io.disconnect();
   }, []);
+
+  const scrollTo = (id: string) => {
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
 
   const handleLaunchClick = () => setShowEnginePicker(true);
 
@@ -356,404 +368,548 @@ export function LandingPage({
     } else {
       onLaunch3DStudio();
     }
-    toast.success(`Launched ${ENGINES.find(e => e.id === engine)?.name}`, {
-      description: ENGINES.find(e => e.id === engine)?.tagline,
+    toast.success(`Launched ${ENGINES.find((e) => e.id === engine)?.name}`, {
+      description: ENGINES.find((e) => e.id === engine)?.tagline,
     });
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0b0e] text-white" style={{ overflowX: "hidden" }}>
+    <div className="min-h-screen text-white ae-page" style={{ overflowX: "hidden" }}>
       <style jsx global>{`
-        @keyframes pulse-slow {
-          0%, 100% { opacity: 0.4; transform: scale(1); }
-          50% { opacity: 0.7; transform: scale(1.1); }
+        html { scroll-behavior: smooth; }
+        .ae-page {
+          background: #06060a;
+          font-family: var(--font-geist-sans), sans-serif;
         }
-        @keyframes pulse-slow-delayed {
-          0%, 100% { opacity: 0.3; transform: scale(1); }
-          50% { opacity: 0.6; transform: scale(1.15); }
+        ::selection { background: rgba(217, 70, 239, 0.4); }
+
+        /* ---------- ambient background ---------- */
+        .ae-grid-overlay {
+          position: fixed; inset: 0; pointer-events: none; z-index: 0;
+          background-image:
+            linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+          background-size: 56px 56px;
+          mask-image: radial-gradient(ellipse 90% 60% at 50% 0%, black 30%, transparent 100%);
+          -webkit-mask-image: radial-gradient(ellipse 90% 60% at 50% 0%, black 30%, transparent 100%);
         }
-        @keyframes float-up {
-          0% { transform: translateY(20px); opacity: 0; }
-          100% { transform: translateY(0); opacity: 1; }
+        .ae-aurora {
+          position: fixed; inset: 0; pointer-events: none; z-index: 0;
+          overflow: hidden;
         }
-        @keyframes gradient-shift {
-          0%, 100% { background-position: 0% 50%; }
-          50% { background-position: 100% 50%; }
+        .ae-blob { position: absolute; border-radius: 9999px; filter: blur(110px); }
+        .ae-blob-1 { width: 640px; height: 640px; top: -220px; left: -140px;
+          background: radial-gradient(circle, rgba(139,92,246,0.22), transparent 65%);
+          animation: ae-drift 16s ease-in-out infinite; }
+        .ae-blob-2 { width: 560px; height: 560px; top: -160px; right: -120px;
+          background: radial-gradient(circle, rgba(249,115,22,0.16), transparent 65%);
+          animation: ae-drift 19s ease-in-out infinite reverse; }
+        .ae-blob-3 { width: 520px; height: 520px; top: 34%; left: 38%;
+          background: radial-gradient(circle, rgba(217,70,239,0.12), transparent 65%);
+          animation: ae-drift 23s ease-in-out infinite; }
+        @keyframes ae-drift {
+          0%, 100% { transform: translate(0, 0) scale(1); }
+          50% { transform: translate(50px, 36px) scale(1.08); }
         }
-        @keyframes shimmer {
-          0% { background-position: -200% 0; }
-          100% { background-position: 200% 0; }
+        .ae-scanlines {
+          position: fixed; inset: 0; pointer-events: none; z-index: 1; opacity: 0.35;
+          background: repeating-linear-gradient(0deg, rgba(255,255,255,0.018) 0 1px, transparent 1px 3px);
         }
-        @keyframes scroll-x {
+
+        /* ---------- glass + cards ---------- */
+        .ae-glass {
+          background: rgba(255,255,255,0.028);
+          backdrop-filter: blur(18px);
+          -webkit-backdrop-filter: blur(18px);
+          border: 1px solid rgba(255,255,255,0.08);
+        }
+        .ae-card {
+          position: relative;
+          background: linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.015));
+          border: 1px solid rgba(255,255,255,0.08);
+          border-radius: 20px;
+          transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.35s, box-shadow 0.35s;
+        }
+        .ae-card:hover {
+          transform: translateY(-4px);
+          border-color: rgba(217,70,239,0.45);
+          box-shadow: 0 24px 60px -24px rgba(139,92,246,0.45), 0 0 0 1px rgba(217,70,239,0.15) inset;
+        }
+        .ae-card-engine:hover { border-color: rgba(255,255,255,0.18); }
+        .ae-eyebrow {
+          display: inline-flex; align-items: center; gap: 8px;
+          font-family: var(--font-geist-mono), monospace;
+          font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase;
+          color: rgba(255,255,255,0.55);
+          border: 1px solid rgba(255,255,255,0.1);
+          border-radius: 9999px; padding: 6px 14px;
+          background: rgba(255,255,255,0.03);
+        }
+        .ae-gradient-text {
+          background: linear-gradient(92deg, #a78bfa 0%, #e879f9 45%, #fb923c 100%);
+          -webkit-background-clip: text; background-clip: text; color: transparent;
+        }
+        .ae-btn-primary {
+          position: relative;
+          background: linear-gradient(92deg, #8b5cf6, #d946ef, #f97316);
+          background-size: 180% 100%;
+          transition: background-position 0.5s, transform 0.25s, box-shadow 0.35s;
+          box-shadow: 0 10px 34px -8px rgba(217,70,239,0.55);
+        }
+        .ae-btn-primary:hover {
+          background-position: 100% 0;
+          transform: translateY(-2px) scale(1.02);
+          box-shadow: 0 16px 44px -8px rgba(217,70,239,0.7);
+        }
+        .ae-btn-ghost {
+          border: 1px solid rgba(255,255,255,0.12);
+          background: rgba(255,255,255,0.03);
+          transition: background 0.25s, border-color 0.25s, transform 0.25s;
+        }
+        .ae-btn-ghost:hover {
+          background: rgba(255,255,255,0.08);
+          border-color: rgba(255,255,255,0.25);
+          transform: translateY(-2px);
+        }
+
+        /* ---------- hero pixel sprites ---------- */
+        .ae-pixel { image-rendering: pixelated; }
+        .ae-float { animation: ae-float 6s ease-in-out infinite; }
+        @keyframes ae-float {
+          0%, 100% { transform: translateY(0) rotate(-3deg); }
+          50% { transform: translateY(-16px) rotate(3deg); }
+        }
+        .ae-float-2 { animation: ae-float-b 7.5s ease-in-out infinite; }
+        @keyframes ae-float-b {
+          0%, 100% { transform: translateY(0) rotate(4deg); }
+          50% { transform: translateY(-20px) rotate(-4deg); }
+        }
+
+        /* ---------- marquee ---------- */
+        .ae-marquee-track { animation: ae-marquee 36s linear infinite; }
+        .ae-marquee-track:hover { animation-play-state: paused; }
+        @keyframes ae-marquee {
           0% { transform: translateX(0); }
           100% { transform: translateX(-50%); }
         }
-        @keyframes rotate-slow {
-          0% { transform: rotateY(0deg); }
-          100% { transform: rotateY(360deg); }
+
+        /* ---------- reveal on scroll ---------- */
+        .reveal {
+          opacity: 0; transform: translateY(28px);
+          transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
         }
-        @keyframes bounce-in {
-          0% { transform: scale(0.3); opacity: 0; }
-          50% { transform: scale(1.05); }
-          100% { transform: scale(1); opacity: 1; }
+        .reveal.is-visible { opacity: 1; transform: translateY(0); }
+
+        /* ---------- bento ---------- */
+        .ae-bento { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+        @media (min-width: 1024px) {
+          .ae-bento { grid-template-columns: repeat(6, 1fr); }
+          .ae-bento .span-big { grid-column: span 4; grid-row: span 2; }
+          .ae-bento .span-tall { grid-column: span 2; grid-row: span 2; }
+          .ae-bento .span-wide { grid-column: span 6; }
+          .ae-bento .span-normal { grid-column: span 2; }
         }
-        @keyframes slide-up-fade {
-          0% { transform: translateY(40px); opacity: 0; }
-          100% { transform: translateY(0); opacity: 1; }
+        @media (max-width: 1023px) {
+          .ae-bento .span-big, .ae-bento .span-tall, .ae-bento .span-wide, .ae-bento .span-normal { grid-column: span 3; }
         }
-        @keyframes glow-pulse {
-          0%, 100% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.3); }
-          50% { box-shadow: 0 0 40px rgba(59, 130, 246, 0.6), 0 0 60px rgba(139, 92, 246, 0.3); }
-        }
-        .animate-pulse-slow { animation: pulse-slow 8s ease-in-out infinite; }
-        .animate-pulse-slow-delayed { animation: pulse-slow-delayed 10s ease-in-out infinite; }
-        .animate-float-up { animation: float-up 0.8s ease-out forwards; }
-        .animate-bounce-in { animation: bounce-in 0.6s ease-out forwards; }
-        .animate-slide-up-fade { animation: slide-up-fade 0.8s ease-out forwards; }
-        .animate-glow-pulse { animation: glow-pulse 3s ease-in-out infinite; }
-        .gradient-text {
-          background: linear-gradient(90deg, #06b6d4, #3b82f6, #8b5cf6, #06b6d4);
-          background-size: 300% 100%;
-          -webkit-background-clip: text;
-          background-clip: text;
+
+        /* ---------- steps connector ---------- */
+        .ae-step-num {
+          font-family: var(--font-geist-mono), monospace;
+          font-size: 44px; font-weight: 700; line-height: 1;
           color: transparent;
-          animation: gradient-shift 6s linear infinite;
+          -webkit-text-stroke: 1.5px rgba(217,70,239,0.55);
         }
-        .scroll-track {
-          animation: scroll-x 30s linear infinite;
+
+        /* ---------- nav ---------- */
+        .ae-nav-link {
+          position: relative; color: rgba(255,255,255,0.55);
+          transition: color 0.25s;
         }
-        .glass {
-          background: rgba(255,255,255,0.03);
-          backdrop-filter: blur(20px);
-          border: 1px solid rgba(255,255,255,0.08);
+        .ae-nav-link:hover { color: #fff; }
+        .ae-nav-link.active { color: #fff; }
+        .ae-nav-link.active::after {
+          content: ""; position: absolute; left: 0; right: 0; bottom: -6px; height: 2px;
+          border-radius: 2px;
+          background: linear-gradient(90deg, #8b5cf6, #d946ef, #f97316);
         }
-        .rotate-slow { animation: rotate-slow 20s linear infinite; transform-style: preserve-3d; }
+
+        /* ---------- glow ring for engine icons ---------- */
+        .ae-engine-glow { position: relative; }
+        .ae-engine-glow::before {
+          content: ""; position: absolute; inset: -14px; border-radius: 9999px;
+          background: radial-gradient(circle, rgba(var(--glow-rgb), 0.35), transparent 70%);
+          opacity: 0; transition: opacity 0.4s;
+        }
+        .ae-engine-card:hover .ae-engine-glow::before { opacity: 1; }
       `}</style>
 
-      {/* Animated background */}
-      <div className="fixed inset-0 pointer-events-none">
-        <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-blue-500/20 rounded-full blur-[120px] animate-pulse-slow" />
-        <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-purple-500/20 rounded-full blur-[100px] animate-pulse-slow-delayed" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-cyan-500/10 rounded-full blur-[80px] animate-pulse-slow" />
+      {/* Ambient background */}
+      <div className="ae-grid-overlay" />
+      <div className="ae-aurora">
+        <div className="ae-blob ae-blob-1" />
+        <div className="ae-blob ae-blob-2" />
+        <div className="ae-blob ae-blob-3" />
       </div>
+      <div className="ae-scanlines" />
 
-      {/* Navigation */}
-      <nav className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${scrolled ? "glass py-2" : "py-4"}`}>
+      {/* ============ NAV ============ */}
+      <nav className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${scrolled ? "ae-glass" : ""}`} style={{ padding: scrolled ? "10px 0" : "18px 0" }}>
         <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <img src="/logo.svg" alt="All In One Engine" className="w-9 h-9" />
-            <div>
-              <div className="font-bold text-base leading-tight">All In One <span className="text-muted-foreground font-normal">Engine</span></div>
-              <div className="text-[10px] text-muted-foreground leading-tight">2D · 3D · Multiplayer</div>
+          <button onClick={() => scrollTo("home")} className="flex items-center gap-2.5 group">
+            <img src="/logo.svg" alt="All In One Engine" className="w-9 h-9 group-hover:rotate-12 transition-transform duration-300" />
+            <div className="text-left">
+              <div className="font-bold text-[15px] leading-tight tracking-tight">
+                All In One <span className="ae-gradient-text">Engine</span>
+              </div>
+              <div className="text-[10px] text-white/40 leading-tight font-mono tracking-widest uppercase">2D · 3D · MULTIPLAYER</div>
             </div>
-          </div>
-          <div className="hidden md:flex items-center gap-8 text-sm text-muted-foreground">
-            <button onClick={() => setActiveTab("home")} className={`hover:text-white transition-colors ${activeTab === "home" ? "text-white" : ""}`}>Home</button>
-            <button onClick={() => setActiveTab("features")} className={`hover:text-white transition-colors ${activeTab === "features" ? "text-white" : ""}`}>Features</button>
-            <button onClick={() => setActiveTab("download")} className={`hover:text-white transition-colors ${activeTab === "download" ? "text-white" : ""}`}>Download</button>
-            <button onClick={() => setActiveTab("instructions")} className={`hover:text-white transition-colors ${activeTab === "instructions" ? "text-white" : ""}`}>Instructions</button>
-            <button onClick={() => setActiveTab("publish")} className={`hover:text-white transition-colors ${activeTab === "publish" ? "text-white" : ""}`}>Publish</button>
+          </button>
+          <div className="hidden lg:flex items-center gap-7 text-[13px] font-medium">
+            {NAV_SECTIONS.map((s) => (
+              <button key={s.id} onClick={() => scrollTo(s.id)} className={`ae-nav-link ${activeSection === s.id ? "active" : ""}`}>
+                {s.label}
+              </button>
+            ))}
           </div>
           <div className="flex items-center gap-2">
-            <a href="https://github.com/gefrus112/lapia-ai-agent" target="_blank" rel="noreferrer"
-               className="p-2 rounded-md hover:bg-white/10 transition-colors">
+            <a href={GITHUB_URL} target="_blank" rel="noreferrer" className="p-2 rounded-lg ae-btn-ghost" aria-label="GitHub">
               <Github className="w-4 h-4" />
             </a>
-            <button
-              onClick={handleLaunchClick}
-              className="px-4 py-2 rounded-md bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-600 hover:from-cyan-400 hover:to-purple-500 text-sm font-medium transition-all hover:scale-105 animate-glow-pulse"
-            >
+            <button onClick={handleLaunchClick} className="px-4 py-2 rounded-lg ae-btn-primary text-sm font-semibold">
               Launch Studio
             </button>
           </div>
         </div>
       </nav>
 
-      {/* HOME TAB */}
-      {activeTab === "home" && (
-        <>
-          {/* Hero */}
-          <section className="relative min-h-screen flex items-center justify-center px-6 pt-20">
-            <div className="max-w-6xl mx-auto text-center">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full glass text-xs text-muted-foreground mb-8 animate-float-up">
-                <Sparkles className="w-3 h-3 text-yellow-400" />
-                v3.0 — Now with 3D Studio + Avatar Customizer + Publishing
-                <ArrowRight className="w-3 h-3" />
+      {/* ============ HERO ============ */}
+      <section id="home" className="relative z-10 min-h-screen flex items-center justify-center px-6 pt-28 pb-16">
+        <div ref={heroRef} className="max-w-6xl mx-auto text-center relative">
+          {/* floating pixel sprites */}
+          <div className="hidden md:block absolute -left-24 top-10 ae-float opacity-90 pointer-events-none">
+            <img src="/sprites/player/knight.png" alt="" className="w-20 h-20 ae-pixel" style={{ imageRendering: "pixelated" }} />
+          </div>
+          <div className="hidden md:block absolute -right-20 top-24 ae-float-2 opacity-90 pointer-events-none">
+            <img src="/sprites/enemies/slime_purple.png" alt="" className="w-16 h-16 ae-pixel" style={{ imageRendering: "pixelated" }} />
+          </div>
+          <div className="hidden lg:block absolute left-10 bottom-24 ae-float-2 opacity-70 pointer-events-none">
+            <img src="/sprites/props/portal.png" alt="" className="w-14 h-14 ae-pixel" style={{ imageRendering: "pixelated" }} />
+          </div>
+          <div className="hidden lg:block absolute right-16 bottom-40 ae-float opacity-70 pointer-events-none">
+            <img src="/sprites/coins/coin_gold.png" alt="" className="w-12 h-12 ae-pixel" style={{ imageRendering: "pixelated" }} />
+          </div>
+
+          <div className="ae-eyebrow mb-8">
+            <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+            v3.0 — 3D Studio · Avatar Customizer · One-click Publishing
+            <ArrowUpRight className="w-3.5 h-3.5" />
+          </div>
+
+          <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-[86px] font-bold tracking-tight leading-[1.02] mb-6">
+            Build 2D &amp; 3D games
+            <br />
+            <span className="ae-gradient-text">all in one engine.</span>
+          </h1>
+
+          <p className="text-base md:text-lg text-white/55 max-w-2xl mx-auto mb-10 leading-relaxed">
+            A Roblox Studio-style IDE that lives in your browser. Write Python or JavaScript,
+            hit <kbd className="px-1.5 py-0.5 rounded bg-white/10 border border-white/15 text-[0.8em] font-mono">Play</kbd> and watch it run at 60 FPS.
+            Three engines, 134 sprites, multiplayer, publishing — zero installs.
+          </p>
+
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-14">
+            <button onClick={handleLaunchClick} className="group flex items-center gap-2 px-7 py-3.5 rounded-xl ae-btn-primary font-semibold text-[15px]">
+              <Play className="w-4 h-4 fill-current" />
+              Launch Studio
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            </button>
+            <button onClick={() => scrollTo("download")} className="flex items-center gap-2 px-7 py-3.5 rounded-xl ae-btn-ghost font-semibold text-[15px]">
+              <Download className="w-4 h-4" />
+              Download Desktop
+            </button>
+            <a href={LIVE_URL} target="_blank" rel="noreferrer" className="hidden sm:flex items-center gap-2 px-6 py-3.5 rounded-xl ae-btn-ghost font-semibold text-[15px] text-white/80">
+              <Globe className="w-4 h-4" />
+              Live Site
+            </a>
+          </div>
+
+          {/* stats strip */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 max-w-3xl mx-auto">
+            {[
+              { label: "Sprites included", value: "134", icon: <Boxes className="w-3.5 h-3.5" /> },
+              { label: "Engine systems", value: "50+", icon: <Layers className="w-3.5 h-3.5" /> },
+              { label: "Properties / entity", value: "666", icon: <Cpu className="w-3.5 h-3.5" /> },
+              { label: "FPS in browser", value: "60", icon: <Zap className="w-3.5 h-3.5" /> },
+            ].map((s) => (
+              <div key={s.label} className="ae-glass rounded-2xl px-4 py-4">
+                <div className="flex items-center justify-center gap-1.5 text-fuchsia-400 mb-1.5">{s.icon}</div>
+                <div className="text-3xl font-bold tracking-tight">{s.value}</div>
+                <div className="text-[10px] text-white/40 uppercase tracking-[0.18em] font-mono mt-0.5">{s.label}</div>
               </div>
+            ))}
+          </div>
+        </div>
 
-              <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight mb-6 animate-float-up" style={{ animationDelay: "0.1s" }}>
-                Build 2D & 3D games
-                <br />
-                <span className="gradient-text">all in one engine</span>
-              </h1>
+        <button onClick={() => scrollTo("engines")} className="absolute bottom-6 left-1/2 -translate-x-1/2 animate-bounce text-white/30 hover:text-white/70 transition-colors" aria-label="Scroll down">
+          <ChevronDown className="w-6 h-6" />
+        </button>
+      </section>
 
-              <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 animate-float-up" style={{ animationDelay: "0.2s" }}>
-                All In One Engine is the Roblox Studio-style IDE for Python and JavaScript game development.
-                Write code, see it run live in the browser at 60 FPS. 2D Pygame, 3D Three.js, and experimental Zhitlow 3D — pick your engine.
-              </p>
+      {/* ============ ENGINES ============ */}
+      <section id="engines" className="relative z-10 py-24 px-6 scroll-mt-20">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-14 reveal">
+            <div className="ae-eyebrow mb-5">
+              <Wand2 className="w-3.5 h-3.5 text-violet-400" />
+              Three engines, one IDE
+            </div>
+            <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-4">
+              Pick your engine <span className="ae-gradient-text">on launch</span>
+            </h2>
+            <p className="text-white/50 max-w-2xl mx-auto">
+              2D Pygame, 3D Three.js, or experimental Zhitlow 3D — every engine launches from the same studio, and you can switch anytime.
+            </p>
+          </div>
 
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16 animate-float-up" style={{ animationDelay: "0.3s" }}>
-                <button
-                  onClick={handleLaunchClick}
-                  className="group flex items-center gap-2 px-6 py-3 rounded-lg bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-600 hover:from-cyan-400 hover:to-purple-500 font-medium transition-all hover:scale-105 shadow-lg shadow-blue-500/30 animate-glow-pulse"
-                >
-                  <Play className="w-4 h-4 fill-current" />
-                  Launch Studio
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                </button>
-                <button
-                  onClick={() => setActiveTab("download")}
-                  className="flex items-center gap-2 px-6 py-3 rounded-lg glass hover:bg-white/10 font-medium transition-all"
-                >
-                  <Download className="w-4 h-4" />
-                  Download
-                </button>
-                <button
-                  onClick={() => setActiveTab("instructions")}
-                  className="flex items-center gap-2 px-6 py-3 rounded-lg glass hover:bg-white/10 font-medium transition-all"
-                >
-                  <BookOpen className="w-4 h-4" />
-                  Instructions
-                </button>
-              </div>
-
-              {/* Stats */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto animate-float-up" style={{ animationDelay: "0.4s" }}>
-                {[
-                  { label: "Sprites", value: "134", icon: <Boxes className="w-4 h-4" /> },
-                  { label: "Engine systems", value: "50+", icon: <Layers className="w-4 h-4" /> },
-                  { label: "Properties/entity", value: "666", icon: <Cpu className="w-4 h-4" /> },
-                  { label: "FPS in browser", value: "60", icon: <Zap className="w-4 h-4" /> },
-                ].map((s) => (
-                  <div key={s.label} className="glass rounded-xl p-4">
-                    <div className="flex items-center justify-center gap-2 text-cyan-400 mb-1">{s.icon}</div>
-                    <div className="text-3xl font-bold">{s.value}</div>
-                    <div className="text-xs text-muted-foreground uppercase tracking-wider">{s.label}</div>
+          <div className="grid md:grid-cols-3 gap-5">
+            {ENGINES.map((e, i) => (
+              <button
+                key={e.id}
+                onClick={() => handlePickEngine(e.id)}
+                className={`ae-card ae-card-engine text-left p-7 group reveal ${i === 1 ? "md:-translate-y-3" : ""}`}
+                style={{ transitionDelay: `${i * 90}ms` }}
+              >
+                <div className="flex items-center gap-4 mb-5">
+                  <div className="ae-engine-glow" style={{ "--glow-rgb": e.glow } as React.CSSProperties}>
+                    <img src={e.iconSrc} alt={e.name} className="w-14 h-14 relative z-10" />
                   </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
-              <ChevronDown className="w-5 h-5 text-muted-foreground" />
-            </div>
-          </section>
-
-          {/* Three engines highlight */}
-          <section className="py-20 px-6">
-            <div className="max-w-6xl mx-auto">
-              <div className="text-center mb-12">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full glass text-xs text-muted-foreground mb-4">
-                  <Wand2 className="w-3 h-3 text-purple-400" />
-                  Three engines, one IDE
+                  <div>
+                    <h3 className="text-xl font-bold leading-tight">{e.name}</h3>
+                    <p className="text-xs text-fuchsia-400 font-mono mt-0.5">{e.tagline}</p>
+                  </div>
                 </div>
-                <h2 className="text-3xl md:text-5xl font-bold mb-3">Pick your engine on launch</h2>
-                <p className="text-muted-foreground max-w-2xl mx-auto">
-                  When you click Launch Studio, you choose: 2D Pygame, 3D Three.js, or experimental Zhitlow 3D.
-                </p>
-              </div>
-              <div className="grid md:grid-cols-3 gap-6">
-                {ENGINES.map((e) => (
-                  <button
-                    key={e.id}
-                    onClick={() => handlePickEngine(e.id)}
-                    className="text-left glass rounded-2xl p-6 hover:border-cyan-500/50 transition-all group"
-                  >
-                    <div className="flex items-center gap-3 mb-4">
-                      <img src={e.iconSrc} alt={e.name} className="w-14 h-14" />
-                      <div>
-                        <h3 className="text-xl font-semibold leading-tight">{e.name}</h3>
-                        <p className="text-xs text-cyan-400">{e.tagline}</p>
-                      </div>
-                    </div>
-                    <p className="text-sm text-muted-foreground mb-3">{e.description}</p>
-                    <div className="flex items-center gap-2 mb-4 text-[10px] text-muted-foreground">
-                      <span className="px-1.5 py-0.5 rounded bg-white/5">{e.version}</span>
-                      <span>·</span>
-                      <span>Updated {e.lastUpdate}</span>
-                    </div>
-                    <div className="flex flex-wrap gap-1 mb-3">
-                      {e.tags.map((t) => (
-                        <span key={t} className="text-[10px] px-2 py-0.5 rounded-full bg-white/5 text-muted-foreground">{t}</span>
-                      ))}
-                    </div>
-                    <div className="mt-4 flex items-center gap-1 text-xs text-cyan-400 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <MousePointerClick className="w-3 h-3" />
-                      Click to launch
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </div>
-          </section>
-
-          {/* Sprite showcase marquee */}
-          <section className="py-20 relative">
-            <div className="max-w-7xl mx-auto px-6 mb-8 text-center">
-              <h2 className="text-3xl md:text-5xl font-bold mb-3">134 sprites, ready to drag in</h2>
-              <p className="text-muted-foreground">From knights to crystals to castles — all yours, all free, all MIT-licensed.</p>
-            </div>
-            <div className="relative overflow-hidden py-4">
-              <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-[#0a0b0e] to-transparent z-10" />
-              <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-[#0a0b0e] to-transparent z-10" />
-              <div className="flex gap-2 scroll-track" style={{ width: "max-content" }}>
-                {[...SPRITE_LIST, ...SPRITE_LIST].map((s, i) => (
-                  <div key={i} className="w-16 h-16 glass rounded-lg p-2 hover:scale-110 hover:border-cyan-500 transition-all cursor-pointer flex-shrink-0">
-                    <img src={s} alt="" className="w-full h-full object-contain" style={{ imageRendering: "pixelated" }} />
+                <p className="text-sm text-white/55 mb-5 leading-relaxed">{e.description}</p>
+                <div className="flex flex-wrap gap-1.5 mb-5">
+                  {e.tags.map((t) => (
+                    <span key={t} className="text-[10px] px-2.5 py-1 rounded-full bg-white/5 border border-white/8 text-white/55 font-medium">{t}</span>
+                  ))}
+                </div>
+                <div className="rounded-xl bg-black/40 border border-white/5 p-3.5 mb-4">
+                  <div className="flex items-center gap-1.5 mb-2">
+                    <Sparkles className="w-3 h-3 text-amber-400" />
+                    <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/40 font-mono">Latest updates</span>
+                    <span className="text-[9px] text-white/30 ml-auto font-mono">{e.version} · {e.lastUpdate}</span>
                   </div>
-                ))}
-              </div>
-            </div>
-          </section>
-        </>
-      )}
+                  <ul className="space-y-1.5">
+                    {e.updates.map((u, j) => (
+                      <li key={j} className="text-[11px] text-white/50 flex items-start gap-1.5">
+                        <Check className="w-3 h-3 text-fuchsia-400 flex-shrink-0 mt-0.5" />
+                        <span>{u}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div className="flex items-center gap-1.5 text-xs text-fuchsia-400 font-semibold">
+                  <MousePointerClick className="w-3.5 h-3.5" />
+                  Click to launch this engine
+                  <ArrowRight className="w-3.5 h-3.5 ml-auto group-hover:translate-x-1 transition-transform" />
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+      </section>
 
-      {/* FEATURES TAB */}
-      {activeTab === "features" && (
-        <section className="py-32 px-6 min-h-screen">
-          <div className="max-w-6xl mx-auto">
-            <div className="text-center mb-16">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full glass text-xs text-muted-foreground mb-4">
-                <Star className="w-3 h-3 text-yellow-400" />
-                Features
+      {/* ============ FEATURES (BENTO) ============ */}
+      <section id="features" className="relative z-10 py-24 px-6 scroll-mt-20">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-14 reveal">
+            <div className="ae-eyebrow mb-5">
+              <Star className="w-3.5 h-3.5 text-amber-400" />
+              Everything you need to ship
+            </div>
+            <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-4">
+              One studio. <span className="ae-gradient-text">Every tool.</span>
+            </h2>
+            <p className="text-white/50 max-w-2xl mx-auto">
+              Engine, editor, asset library, multiplayer, publishing and packaging — a complete 2D + 3D game dev platform.
+            </p>
+          </div>
+
+          <div className="ae-bento">
+            {FEATURES.map((f) => (
+              <div key={f.title} className={`ae-card p-6 reveal span-${f.span}`}>
+                <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-violet-500/30 to-fuchsia-500/20 border border-white/10 flex items-center justify-center mb-4">
+                  <f.icon className="w-5 h-5 text-fuchsia-300" />
+                </div>
+                <h3 className="text-lg font-bold mb-2">{f.title}</h3>
+                <p className="text-sm text-white/50 leading-relaxed mb-4">{f.description}</p>
+                <div className="flex flex-wrap gap-1.5 mt-auto">
+                  {f.tags.map((t) => (
+                    <span key={t} className="text-[10px] px-2 py-0.5 rounded-full bg-white/5 border border-white/8 text-white/45 font-mono">{t}</span>
+                  ))}
+                </div>
               </div>
-              <h2 className="text-3xl md:text-5xl font-bold mb-3">Everything you need to ship</h2>
-              <p className="text-muted-foreground max-w-2xl mx-auto">
-                A complete 2D + 3D game development platform — engine, editor, asset library, multiplayer, publishing, and packaging.
+            ))}
+          </div>
+
+          {/* Templates */}
+          <div className="mt-24 reveal">
+            <div className="text-center mb-10">
+              <div className="ae-eyebrow mb-5">
+                <Wand2 className="w-3.5 h-3.5 text-violet-400" />
+                Starter templates
+              </div>
+              <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-4">
+                Start in seconds, <span className="ae-gradient-text">ship in hours</span>
+              </h2>
+              <p className="text-white/50 max-w-2xl mx-auto">
+                Load a complete, working game with one click — then customize it into your own.
               </p>
             </div>
-
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {FEATURES.map((f, i) => (
-                <div
-                  key={f.title}
-                  onMouseEnter={() => setActiveFeature(i)}
-                  className={`glass rounded-2xl p-6 transition-all duration-300 cursor-pointer ${activeFeature === i ? "border-cyan-500/50 scale-[1.02]" : ""}`}
-                >
-                  <div className={`w-12 h-12 rounded-lg flex items-center justify-center mb-4 transition-all ${activeFeature === i ? "bg-gradient-to-br from-cyan-500 to-purple-600 scale-110" : "bg-white/5"}`}>
-                    <f.icon className="w-6 h-6 text-white" />
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {TEMPLATES.map((t, i) => (
+                <div key={t.name} className="ae-card p-5 group reveal" style={{ transitionDelay: `${i * 70}ms` }}>
+                  <div className="w-12 h-12 rounded-xl mb-4 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform" style={{ background: t.gradient }}>
+                    <t.icon className="w-6 h-6 text-white" />
                   </div>
-                  <h3 className="text-xl font-semibold mb-2">{f.title}</h3>
-                  <p className="text-sm text-muted-foreground mb-3">{f.description}</p>
-                  <div className="flex flex-wrap gap-1">
-                    {f.tags.map((t) => (
-                      <span key={t} className="text-[10px] px-2 py-0.5 rounded-full bg-white/5 text-muted-foreground">{t}</span>
-                    ))}
-                  </div>
+                  <h3 className="font-bold mb-1">{t.name}</h3>
+                  <p className="text-xs text-white/45 leading-relaxed">{t.description}</p>
                 </div>
               ))}
-            </div>
-
-            {/* Templates */}
-            <div className="mt-20">
-              <div className="text-center mb-12">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full glass text-xs text-muted-foreground mb-4">
-                  <Wand2 className="w-3 h-3 text-purple-400" />
-                  Starter Templates
-                </div>
-                <h2 className="text-3xl md:text-5xl font-bold mb-3">Start in seconds, ship in hours</h2>
-                <p className="text-muted-foreground max-w-2xl mx-auto">
-                  Load a complete template, hit Play, start customizing. Four templates included.
-                </p>
-              </div>
-              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {TEMPLATES.map((t) => (
-                  <div key={t.name} className="glass rounded-xl p-5 hover:border-cyan-500/50 transition-all group cursor-pointer">
-                    <div className="w-12 h-12 rounded-lg mb-4 flex items-center justify-center" style={{ background: t.gradient }}>
-                      <t.icon className="w-6 h-6 text-white" />
-                    </div>
-                    <h3 className="font-semibold mb-1">{t.name}</h3>
-                    <p className="text-xs text-muted-foreground mb-3">{t.description}</p>
-                  </div>
-                ))}
-              </div>
             </div>
           </div>
-        </section>
-      )}
+        </div>
+      </section>
 
-      {/* DOWNLOAD TAB */}
-      {activeTab === "download" && (
-        <section className="py-32 px-6 min-h-screen">
-          <div className="max-w-5xl mx-auto">
-            <div className="text-center mb-16">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full glass text-xs text-muted-foreground mb-4">
-                <Download className="w-3 h-3 text-green-400" />
-                Get All In One Engine
+      {/* ============ SPRITE MARQUEE ============ */}
+      <section className="relative z-10 py-16 overflow-hidden">
+        <div className="max-w-7xl mx-auto px-6 mb-10 text-center reveal">
+          <div className="ae-eyebrow mb-5">
+            <Boxes className="w-3.5 h-3.5 text-fuchsia-400" />
+            134 sprites included
+          </div>
+          <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-4">
+            Drag them straight <span className="ae-gradient-text">into your game</span>
+          </h2>
+          <p className="text-white/50">From knights to crystals to castles — all yours, all free, all MIT-licensed.</p>
+        </div>
+        <div className="relative reveal">
+          <div className="absolute left-0 top-0 bottom-0 w-40 bg-gradient-to-r from-[#06060a] to-transparent z-10" />
+          <div className="absolute right-0 top-0 bottom-0 w-40 bg-gradient-to-l from-[#06060a] to-transparent z-10" />
+          <div className="flex gap-3 ae-marquee-track" style={{ width: "max-content" }}>
+            {[...SPRITE_LIST, ...SPRITE_LIST].map((s, i) => (
+              <div key={i} className="w-16 h-16 ae-glass rounded-xl p-2.5 hover:scale-110 hover:border-fuchsia-500/60 hover:shadow-lg hover:shadow-fuchsia-500/20 transition-all cursor-pointer flex-shrink-0">
+                <img src={s} alt="" className="w-full h-full object-contain" style={{ imageRendering: "pixelated" }} />
               </div>
-              <h2 className="text-3xl md:text-5xl font-bold mb-3">Free. Open source. Cross-platform.</h2>
-              <p className="text-muted-foreground max-w-2xl mx-auto mb-10">
-                Download for Linux, macOS, or Chromebook. Or run in your browser right now — no install needed.
-              </p>
-            </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
-            {/* Run in browser */}
-            <div className="glass rounded-2xl p-6 mb-8 text-center">
-              <Rocket className="w-10 h-10 text-cyan-400 mb-3 mx-auto" />
-              <h3 className="text-xl font-semibold mb-2">Run in Browser (Recommended)</h3>
-              <p className="text-sm text-muted-foreground mb-4">Launch the IDE right now. No install needed. Works on any modern browser.</p>
-              <button
-                onClick={handleLaunchClick}
-                className="px-6 py-3 rounded-lg bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-600 hover:from-cyan-400 hover:to-purple-500 font-medium transition-all hover:scale-105"
-              >
-                Launch Web Studio
-              </button>
+      {/* ============ HOW IT WORKS ============ */}
+      <section id="how" className="relative z-10 py-24 px-6 scroll-mt-20">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-14 reveal">
+            <div className="ae-eyebrow mb-5">
+              <BookOpen className="w-3.5 h-3.5 text-cyan-400" />
+              How it works
             </div>
-
-            {/* Platform downloads */}
-            <div className="grid md:grid-cols-3 gap-4 mb-8">
-              {DOWNLOAD_TARGETS.map((target) => (
-                <div key={target.id} className="glass rounded-xl p-6">
-                  <target.icon className="w-10 h-10 mb-3" style={{ color: target.color }} />
-                  <h3 className="font-semibold mb-1">{target.name}</h3>
-                  <p className="text-xs text-muted-foreground mb-4">{target.description}</p>
-                  <button
-                    onClick={() => {
-                      const blob = new Blob([target.instructions], { type: "text/plain" });
-                      const url = URL.createObjectURL(blob);
-                      const a = document.createElement("a");
-                      a.href = url;
-                      a.download = `build-${target.id}.sh`;
-                      a.click();
-                      URL.revokeObjectURL(url);
-                      toast.success(`Downloaded build-${target.id}.sh`, {
-                        description: "Run this script on your target platform to build the installer.",
-                      });
-                    }}
-                    className="w-full px-3 py-2 rounded-md glass hover:bg-white/10 text-xs font-medium transition-all"
-                  >
-                    <Download className="w-3 h-3 inline mr-1" />
-                    Build Script
-                  </button>
+            <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-4">
+              From zero to published <span className="ae-gradient-text">in 8 steps</span>
+            </h2>
+            <p className="text-white/50 max-w-2xl mx-auto">
+              Follow the flow — most people ship their first playable game in under an hour.
+            </p>
+          </div>
+          <div className="grid md:grid-cols-2 gap-4">
+            {STEPS.map((step, i) => (
+              <div key={i} className="ae-card p-6 flex gap-5 items-start reveal" style={{ transitionDelay: `${(i % 2) * 80}ms` }}>
+                <div className="flex flex-col items-center gap-2 flex-shrink-0">
+                  <span className="ae-step-num">{String(i + 1).padStart(2, "0")}</span>
+                  <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-violet-500/30 to-fuchsia-500/20 border border-white/10 flex items-center justify-center">
+                    <step.icon className="w-4 h-4 text-fuchsia-300" />
+                  </div>
                 </div>
-              ))}
-            </div>
+                <div>
+                  <h3 className="font-bold mb-1.5">{step.title}</h3>
+                  <p className="text-sm text-white/50 leading-relaxed">{step.content}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
-            {/* GitHub */}
-            <div className="glass rounded-xl p-6 text-center">
-              <Github className="w-10 h-10 text-white mb-3 mx-auto" />
-              <h3 className="font-semibold mb-2">Clone from GitHub</h3>
-              <p className="text-xs text-muted-foreground mb-4">Get the full source code. MIT-licensed. Contribute back!</p>
-              <a
-                href="https://github.com/gefrus112/lapia-ai-agent"
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-md glass hover:bg-white/10 text-sm font-medium transition-all"
-              >
-                <Github className="w-4 h-4" />
-                View on GitHub
-              </a>
+      {/* ============ DOWNLOAD ============ */}
+      <section id="download" className="relative z-10 py-24 px-6 scroll-mt-20">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-14 reveal">
+            <div className="ae-eyebrow mb-5">
+              <Download className="w-3.5 h-3.5 text-green-400" />
+              Get All In One Engine
             </div>
+            <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-4">
+              Free. Open source. <span className="ae-gradient-text">Cross-platform.</span>
+            </h2>
+            <p className="text-white/50 max-w-2xl mx-auto">
+              Run it in your browser right now, or build a native installer for Linux, macOS or Chromebook.
+            </p>
+          </div>
 
-            {/* Quick start code */}
-            <div className="glass rounded-xl p-6 text-left mt-8">
-              <h3 className="font-semibold mb-3 flex items-center gap-2">
-                <Terminal className="w-4 h-4 text-green-400" />
-                Quick start (any platform)
-              </h3>
-              <pre className="text-xs font-mono bg-black/40 p-4 rounded-lg overflow-x-auto"><code>{`# 1. Clone the repo
-git clone https://github.com/gefrus112/lapia-ai-agent.git
-cd lapia-ai-agent
+          {/* Run in browser — hero CTA */}
+          <div className="ae-card p-10 text-center mb-6 reveal" style={{ background: "linear-gradient(135deg, rgba(139,92,246,0.14), rgba(217,70,239,0.08) 50%, rgba(249,115,22,0.1))" }}>
+            <Rocket className="w-11 h-11 text-fuchsia-400 mb-4 mx-auto" />
+            <h3 className="text-2xl font-bold mb-2">Run in Browser — Recommended</h3>
+            <p className="text-sm text-white/55 mb-6 max-w-md mx-auto">Launch the IDE right now. No install, no account. Works in any modern browser on any OS.</p>
+            <button onClick={handleLaunchClick} className="px-8 py-3.5 rounded-xl ae-btn-primary font-semibold inline-flex items-center gap-2">
+              <Play className="w-4 h-4 fill-current" />
+              Launch Web Studio
+            </button>
+          </div>
+
+          {/* Platform downloads */}
+          <div className="grid md:grid-cols-3 gap-4 mb-6">
+            {DOWNLOAD_TARGETS.map((target, i) => (
+              <div key={target.id} className="ae-card p-6 reveal" style={{ transitionDelay: `${i * 70}ms` }}>
+                <target.icon className="w-9 h-9 mb-4" style={{ color: target.color }} />
+                <h3 className="font-bold mb-1">{target.name}</h3>
+                <p className="text-xs text-white/45 mb-5">{target.description}</p>
+                <button
+                  onClick={() => {
+                    const blob = new Blob([target.instructions], { type: "text/plain" });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement("a");
+                    a.href = url;
+                    a.download = `build-${target.id}.sh`;
+                    a.click();
+                    URL.revokeObjectURL(url);
+                    toast.success(`Downloaded build-${target.id}.sh`, {
+                      description: "Run this script on your target platform to build the installer.",
+                    });
+                  }}
+                  className="w-full px-3 py-2.5 rounded-lg ae-btn-ghost text-xs font-semibold transition-all"
+                >
+                  <Download className="w-3.5 h-3.5 inline mr-1.5" />
+                  Download Build Script
+                </button>
+              </div>
+            ))}
+          </div>
+
+          {/* Quick start terminal */}
+          <div className="grid md:grid-cols-2 gap-4">
+            <div className="ae-card p-0 overflow-hidden reveal">
+              <div className="flex items-center gap-1.5 px-4 py-3 border-b border-white/8 bg-black/30">
+                <span className="w-2.5 h-2.5 rounded-full bg-red-500/70" />
+                <span className="w-2.5 h-2.5 rounded-full bg-yellow-500/70" />
+                <span className="w-2.5 h-2.5 rounded-full bg-green-500/70" />
+                <span className="text-[10px] font-mono text-white/35 ml-2">quick-start.sh</span>
+              </div>
+              <pre className="text-xs font-mono p-5 leading-relaxed overflow-x-auto text-white/70"><code>{`# 1. Clone the repo
+git clone ${GITHUB_URL}.git
+cd all-in-onen-engine
 
 # 2. Install dependencies
 bun install   # or: npm install
@@ -762,157 +918,128 @@ bun install   # or: npm install
 ./start-multiplayer.sh
 
 # 4. Launch the IDE
-bun run dev
-
-# 5. Open http://localhost:3000`}</code></pre>
+bun run dev   # → http://localhost:3000`}</code></pre>
+            </div>
+            <div className="ae-card p-8 flex flex-col items-center justify-center text-center reveal" style={{ transitionDelay: "80ms" }}>
+              <Github className="w-10 h-10 text-white/80 mb-4" />
+              <h3 className="font-bold mb-1.5">Clone from GitHub</h3>
+              <p className="text-xs text-white/45 mb-5 max-w-xs">Get the full source code. MIT-licensed. Contributions welcome!</p>
+              <a href={GITHUB_URL} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg ae-btn-ghost text-sm font-semibold">
+                <Github className="w-4 h-4" />
+                View on GitHub
+                <ArrowUpRight className="w-3.5 h-3.5" />
+              </a>
             </div>
           </div>
-        </section>
-      )}
+        </div>
+      </section>
 
-      {/* INSTRUCTIONS TAB */}
-      {activeTab === "instructions" && (
-        <section className="py-32 px-6 min-h-screen">
-          <div className="max-w-4xl mx-auto">
-            <div className="text-center mb-16">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full glass text-xs text-muted-foreground mb-4">
-                <BookOpen className="w-3 h-3 text-cyan-400" />
-                Instructions
-              </div>
-              <h2 className="text-3xl md:text-5xl font-bold mb-3">From zero to published in 8 steps</h2>
-              <p className="text-muted-foreground max-w-2xl mx-auto">
-                Follow these steps to build and publish your first game with All In One Engine.
-              </p>
+      {/* ============ PUBLISH ============ */}
+      <section id="publish" className="relative z-10 py-24 px-6 scroll-mt-20">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-14 reveal">
+            <div className="ae-eyebrow mb-5">
+              <Send className="w-3.5 h-3.5 text-pink-400" />
+              Publish your game
             </div>
+            <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-4">
+              Build once. <span className="ae-gradient-text">Publish everywhere.</span>
+            </h2>
+            <p className="text-white/50 max-w-2xl mx-auto">
+              Ship to itch.io, Crazy Games, GitHub Pages or standalone HTML5 — step-by-step instructions included for each.
+            </p>
+          </div>
 
-            <div className="space-y-4">
-              {INSTRUCTIONS.map((step, i) => (
-                <div
-                  key={i}
-                  className="glass rounded-xl p-6 flex gap-4 hover:border-cyan-500/30 transition-all"
-                >
-                  <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-cyan-500 to-purple-600 flex items-center justify-center flex-shrink-0">
-                    <step.icon className="w-5 h-5 text-white" />
+          <div className="grid md:grid-cols-2 gap-4 mb-6">
+            {PUBLISH_TARGETS.map((target, i) => (
+              <div key={target.id} className="ae-card p-6 reveal" style={{ transitionDelay: `${(i % 2) * 80}ms` }}>
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-11 h-11 rounded-xl flex items-center justify-center border border-white/10" style={{ background: `${target.color}22` }}>
+                    <target.icon className="w-5 h-5" style={{ color: target.color }} />
                   </div>
-                  <div className="flex-1">
-                    <h3 className="font-semibold mb-1">{step.title}</h3>
-                    <p className="text-sm text-muted-foreground">{step.content}</p>
+                  <div>
+                    <h3 className="font-bold">{target.name}</h3>
+                    <p className="text-xs text-white/45">{target.description}</p>
                   </div>
+                </div>
+                <ol className="space-y-2.5 mb-4">
+                  {target.steps.map((step, j) => (
+                    <li key={j} className="flex gap-2.5 text-xs">
+                      <span className="flex-shrink-0 w-5 h-5 rounded-full bg-gradient-to-br from-violet-500/40 to-fuchsia-500/30 border border-white/10 flex items-center justify-center text-[10px] font-bold font-mono">
+                        {j + 1}
+                      </span>
+                      <span className="text-white/50 pt-0.5">{step}</span>
+                    </li>
+                  ))}
+                </ol>
+                {target.url !== "#" && (
+                  <a href={target.url} target="_blank" rel="noreferrer" className="text-xs text-fuchsia-400 hover:text-fuchsia-300 inline-flex items-center gap-1 font-semibold">
+                    Open {target.name} <ArrowRight className="w-3 h-3" />
+                  </a>
+                )}
+              </div>
+            ))}
+          </div>
+
+          <div className="ae-card p-6 reveal">
+            <h3 className="font-bold mb-4 flex items-center gap-2">
+              <TrendingUp className="w-4 h-4 text-green-400" />
+              Tips for getting featured
+            </h3>
+            <div className="grid sm:grid-cols-2 gap-x-6 gap-y-2.5">
+              {[
+                "Add screenshots and a gameplay video to your store listing",
+                "Write a clear description and tag your game well",
+                "Test on multiple browsers before publishing",
+                "Add mobile touch controls for broader reach",
+                "Price it free for your first release to build an audience",
+                "Share on social media with #AllInOneEngine",
+              ].map((tip) => (
+                <div key={tip} className="flex gap-2 text-sm">
+                  <Check className="w-4 h-4 text-green-400 flex-shrink-0 mt-0.5" />
+                  <span className="text-white/50">{tip}</span>
                 </div>
               ))}
             </div>
           </div>
-        </section>
-      )}
+        </div>
+      </section>
 
-      {/* PUBLISH TAB */}
-      {activeTab === "publish" && (
-        <section className="py-32 px-6 min-h-screen">
-          <div className="max-w-5xl mx-auto">
-            <div className="text-center mb-16">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full glass text-xs text-muted-foreground mb-4">
-                <Send className="w-3 h-3 text-pink-400" />
-                Publish Your Game
-              </div>
-              <h2 className="text-3xl md:text-5xl font-bold mb-3">Publish everywhere</h2>
-              <p className="text-muted-foreground max-w-2xl mx-auto">
-                Build your game once, publish to itch.io, Crazy Games, GitHub Pages, or standalone HTML5.
-                Step-by-step instructions for each platform below.
-              </p>
-            </div>
-
-            <div className="grid md:grid-cols-2 gap-6">
-              {PUBLISH_TARGETS.map((target) => (
-                <div key={target.id} className="glass rounded-xl p-6">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ background: `${target.color}30` }}>
-                      <target.icon className="w-5 h-5" style={{ color: target.color }} />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold">{target.name}</h3>
-                      <p className="text-xs text-muted-foreground">{target.description}</p>
-                    </div>
-                  </div>
-                  <ol className="space-y-2 mb-4">
-                    {target.steps.map((step, i) => (
-                      <li key={i} className="flex gap-2 text-xs">
-                        <span className="flex-shrink-0 w-5 h-5 rounded-full bg-white/10 flex items-center justify-center text-[10px] font-medium">
-                          {i + 1}
-                        </span>
-                        <span className="text-muted-foreground pt-0.5">{step}</span>
-                      </li>
-                    ))}
-                  </ol>
-                  {target.url !== "#" && (
-                    <a
-                      href={target.url}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="text-xs text-cyan-400 hover:text-cyan-300 inline-flex items-center gap-1"
-                    >
-                      Open {target.name} <ArrowRight className="w-3 h-3" />
-                    </a>
-                  )}
-                </div>
-              ))}
-            </div>
-
-            <div className="glass rounded-xl p-6 mt-8">
-              <h3 className="font-semibold mb-3 flex items-center gap-2">
-                <TrendingUp className="w-4 h-4 text-green-400" />
-                Tips for getting featured
-              </h3>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li className="flex gap-2"><Check className="w-4 h-4 text-green-400 flex-shrink-0" /> Add screenshots and a gameplay video to your store listing</li>
-                <li className="flex gap-2"><Check className="w-4 h-4 text-green-400 flex-shrink-0" /> Write a clear description and tag your game well</li>
-                <li className="flex gap-2"><Check className="w-4 h-4 text-green-400 flex-shrink-0" /> Test on multiple browsers before publishing</li>
-                <li className="flex gap-2"><Check className="w-4 h-4 text-green-400 flex-shrink-0" /> Add mobile touch controls for broader reach</li>
-                <li className="flex gap-2"><Check className="w-4 h-4 text-green-400 flex-shrink-0" /> Share on social media with #AllInOneEngine</li>
-              </ul>
-            </div>
+      {/* ============ AI TEASER ============ */}
+      <section className="relative z-10 py-24 px-6">
+        <div className="max-w-3xl mx-auto text-center reveal">
+          <div className="ae-eyebrow mb-5">
+            <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+            Under development
           </div>
-        </section>
-      )}
-
-      {/* AI Assistant — coming soon */}
-      <section className="py-20 px-6">
-        <div className="max-w-3xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full glass text-xs text-muted-foreground mb-4">
-            <Sparkles className="w-3 h-3 text-yellow-400" />
-            Under Development
-          </div>
-          <h2 className="text-3xl md:text-5xl font-bold mb-3">AI Game Assistant</h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto mb-8">
-            An AI assistant that helps you write game code, debug scripts, generate levels,
-            and suggest improvements — right inside the studio. Coming soon.
+          <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-4">
+            Meet the <span className="ae-gradient-text">AI Game Assistant</span>
+          </h2>
+          <p className="text-white/50 max-w-xl mx-auto mb-10">
+            An AI that helps you write game code, debug scripts, generate levels and suggest improvements — right inside the studio.
           </p>
-          <div className="glass rounded-2xl p-8 max-w-md mx-auto">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-yellow-400 via-orange-500 to-pink-500 flex items-center justify-center mx-auto mb-4 animate-glow-pulse">
+          <div className="ae-card p-8 max-w-md mx-auto">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-400 via-fuchsia-500 to-violet-600 flex items-center justify-center mx-auto mb-5 ae-float">
               <Sparkles className="w-8 h-8 text-white" />
             </div>
-            <h3 className="font-semibold mb-1">AI Assistant</h3>
-            <p className="text-xs text-muted-foreground mb-4">Status: In Development</p>
-            <div className="space-y-2 text-left">
-              <div className="flex items-center gap-2 text-xs">
-                <Check className="w-3 h-3 text-green-400" />
-                <span className="text-muted-foreground">Code generation from natural language</span>
-              </div>
-              <div className="flex items-center gap-2 text-xs">
-                <Check className="w-3 h-3 text-green-400" />
-                <span className="text-muted-foreground">Debug script errors automatically</span>
-              </div>
-              <div className="flex items-center gap-2 text-xs">
-                <Check className="w-3 h-3 text-green-400" />
-                <span className="text-muted-foreground">Generate 3D scenes from descriptions</span>
-              </div>
-              <div className="flex items-center gap-2 text-xs">
-                <Check className="w-3 h-3 text-green-400" />
-                <span className="text-muted-foreground">Suggest gameplay improvements</span>
-              </div>
+            <h3 className="font-bold mb-1">AI Assistant</h3>
+            <p className="text-xs text-white/40 font-mono uppercase tracking-widest mb-5">Status: In Development</p>
+            <div className="space-y-2.5 text-left">
+              {[
+                "Code generation from natural language",
+                "Debug script errors automatically",
+                "Generate 3D scenes from descriptions",
+                "Suggest gameplay improvements",
+              ].map((f) => (
+                <div key={f} className="flex items-center gap-2.5 text-xs">
+                  <Check className="w-3.5 h-3.5 text-green-400 flex-shrink-0" />
+                  <span className="text-white/55">{f}</span>
+                </div>
+              ))}
             </div>
             <button
               onClick={() => toast.info("AI Assistant is under development — check back soon!")}
-              className="mt-4 w-full px-4 py-2 rounded-lg glass hover:bg-white/10 text-sm font-medium transition-all"
+              className="mt-6 w-full px-4 py-2.5 rounded-lg ae-btn-ghost text-sm font-semibold"
             >
               Notify Me When Ready
             </button>
@@ -920,64 +1047,95 @@ bun run dev
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="border-t border-white/5 py-10 px-6">
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <img src="/logo.svg" alt="All In One Engine" className="w-6 h-6" />
-            <span className="text-sm text-muted-foreground">All In One Engine — MIT License · 2D + 3D + Multiplayer</span>
+      {/* ============ FINAL CTA ============ */}
+      <section className="relative z-10 py-20 px-6">
+        <div className="max-w-4xl mx-auto text-center reveal">
+          <h2 className="text-4xl md:text-6xl font-bold tracking-tight mb-5">
+            Ready to make <span className="ae-gradient-text">something?</span>
+          </h2>
+          <p className="text-white/50 max-w-lg mx-auto mb-9">
+            Your next game is one click away. No installs, no signups — just open the studio and press Play.
+          </p>
+          <button onClick={handleLaunchClick} className="group inline-flex items-center gap-2.5 px-9 py-4 rounded-xl ae-btn-primary font-bold text-lg">
+            <Play className="w-5 h-5 fill-current" />
+            Launch Studio — it's free
+            <ArrowRight className="w-5 h-5 group-hover:translate-x-1.5 transition-transform" />
+          </button>
+        </div>
+      </section>
+
+      {/* ============ FOOTER ============ */}
+      <footer className="relative z-10 border-t border-white/5 py-12 px-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="flex items-center gap-2.5">
+              <img src="/logo.svg" alt="All In One Engine" className="w-7 h-7" />
+              <div>
+                <div className="text-sm font-bold">All In One <span className="ae-gradient-text">Engine</span></div>
+                <div className="text-[10px] text-white/35 font-mono">MIT License · 2D + 3D + Multiplayer</div>
+              </div>
+            </div>
+            <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-[13px] text-white/45">
+              {NAV_SECTIONS.map((s) => (
+                <button key={s.id} onClick={() => scrollTo(s.id)} className="hover:text-white transition-colors">
+                  {s.label}
+                </button>
+              ))}
+              <a href={GITHUB_URL} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 hover:text-white transition-colors">
+                <Github className="w-3.5 h-3.5" /> GitHub
+              </a>
+            </div>
           </div>
-          <div className="flex items-center gap-6 text-sm text-muted-foreground">
-            <button onClick={() => setActiveTab("home")} className="hover:text-white">Home</button>
-            <button onClick={() => setActiveTab("features")} className="hover:text-white">Features</button>
-            <button onClick={() => setActiveTab("download")} className="hover:text-white">Download</button>
-            <button onClick={() => setActiveTab("instructions")} className="hover:text-white">Instructions</button>
-            <button onClick={() => setActiveTab("publish")} className="hover:text-white">Publish</button>
-            <a href="https://github.com/gefrus112/lapia-ai-agent" target="_blank" rel="noreferrer" className="hover:text-white">GitHub</a>
+          <div className="text-center text-[11px] text-white/25 mt-8 font-mono">
+            © {new Date().getFullYear()} All In One Engine — made for people who want to make games
           </div>
         </div>
       </footer>
 
-      {/* Engine Picker Modal */}
+      {/* ============ ENGINE PICKER MODAL ============ */}
       {showEnginePicker && (
         <div
-          className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-bounce-in"
+          className="fixed inset-0 bg-black/75 backdrop-blur-md z-[100] flex items-center justify-center p-4"
           onClick={() => setShowEnginePicker(false)}
         >
           <div
-            className="glass rounded-2xl p-8 max-w-3xl w-full max-h-[90vh] overflow-y-auto"
+            className="ae-glass rounded-3xl p-8 max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl"
             onClick={(e) => e.stopPropagation()}
+            style={{ background: "rgba(13,13,20,0.92)" }}
           >
-            <div className="text-center mb-6">
-              <h2 className="text-2xl font-bold mb-2">Pick your engine</h2>
-              <p className="text-sm text-muted-foreground">Choose which engine to launch. You can switch later. Each card shows the latest updates.</p>
+            <div className="text-center mb-7">
+              <div className="ae-eyebrow mb-4">
+                <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                Choose your engine
+              </div>
+              <h2 className="text-2xl font-bold mb-2">Pick an engine to launch</h2>
+              <p className="text-sm text-white/45">You can switch later. Each card shows the latest updates.</p>
             </div>
             <div className="grid md:grid-cols-3 gap-4">
               {ENGINES.map((e) => (
                 <button
                   key={e.id}
                   onClick={() => handlePickEngine(e.id)}
-                  className="text-left glass rounded-xl p-5 hover:border-cyan-500/50 hover:scale-[1.03] transition-all"
+                  className="ae-card ae-card-engine text-left p-5 hover:scale-[1.03] transition-all"
                 >
-                  <div className="flex items-center gap-2 mb-3">
-                    <img src={e.iconSrc} alt={e.name} className="w-12 h-12" />
+                  <div className="flex items-center gap-2.5 mb-3">
+                    <img src={e.iconSrc} alt={e.name} className="w-11 h-11" />
                     <div>
-                      <h3 className="font-semibold leading-tight">{e.name}</h3>
-                      <p className="text-xs text-cyan-400">{e.tagline}</p>
+                      <h3 className="font-bold leading-tight">{e.name}</h3>
+                      <p className="text-[11px] text-fuchsia-400 font-mono">{e.tagline}</p>
                     </div>
                   </div>
-                  <p className="text-xs text-muted-foreground mb-3">{e.description}</p>
-                  {/* Updates tab */}
-                  <div className="rounded-md bg-black/30 border border-white/5 p-2 mb-3">
+                  <p className="text-xs text-white/50 mb-3 leading-relaxed">{e.description}</p>
+                  <div className="rounded-lg bg-black/40 border border-white/5 p-2.5 mb-3">
                     <div className="flex items-center gap-1.5 mb-1.5">
-                      <Sparkles className="w-3 h-3 text-yellow-400" />
-                      <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Updates</span>
-                      <span className="text-[9px] text-muted-foreground ml-auto">{e.version}</span>
+                      <Sparkles className="w-3 h-3 text-amber-400" />
+                      <span className="text-[9px] font-semibold uppercase tracking-[0.18em] text-white/40 font-mono">Updates</span>
+                      <span className="text-[9px] text-white/30 ml-auto font-mono">{e.version}</span>
                     </div>
                     <ul className="space-y-1">
                       {e.updates.map((u, i) => (
-                        <li key={i} className="text-[10px] text-muted-foreground flex items-start gap-1">
-                          <Check className="w-2.5 h-2.5 text-cyan-400 flex-shrink-0 mt-0.5" />
+                        <li key={i} className="text-[10px] text-white/50 flex items-start gap-1">
+                          <Check className="w-2.5 h-2.5 text-fuchsia-400 flex-shrink-0 mt-0.5" />
                           <span>{u}</span>
                         </li>
                       ))}
@@ -985,16 +1143,13 @@ bun run dev
                   </div>
                   <div className="flex flex-wrap gap-1">
                     {e.tags.map((t) => (
-                      <span key={t} className="text-[9px] px-1.5 py-0.5 rounded-full bg-white/5 text-muted-foreground">{t}</span>
+                      <span key={t} className="text-[9px] px-1.5 py-0.5 rounded-full bg-white/5 border border-white/8 text-white/45 font-mono">{t}</span>
                     ))}
                   </div>
                 </button>
               ))}
             </div>
-            <button
-              onClick={() => setShowEnginePicker(false)}
-              className="mt-6 w-full px-4 py-2 rounded-md glass hover:bg-white/10 text-sm"
-            >
+            <button onClick={() => setShowEnginePicker(false)} className="mt-6 w-full px-4 py-2.5 rounded-lg ae-btn-ghost text-sm font-semibold">
               Cancel
             </button>
           </div>
@@ -1003,3 +1158,4 @@ bun run dev
     </div>
   );
 }
+

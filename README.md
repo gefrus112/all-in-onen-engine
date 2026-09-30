@@ -1,26 +1,82 @@
+<div align="center">
+
+<img src="public/logo.svg" alt="All In One Engine" width="88" />
+
 # All In One Engine
 
-**Build 2D & 3D games — all in one engine.**
+### **Build 2D & 3D games — all in one engine.**
 
-> **[Live Website — https://gefrus112.github.io/all-in-onen-engine/](https://gefrus112.github.io/all-in-onen-engine/)**
->
-> Click the link above to launch the IDE right in your browser. No install needed.
+A **Roblox Studio-style IDE** that runs entirely in your browser.
+Write **Python** or **JavaScript**, hit **Play**, and see your game run live at **60 FPS**.
+
+[![Live Site](https://img.shields.io/badge/▶_LIVE_SITE-gefrus112.github.io-8b5cf6?style=for-the-badge&labelColor=0a0a12)](https://gefrus112.github.io/all-in-onen-engine/)
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-4ade80?style=flat-square&labelColor=0a0a12)](LICENSE)
+[![Next.js](https://img.shields.io/badge/Next.js-16-black?style=flat-square&logo=next.js&labelColor=0a0a12)](https://nextjs.org/)
+[![Python](https://img.shields.io/badge/Python-3.12-3776ab?style=flat-square&logo=python&logoColor=white&labelColor=0a0a12)](https://www.python.org/)
+[![Three.js](https://img.shields.io/badge/Three.js-r186-white?style=flat-square&logo=threedotjs&labelColor=0a0a12)](https://threejs.org/)
+[![Pyodide](https://img.shields.io/badge/Pyodide-0.26-8b5cf6?style=flat-square&labelColor=0a0a12)](https://pyodide.org/)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-f97316?style=flat-square&labelColor=0a0a12)](CONTRIBUTING.md)
+
+**[🌐 Launch the IDE](https://gefrus112.github.io/all-in-onen-engine/)** · **[📖 Wiki](https://github.com/gefrus112/all-in-onen-engine/wiki)** · **[📦 Releases](https://github.com/gefrus112/all-in-onen-engine/releases)** · **[🐛 Report Bug](https://github.com/gefrus112/all-in-onen-engine/issues)**
+
+</div>
+
+<br />
 
 [![All In One Engine — 3D Studio](download/studio-3d.png)](https://gefrus112.github.io/all-in-onen-engine/)
 
-All In One Engine is a Roblox Studio-style IDE for building 2D and 3D games in Python and JavaScript.
-Write code, see it run live in the browser at 60 FPS. Three engines in one IDE:
-Pygame 2D, Three.js 3D, and experimental Zhitlow 3D.
+<br />
 
-Includes a built-in sprite asset library (134 sprites), 4+ starter templates, real 3D editor
-with Three.js viewport, custom play-test avatar, multiplayer via socket.io, one-click publishing
-to itch.io / Crazy Games / GitHub Pages, and native installers for Linux / macOS / Chromebook.
+## 💡 What is this?
 
-## Sprite Library (134 sprites)
+All In One Engine is a complete game development platform in a single browser tab. No installs, no accounts, no setup — click the link, pick an engine, and start building. It bundles **three game engines**, a **full code editor**, a **134-sprite asset library**, **multiplayer networking**, and **one-click publishing** behind one Roblox Studio-inspired interface.
+
+It ships in four parts:
+
+| | Part | What it is |
+|---|---|---|
+| 🎨 | **Lapia Studio IDE** (`/src`) | The web IDE — Monaco editor, live preview, 3D viewport, properties inspector |
+| ⚙️ | **Lapia Engine** (`/engine`) | A MIT-licensed 2D game engine for Python with ~50 core systems |
+| 🌐 | **Multiplayer Relay** (`/mini-services`) | A socket.io relay server for real-time multiplayer |
+| 📦 | **Build Scripts** (`/build_*.sh`) | Native installers: Linux AppImage, macOS .dmg, Chromebook .deb |
+
+---
+
+## 🎮 Three engines, one IDE
+
+Pick your engine when you launch — or switch anytime:
+
+| | 🔵 **Pygame 2D** | 🟣 **Three.js 3D** | 🟢 **Zhitlow 3D** *(beta)* |
+|---|---|---|---|
+| **Language** | Python 3.12 | JavaScript | Zhitlow Script |
+| **Runtime** | Pyodide (WASM) | WebGL / Three.js r186 | Custom renderer |
+| **Best for** | Sprite games, platformers, shooters | 3D worlds, meshes, lighting | Experimental open worlds |
+| **Status** | ✅ Stable | ✅ Stable | 🧪 Experimental |
+| **Highlights** | 134 sprites · physics · ECS · AI · CRT preview | Shadows · Sky · keyframe timeline · WASD play-test | 100 physics props · 20 PBR materials · GUI editor |
+
+---
+
+## ✨ Everything you need to ship
+
+| | Feature | Details |
+|---|---|---|
+| ✍️ | **Monaco Code Editor** | Python + JS syntax highlighting, multi-tab, autosave, Ctrl+S / F5 |
+| 👁️ | **Live Preview** | Runs your Python game in-browser via Pyodide at 60 FPS with real input |
+| 🧊 | **3D Studio** | Interactive Three.js viewport — place meshes, lights, cameras, animate keyframes |
+| 👥 | **Multiplayer** | Socket.io relay included — 2-4 players, real-time position sync |
+| 🖼️ | **134+ Sprite Library** | 15 categories of pixel art — players, enemies, tiles, props, weapons |
+| 📤 | **Asset Upload** | Drag in your own `.glb` `.gltf` `.wav` `.mp3` `.png` files |
+| 🎵 | **Audio Editor** | Visual waveform editor — trim, fade, loop, mix |
+| 🧍 | **Avatar Customizer** | 6 presets or build your own for play-test mode |
+| 🔍 | **666+ Properties Panel** | Roblox Studio-style inspector with searchable, type-aware editors |
+| 🚀 | **Publish Everywhere** | One-click export to itch.io, Crazy Games, GitHub Pages, or HTML5 |
+| 🖥️ | **Native Builds** | Linux AppImage, macOS .dmg, Chromebook .deb, Windows .exe |
+
+<details>
+<summary><b>🎨 Sprite Library — 134 sprites across 15 categories</b></summary>
 
 ![All Sprites](download/sprites-overview.png)
-
-### By category
 
 | | | |
 |---|---|---|
@@ -29,109 +85,34 @@ to itch.io / Crazy Games / GitHub Pages, and native installers for Linux / macOS
 | ![Coins](download/sprites-coins.png) | ![Power-ups](download/sprites-powerups.png) | ![Props](download/sprites-props.png) |
 | ![Food](download/sprites-food.png) | ![Weapons](download/sprites-weapons.png) | ![Vehicles](download/sprites-vehicles.png) |
 
-## What you get
+</details>
 
-### 1. Lapia Engine (`/engine`)
+---
 
-A MIT-licensed 2D game engine for Python, built on Pygame. ~50 well-built
-core systems covering:
+## 🚀 Quick start
 
-- **Rendering** — Sprite, Animation, Animator, Tilemap, ParticleSystem,
-  Camera (with follow / deadzone / shake / zoom), Text, Primitive drawing,
-  LayerManager, software Shaders (grayscale, vignette), 2D Lighting.
-- **Physics** — PhysicsWorld with fixed timestep, RigidBody (static /
-  kinematic / dynamic), AABB + circle colliders, friction + restitution,
-  raycasting, joints (distance, spring), sleeping bodies.
-- **Input** — Keyboard / Mouse / Gamepad / Touch, with action bindings
-  ("jump" → [Space, W, Gamepad A]) and just-pressed / just-released deltas.
-- **Audio** — AudioMixer with master / SFX / music channels, positional
-  audio, programmatic sound generation (beep, noise), reverb / low-pass
-  effects.
-- **Scene / ECS** — Scene with full lifecycle, Entity with parent-child
-  hierarchy, built-in Components (Transform, Sprite, RigidBody, Script,
-  Lifetime, Tag), Scene manager with stack-based navigation, JSON
-  serialization.
-- **AI** — A* pathfinding with smoothing, flow fields, finite state
-  machines, behavior trees (Sequence, Selector, Action, Condition, Wait,
-  Inverter, Repeat), Reynolds steering behaviors, boid flocking.
-- **Network** — TCP client / server stubs, message protocol, state sync
-  with interpolation, in-memory leaderboard.
-- **UI** — Widget system (Button, Label, Panel, Image, Slider, ProgressBar,
-  Checkbox), layout helpers (vertical, horizontal, grid), themable colors.
-- **Tooling** — Frame profiler, on-screen debug overlay, dev console with
-  command registration, asset manager (images, sounds, fonts, JSON, sprite
-  atlases), runtime object inspector.
+### Option A — Run in your browser (zero install)
 
-[Read the engine README →](engine/README.md)
+> **[▶ Launch the IDE now](https://gefrus112.github.io/all-in-onen-engine/)**
 
-### 2. Lapia Studio IDE (`/src`)
+That's it. Pick an engine, load a template, hit **Play**.
 
-A Roblox Studio-inspired web IDE built with Next.js 16 + TypeScript +
-Tailwind CSS 4 + shadcn/ui. Features:
-
-- **4-panel layout** — Explorer | Toolbox | Editor+Preview | Properties+Console (all resizable)
-- **Monaco code editor** with Python syntax highlighting, multi-tab editing,
-  autosave to localStorage, Ctrl+S to save, F5 to run.
-- **Live preview** that actually runs your Python game in the browser via
-  Pyodide + a custom canvas shim. Real-time at 60 FPS, with keyboard /
-  mouse / gamepad input piped through. CRT-style scanline glow effect.
-- **Asset Picker** — browse 55 built-in sprites (players, enemies, tiles,
-  coins, power-ups, projectiles, particles, UI icons) organized by category.
-  Click any sprite to copy paste-ready Python code to your clipboard.
-- **Templates panel** — 4 starter templates you can load with one click:
-  - **Platformer** — player movement, gravity, jumping, tilemap collision
-  - **Top-Down Shooter** — player rotation, shooting, enemy spawning, particles
-  - **Multiplayer Arena** — 2-4 player online arena via socket.io relay
-  - **Physics Sandbox** — bouncing balls with gravity, walls, restitution
-- **CSS editor** — styles the preview container around the canvas.
-- **File Explorer** — tree view of all your project files.
-- **Scene Hierarchy** — list of game objects in the current scene.
-- **Properties panel** — inspect and edit entity properties live (numbers,
-  booleans, colors, vectors).
-- **Output console** — captures Python `print()` and exceptions with
-  timestamps and severity coloring.
-- **Status bar** — shows FPS, frame time, draw calls, entity count,
-  Pyodide status, current file kind.
-- **Top toolbar** — Play / Stop / Pause controls, view toggles for every
-  panel, GitHub link.
-- **Resizable panels** — drag handles to resize any panel.
-
-### 3. Multiplayer Relay (`/mini-services/multiplayer-relay`)
-
-A lightweight socket.io server (Bun + TypeScript) that relays player state
-between browser sessions. Used by the Multiplayer Arena template.
-
-- Protocol: `join` → `player_joined`, `state_update` (bidirectional), `player_left`
-- Auto-cleanup of stale players (5s timeout)
-- Up to 4 players per room
-- CORS enabled for any origin
-- Bound to `0.0.0.0:3001` so it's reachable from other machines on your LAN
-
-Start it with: `./start-multiplayer.sh`
-
-### 4. Demo Platformer
-
-A complete platformer demo built with the engine showcasing:
-- Sprite rendering with player + enemies + coins
-- Tilemap collision
-- Camera follow with smoothing
-- Coyote time + jump buffering
-- Enemy patrol AI
-- Particle effects on jump and hit
-- Score collection
-- Live score HUD
-
-## Quick start
-
-### Run the IDE + multiplayer relay
+### Option B — Run locally
 
 ```bash
-bun install
-./start-multiplayer.sh  # optional: starts socket.io relay on :3001
-bun run dev
-```
+# 1. Clone
+git clone https://github.com/gefrus112/all-in-onen-engine.git
+cd all-in-onen-engine
 
-Then open http://localhost:3000.
+# 2. Install dependencies
+bun install          # or: npm install
+
+# 3. (Optional) start the multiplayer relay on :3001
+./start-multiplayer.sh
+
+# 4. Launch the IDE
+bun run dev          # → http://localhost:3000
+```
 
 ### Run the Python engine standalone
 
@@ -141,115 +122,148 @@ pip install -e .
 python -m examples.platformer
 ```
 
-Controls:
-- Arrow keys / A,D — move
-- Space / W / Up — jump
-- F1 — toggle debug overlay
-- F2 — toggle sprite bounds
-- F3 — toggle grid
-- ` (backtick) — open dev console
+<details>
+<summary><b>⌨️ Demo controls</b></summary>
 
-## Architecture
+| Key | Action |
+|---|---|
+| `←` `→` / `A` `D` | Move |
+| `Space` / `W` / `↑` | Jump |
+| `F1` | Toggle debug overlay |
+| `F2` | Toggle sprite bounds |
+| `F3` | Toggle grid |
+| `` ` `` | Open dev console |
 
-```
-lapia-ai-agent/
+</details>
+
+---
+
+## 🧰 Under the hood
+
+<details>
+<summary><b>⚙️ Lapia Engine — ~50 core systems (click to expand)</b></summary>
+
+- **Rendering** — Sprite, Animation, Animator, Tilemap, ParticleSystem, Camera (follow / deadzone / shake / zoom), Text, primitives, LayerManager, software shaders (grayscale, vignette), 2D lighting
+- **Physics** — fixed-timestep PhysicsWorld, RigidBody (static / kinematic / dynamic), AABB + circle colliders, friction + restitution, raycasting, distance & spring joints, sleeping bodies
+- **Input** — Keyboard / Mouse / Gamepad / Touch with action bindings (`"jump"` → `[Space, W, Gamepad A]`) and just-pressed deltas
+- **Audio** — AudioMixer with master / SFX / music channels, positional audio, programmatic sound generation, reverb / low-pass effects
+- **Scene / ECS** — Scene lifecycle, Entity parent-child hierarchy, Components (Transform, Sprite, RigidBody, Script, Lifetime, Tag), stack-based scene navigation, JSON serialization
+- **AI** — A* pathfinding with smoothing, flow fields, FSMs, behavior trees, Reynolds steering, boid flocking
+- **Network** — TCP client / server, message protocol, state sync with interpolation, leaderboard
+- **UI** — Widgets (Button, Label, Panel, Image, Slider, ProgressBar, Checkbox), layout helpers, themes
+- **Tooling** — Frame profiler, debug overlay, dev console, asset manager, runtime inspector
+
+📖 Full docs: [engine/README.md](engine/README.md)
+
+</details>
+
+<details>
+<summary><b>🏗️ Architecture (click to expand)</b></summary>
+
+```text
+all-in-onen-engine/
 ├── engine/                    # Python/Pygame engine
-│   ├── lapia/                  # The engine package
-│   │   ├── __init__.py
-│   │   ├── core.py             # Vector2/3, Color, Math, Clock, EventBus, Config
-│   │   ├── rendering.py        # Sprite, Animation, Tilemap, Particles, Camera, ...
-│   │   ├── physics.py          # PhysicsWorld, RigidBody, Collider, Joints
-│   │   ├── input.py            # InputManager (keyboard/mouse/gamepad/touch)
-│   │   ├── audio.py            # AudioMixer, Sound, Music
-│   │   ├── scene.py            # Scene, Entity, Component, ECS
-│   │   ├── ai.py               # Pathfinder, FSM, BehaviorTree, Steering
-│   │   ├── network.py          # NetworkClient/Server, StateSync, Leaderboard
-│   │   ├── ui.py               # Widgets, Layout, Theme
-│   │   ├── tools.py            # Profiler, DebugOverlay, Console, AssetManager
-│   │   └── engine.py           # Game class (main loop)
+│   ├── lapia/
+│   │   ├── core.py            # Vector2/3, Color, Math, Clock, EventBus, Config
+│   │   ├── rendering.py       # Sprite, Animation, Tilemap, Particles, Camera
+│   │   ├── physics.py         # PhysicsWorld, RigidBody, Collider, Joints
+│   │   ├── input.py           # InputManager (keyboard/mouse/gamepad/touch)
+│   │   ├── audio.py           # AudioMixer, Sound, Music
+│   │   ├── scene.py           # Scene, Entity, Component, ECS
+│   │   ├── ai.py              # Pathfinder, FSM, BehaviorTree, Steering
+│   │   ├── network.py         # NetworkClient/Server, StateSync, Leaderboard
+│   │   ├── ui.py              # Widgets, Layout, Theme
+│   │   ├── tools.py           # Profiler, DebugOverlay, Console, AssetManager
+│   │   └── engine.py          # Game class (main loop)
 │   ├── examples/platformer.py
-│   ├── tests/test_core.py
-│   ├── setup.py
-│   ├── pyproject.toml
-│   ├── LICENSE
-│   └── README.md
+│   └── tests/test_core.py
 │
-├── src/                        # Next.js Studio IDE
-│   ├── app/                    # Next.js App Router
-│   │   ├── page.tsx            # Main IDE layout (3-panel)
-│   │   ├── layout.tsx
-│   │   └── globals.css         # Roblox Studio dark theme
-│   ├── components/ide/          # IDE components
-│   │   ├── TopBar.tsx          # Studio ribbon (Play/Stop, menus, view toggles)
-│   │   ├── FileExplorer.tsx    # File tree
-│   │   ├── SceneHierarchy.tsx  # Scene entity tree
-│   │   ├── PropertiesPanel.tsx # Live property editor
-│   │   ├── CodeEditor.tsx      # Monaco editor wrapper
-│   │   ├── EditorTabs.tsx      # Open file tabs
-│   │   ├── PreviewPane.tsx     # Pyodide game preview canvas
-│   │   ├── Console.tsx         # Python stdout/stderr console
-│   │   └── StatusBar.tsx       # Bottom status bar
+├── src/                       # Next.js Studio IDE
+│   ├── app/                   # App Router (page.tsx, layout.tsx, globals.css)
+│   ├── components/ide/        # TopBar, FileExplorer, SceneHierarchy,
+│   │                          # PropertiesPanel, CodeEditor, PreviewPane,
+│   │                          # Console, StatusBar, LandingPage, Studio3D
 │   └── lib/
-│       ├── studio-store.ts     # Zustand store (files, console, scene tree, ...)
-│       └── pyodide-runner.ts   # Pyodide loader + lapia_shim Python module
+│       ├── studio-store.ts    # Zustand store
+│       └── pyodide-runner.ts  # Pyodide loader + lapia_shim module
 │
-├── public/                    # Static assets
-├── prisma/                    # Prisma schema (DB, currently unused)
-├── package.json
-├── LICENSE                    # MIT
-└── README.md                  # This file
+├── mini-services/             # socket.io multiplayer relay (Bun)
+├── public/                    # sprites, logos, static assets
+├── prisma/                    # DB schema (reserved)
+└── build_*.sh                 # native installer build scripts
 ```
 
-## How the live preview works
+</details>
 
-The IDE ships a Python module called `lapia_shim` that mirrors the real
-Python `lapia` engine API (Game, Scene, Sprite, Vector2, Color, Math,
-InputManager, Camera, Renderer, Text). When you click Play:
+<details>
+<summary><b>🔮 How the live preview works (click to expand)</b></summary>
 
-1. The IDE loads Pyodide (the Python interpreter compiled to WebAssembly)
-   from CDN.
-2. It injects the `lapia_shim` module into Pyodide's virtual filesystem.
-3. It executes your `main.py` via `exec()`.
-4. Your code constructs a `Game(...)` instance, which registers itself
-   globally so the JS host can drive it.
-5. The JS host calls `game.run_frame(dt)` once per `requestAnimationFrame`,
-   which advances the simulation and renders to an HTML `<canvas>` via JS
-   bridge calls.
+The IDE ships a Python module called `lapia_shim` that mirrors the real `lapia` engine API. When you hit **Play**:
 
-Because the `lapia_shim` API mirrors the real Python engine's API, your
-code is portable — you can download the same `main.py`, drop it into the
-`engine/examples/` folder, and run it with `python -m examples.your_file`
-on your local machine.
+1. Pyodide (Python 3.12 compiled to WebAssembly) loads from CDN
+2. The `lapia_shim` module is injected into Pyodide's virtual filesystem
+3. Your `main.py` is executed via `exec()`
+4. Your `Game(...)` instance registers globally so the JS host can drive it
+5. Each `requestAnimationFrame`, the host calls `game.run_frame(dt)` — advancing the simulation and rendering to an HTML `<canvas>` via JS bridge calls
 
-## Tech stack
+Because `lapia_shim` mirrors the real engine API, your code is **portable**: download `main.py`, drop it in `engine/examples/`, and run `python -m examples.your_file` locally.
 
-- **Next.js 16** (App Router, TypeScript)
-- **Tailwind CSS 4** with custom Roblox Studio dark theme
-- **shadcn/ui** component library
-- **Monaco Editor** (the editor that powers VS Code)
-- **Pyodide 0.26** (Python 3.12 compiled to WebAssembly)
-- **Zustand** for state management (with persistence)
-- **react-resizable-panels** for the draggable panel layout
-- **lucide-react** for icons
+</details>
 
-## License
+---
 
-MIT — see [LICENSE](LICENSE).
+## 🧪 Tech stack
 
-## Links
+| Layer | Tech |
+|---|---|
+| Framework | **Next.js 16** (App Router, TypeScript) |
+| Styling | **Tailwind CSS 4** + **shadcn/ui** |
+| Editor | **Monaco** (the editor behind VS Code) |
+| Python runtime | **Pyodide 0.26** (CPython 3.12 → WebAssembly) |
+| 3D | **Three.js r186** + @react-three/fiber + drei |
+| State | **Zustand** (with persistence) |
+| Layout | **react-resizable-panels** |
+| Relay | **Bun + socket.io** |
+| Icons | **lucide-react** |
+
+## 🗺️ Roadmap
+
+- [x] Pygame 2D engine + live browser preview
+- [x] Three.js 3D Studio with keyframe timeline
+- [x] Multiplayer relay + arena template
+- [x] Avatar customizer + publish dialog
+- [x] Native build scripts (Linux / macOS / Chromebook)
+- [ ] 🤖 **AI Game Assistant** — code generation, debugging, level generation *(in development)*
+- [ ] Zhitlow 3D out of beta
+- [ ] Mobile touch editor
+
+## 🤝 Contributing
+
+1. **Fork** the repo
+2. Create a feature branch — `git checkout -b feature/my-feature`
+3. Commit — `git commit -am 'Add my feature'`
+4. Push — `git push origin feature/my-feature`
+5. Open a **Pull Request** 🎉
+
+## 📄 License
+
+MIT — see [LICENSE](LICENSE). The Lapia engine has its own [MIT license](engine/LICENSE).
+
+## 🔗 Links
 
 | Resource | URL |
 |----------|-----|
-| **Live Website** | [https://gefrus112.github.io/all-in-onen-engine/](https://gefrus112.github.io/all-in-onen-engine/) |
-| **GitHub Repo** | [https://github.com/gefrus112/all-in-onen-engine](https://github.com/gefrus112/all-in-onen-engine) |
-| **Releases** | [https://github.com/gefrus112/all-in-onen-engine/releases](https://github.com/gefrus112/all-in-onen-engine/releases) |
-| **Wiki** | [https://github.com/gefrus112/all-in-onen-engine/wiki](https://github.com/gefrus112/all-in-onen-engine/wiki) |
-| **Issues** | [https://github.com/gefrus112/all-in-onen-engine/issues](https://github.com/gefrus112/all-in-onen-engine/issues) |
+| 🌐 **Live Website** | [gefrus112.github.io/all-in-onen-engine](https://gefrus112.github.io/all-in-onen-engine/) |
+| 💻 **GitHub Repo** | [github.com/gefrus112/all-in-onen-engine](https://github.com/gefrus112/all-in-onen-engine) |
+| 📦 **Releases** | [github.com/gefrus112/all-in-onen-engine/releases](https://github.com/gefrus112/all-in-onen-engine/releases) |
+| 📖 **Wiki** | [github.com/gefrus112/all-in-onen-engine/wiki](https://github.com/gefrus112/all-in-onen-engine/wiki) |
+| 🐛 **Issues** | [github.com/gefrus112/all-in-onen-engine/issues](https://github.com/gefrus112/all-in-onen-engine/issues) |
 
-## Contributing
+<div align="center">
+<br />
 
-1. Fork the repo
-2. Create a feature branch (`git checkout -b feature/my-feature`)
-3. Commit your changes (`git commit -am 'Add my feature'`)
-4. Push to your fork (`git push origin feature/my-feature`)
-5. Open a Pull Request
+**Made for people who want to make games.**
+
+⭐ Star this repo if it helped you ship something!
+
+</div>
