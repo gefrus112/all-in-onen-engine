@@ -28,10 +28,34 @@ export const COMPONENT_ICONS: Record<string, string> = {
   "Tag & Layer": "tag",
 };
 
+// Roblox-style script block attached to an object (runs during play test)
+export interface ScriptBlock {
+  id: string;
+  name: string;
+  code: string;
+  enabled: boolean;
+}
+
+export const DEFAULT_SCRIPT_TEMPLATE = `// This script runs every frame during play test.
+// API: self (this object) · engine · input · print(...)
+
+let t = 0;
+
+function onStart(self) {
+  print(self.name + " started!");
+}
+
+function update(dt, self) {
+  t += dt;
+  self.rotation.y += dt * 1.4;              // spin
+  self.position.y = 0.5 + Math.sin(t * 2) * 0.35; // bob up & down
+}`;
+
 export interface SceneObject3D {
   id: string;
   name: string;
   type: SceneObjType;
+  scripts?: ScriptBlock[];
   lightSubtype?: LightSubtype;
   position: [number, number, number];
   rotation: [number, number, number];
@@ -115,6 +139,10 @@ export interface WorldSettings {
   showGrid: boolean;
   showGizmo: boolean;
   fov: number;
+  // Edge water (ocean around the baseplate)
+  edgeWater: boolean;
+  edgeWaterLevel: number;  // world Y of the water surface
+  edgeWaterColor: string;
 }
 
 export const DEFAULT_WORLD: WorldSettings = {
@@ -136,6 +164,9 @@ export const DEFAULT_WORLD: WorldSettings = {
   showGrid: true,
   showGizmo: true,
   fov: 50,
+  edgeWater: true,
+  edgeWaterLevel: -0.6,
+  edgeWaterColor: "#2f7fd4",
 };
 
 export interface LightPreset {

@@ -21,6 +21,7 @@ import { AvatarPicker } from "../components/ide/AvatarPicker";
 import { PublishDialog } from "../components/ide/PublishDialog";
 import { InstructionsDialog } from "../components/ide/InstructionsDialog";
 import { useStudio } from "../lib/studio-store";
+import { installUiSounds } from "../lib/ui-sounds";
 import {
   ResizableHandle,
   ResizablePanel,
@@ -43,7 +44,19 @@ export default function Home() {
     showConsole,
     showAssetPicker,
     showToolbox,
+    theme,
   } = useStudio();
+
+  // Apply the selected theme to the whole document
+  useEffect(() => {
+    if (theme === "dark") delete document.documentElement.dataset.theme;
+    else document.documentElement.dataset.theme = theme;
+  }, [theme]);
+
+  // Satisfying UI sounds — one-time global install (respects Settings → Audio)
+  useEffect(() => {
+    installUiSounds();
+  }, []);
 
   const launch2DIDE = useCallback(() => setViewMode("ide-2d"), []);
   const launch3DStudio = useCallback(() => setViewMode("ide-3d"), []);

@@ -340,3 +340,154 @@ html.landing-mode body {
 .ae-video-glow {
   box-shadow: 0 0 0 1px rgba(34, 211, 238, 0.15), 0 20px 80px -20px rgba(139, 92, 246, 0.45), 0 8px 40px -12px rgba(34, 211, 238, 0.25);
 }
+
+/* ============================================================
+   Studio themes — applied via <html data-theme="…"> (Settings → Theme)
+   ============================================================ */
+[data-theme="midnight"] {
+  --background: #0a0e1a;
+  --foreground: #dbe4f5;
+  --card: #131826;
+  --card-foreground: #dbe4f5;
+  --popover: #161d30;
+  --popover-foreground: #dbe4f5;
+  --primary: #3b82f6;
+  --primary-foreground: #ffffff;
+  --secondary: #18203a;
+  --secondary-foreground: #a9b7d8;
+  --muted: #18203a;
+  --muted-foreground: #7d8bab;
+  --accent: #1c2542;
+  --accent-foreground: #dbe4f5;
+  --border: #212b4d;
+  --input: #212b4d;
+  --ring: #60a5fa;
+  --sidebar: #111627;
+  --sidebar-foreground: #a9b7d8;
+  --sidebar-primary: #3b82f6;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #1c2542;
+  --sidebar-accent-foreground: #dbe4f5;
+  --sidebar-border: #212b4d;
+  --sidebar-ring: #60a5fa;
+  --studio-tab-active: #0a0e1a;
+  --studio-tab-inactive: #18203a;
+  --studio-tab-hover: #1c2542;
+  --studio-toolbar: #18203a;
+  --studio-statusbar: #1e3a8a;
+  --studio-explorer: #131826;
+  --studio-properties: #131826;
+  --studio-console: #0d1120;
+  --studio-info: #60a5fa;
+}
+
+[data-theme="ocean"] {
+  --background: #0c1a1f;
+  --foreground: #d5eef2;
+  --card: #13262c;
+  --card-foreground: #d5eef2;
+  --popover: #162c34;
+  --popover-foreground: #d5eef2;
+  --primary: #0891b2;
+  --primary-foreground: #ffffff;
+  --secondary: #14303a;
+  --secondary-foreground: #9fcfd8;
+  --muted: #14303a;
+  --muted-foreground: #7aa9b3;
+  --accent: #183a45;
+  --accent-foreground: #d5eef2;
+  --border: #1d4552;
+  --input: #1d4552;
+  --ring: #22d3ee;
+  --sidebar: #10222a;
+  --sidebar-foreground: #9fcfd8;
+  --sidebar-primary: #0891b2;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #183a45;
+  --sidebar-accent-foreground: #d5eef2;
+  --sidebar-border: #1d4552;
+  --sidebar-ring: #22d3ee;
+  --studio-tab-active: #0c1a1f;
+  --studio-tab-inactive: #14303a;
+  --studio-tab-hover: #183a45;
+  --studio-toolbar: #14303a;
+  --studio-statusbar: #0e7490;
+  --studio-explorer: #13262c;
+  --studio-properties: #13262c;
+  --studio-console: #0e181d;
+  --studio-info: #22d3ee;
+}
+
+[data-theme="purple"] {
+  --background: #1a0d24;
+  --foreground: #ecd9f8;
+  --card: #2a1840;
+  --card-foreground: #ecd9f8;
+  --popover: #311c49;
+  --popover-foreground: #ecd9f8;
+  --primary: #9333ea;
+  --primary-foreground: #ffffff;
+  --secondary: #2f1c48;
+  --secondary-foreground: #c9a8e0;
+  --muted: #2f1c48;
+  --muted-foreground: #a58bbd;
+  --accent: #3a2356;
+  --accent-foreground: #ecd9f8;
+  --border: #45296a;
+  --input: #45296a;
+  --ring: #c084fc;
+  --sidebar: #241335;
+  --sidebar-foreground: #c9a8e0;
+  --sidebar-primary: #9333ea;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #3a2356;
+  --sidebar-accent-foreground: #ecd9f8;
+  --sidebar-border: #45296a;
+  --sidebar-ring: #c084fc;
+  --studio-tab-active: #1a0d24;
+  --studio-tab-inactive: #2f1c48;
+  --studio-tab-hover: #3a2356;
+  --studio-toolbar: #2f1c48;
+  --studio-statusbar: #7e22ce;
+  --studio-explorer: #2a1840;
+  --studio-properties: #2a1840;
+  --studio-console: #170b21;
+  --studio-info: #c084fc;
+}
+
+[data-theme="sunset"] {
+  --background: #1f1410;
+  --foreground: #f5e3d5;
+  --card: #2c1d18;
+  --card-foreground: #f5e3d5;
+  --popover: #33221c;
+  --popover-foreground: #f5e3d5;
+  --primary: #ea580c;
+  --primary-foreground: #ffffff;
+  --secondary: #33231b;
+  --secondary-foreground: #dcbfa8;
+  --muted: #33231b;
+  --muted-foreground: #ad9484;
+  --accent: #402a20;
+  --accent-foreground: #f5e3d5;
+  --border: #4d3325;
+  --input: #4d3325;
+  --ring: #fb923c;
+  --sidebar: #281a14;
+  --sidebar-foreground: #dcbfa8;
+  --sidebar-primary: #ea580c;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #402a20;
+  --sidebar-accent-foreground: #f5e3d5;
+  --sidebar-border: #4d3325;
+  --sidebar-ring: #fb923c;
+  --studio-tab-active: #1f1410;
+  --studio-tab-inactive: #33231b;
+  --studio-tab-hover: #402a20;
+  --studio-toolbar: #33231b;
+  --studio-statusbar: #c2410c;
+  --studio-explorer: #2c1d18;
+  --studio-properties: #2c1d18;
+  --studio-console: #1a100c;
+  --studio-info: #fb923c;
+}

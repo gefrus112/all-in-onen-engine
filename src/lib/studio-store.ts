@@ -78,6 +78,7 @@ interface StudioState {
   editorWordWrap: boolean;
   showMinimap: boolean;
   enableSounds: boolean;
+  uiSoundVolume: number;
   enableCRT: boolean;
   autoSave: boolean;
 
@@ -143,6 +144,7 @@ interface StudioState {
   setEditorWordWrap: (w: boolean) => void;
   setShowMinimap: (s: boolean) => void;
   setEnableSounds: (s: boolean) => void;
+  setUiSoundVolume: (v: number) => void;
   setEnableCRT: (s: boolean) => void;
   setAutoSave: (s: boolean) => void;
 
@@ -612,6 +614,7 @@ export const useStudio = create<StudioState>()(
       editorWordWrap: false,
       showMinimap: true,
       enableSounds: true,
+      uiSoundVolume: 0.6,
       enableCRT: true,
       autoSave: true,
 
@@ -754,6 +757,7 @@ export const useStudio = create<StudioState>()(
       setEditorWordWrap: (editorWordWrap) => set({ editorWordWrap }),
       setShowMinimap: (showMinimap) => set({ showMinimap }),
       setEnableSounds: (enableSounds) => set({ enableSounds }),
+      setUiSoundVolume: (uiSoundVolume) => set({ uiSoundVolume }),
       setEnableCRT: (enableCRT) => set({ enableCRT }),
       setAutoSave: (autoSave) => set({ autoSave }),
 

@@ -119,3 +119,23 @@ Stage Summary:
 - Bigger, CRT-styled preview pane
 - All pushed to GitHub: https://github.com/gefrus112/lapia-ai-agent
 - IDE verified working end-to-end: platformer runs at 59 FPS with 102 draw calls
+
+---
+Task ID: v3.1-push
+Agent: main
+Task: Push everything to GitHub — README update, MIT license with showcase restriction, RPG template, all v3.1 engine + website work.
+
+Work Log:
+- Verified previous session's work: Studio3D refactor into studio3d/ modules (canvas, meshes, overlays, panels, rpg, templates, types), RPG Village Quest runtime complete, landing page with icon-before-text + background video + showreel complete
+- Verified production build passes (npx next build --webpack with GITHUB_ACTIONS=true for Pages basePath)
+- Replaced pure MIT LICENSE with Lapia Studio Public License (Modified MIT + Showcase Restriction): free to build/ship games, forbidden to copy/rebrand code for personal showcases, attribution required; applied to engine/LICENSE too
+- Updated README: new license badge + plain-language license section (games you make are 100% yours; engine showcase reuse forbidden)
+- Fixed 14 broken README image links: generated 13 sprite gallery PNGs from public/sprites via scripts/gen_readme_sprites.py + captured live 3D Studio screenshot via agent-browser (static export served under /all-in-onen-engine/ basePath)
+- Committed all v3.1 work (commit 381878c) and pushed to origin/main
+- GitHub Actions "Deploy to GitHub Pages" triggered automatically
+
+Stage Summary:
+- Repo fully republished: https://github.com/gefrus112/all-in-onen-engine (commit 381878c)
+- LICENSE now blocks showcase/portfolio reuse of the code
+- RPG Village Quest template included and playable from the Templates panel
+- All README media verified present (14 images + showreel video + poster)

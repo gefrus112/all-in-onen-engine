@@ -4,7 +4,7 @@
 import { useState } from "react";
 import {
   ChevronDown, ChevronRight, Plus, X, Move, Box, Lightbulb, Code2, Music,
-  Sparkles, Globe, Frame, Tag, Zap, Sun, Eye, Copy, Trash2,
+  Sparkles, Globe, Frame, Tag, Zap, Sun, Eye, Copy, Trash2, Waves,
 } from "lucide-react";
 import type { SceneObject3D, WorldSettings } from "./types";
 import { RPG_COMPONENTS, LIGHT_PRESETS, COMPONENT_ICONS } from "./types";
@@ -359,6 +359,17 @@ export function WorldPanel({ world, setWorld }: {
               <>
                 <SliderRow label="Fog Density" value={world.fogDensity} min={0.02} max={0.8} onChange={(v) => setWorld({ fogDensity: v })} />
                 <ColorRow label="Fog Color" value={world.fogColor} onChange={(v) => setWorld({ fogColor: v })} />
+              </>
+            )}
+          </Section>
+
+          <Section title="Edge Water" icon={<Waves className="w-3.5 h-3.5 text-sky-400" />} defaultOpen={false}>
+            <div className="text-[9px] text-muted-foreground mb-1.5">Animated ocean with foam ring surrounding the baseplate. Walk off the edge to swim.</div>
+            <ToggleRow label="Enable Edge Water" value={world.edgeWater} onChange={(v) => setWorld({ edgeWater: v })} />
+            {world.edgeWater && (
+              <>
+                <SliderRow label="Water Level" value={world.edgeWaterLevel} min={-2.5} max={1.5} step={0.05} onChange={(v) => setWorld({ edgeWaterLevel: v })} />
+                <ColorRow label="Water Color" value={world.edgeWaterColor} onChange={(v) => setWorld({ edgeWaterColor: v })} />
               </>
             )}
           </Section>

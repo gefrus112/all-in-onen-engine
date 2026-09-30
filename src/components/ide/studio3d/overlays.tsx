@@ -285,3 +285,47 @@ export function TerrainEditor({ terrainSize, setTerrainSize, waterLevel, setWate
     </div>
   );
 }
+
+// ================= Script editor (Roblox-style script blocks) =================
+export function ScriptEditor({ objectName, scriptName, code, onChange, onRename, onClose }: {
+  objectName: string;
+  scriptName: string;
+  code: string;
+  onChange: (v: string) => void;
+  onRename: (v: string) => void;
+  onClose: () => void;
+}) {
+  return (
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-6" onClick={onClose}>
+      <div className="glass rounded-2xl w-[720px] max-w-full h-[560px] flex flex-col overflow-hidden" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center gap-2 px-4 py-2.5 border-b border-white/10">
+          <FileCode2 className="w-4 h-4 text-cyan-400" />
+          <input
+            value={scriptName}
+            onChange={(e) => onRename(e.target.value)}
+            className="bg-transparent text-sm font-semibold outline-none border-b border-transparent focus:border-cyan-500 w-56"
+            spellCheck={false}
+          />
+          <span className="text-[10px] text-muted-foreground">in {objectName}</span>
+          <span className="ml-2 px-1.5 py-0.5 rounded bg-cyan-500/15 border border-cyan-500/40 text-[9px] text-cyan-300 font-bold tracking-wider">RUNS ON PLAY</span>
+          <div className="flex-1" />
+          <button onClick={onClose} className="p-1 rounded hover:bg-white/10"><X className="w-4 h-4" /></button>
+        </div>
+        <textarea
+          value={code}
+          onChange={(e) => onChange(e.target.value)}
+          spellCheck={false}
+          className="flex-1 bg-black/40 p-4 text-[12px] leading-relaxed font-mono text-cyan-50 outline-none resize-none"
+        />
+        <div className="px-4 py-2 border-t border-white/10 bg-black/30 flex items-center gap-4 flex-wrap">
+          <span className="text-[10px] text-muted-foreground">
+            API · <code className="text-cyan-300">self</code> name, position, rotation, move(), rotate(), setColor()
+            · <code className="text-cyan-300">engine.player</code> · <code className="text-cyan-300">input.key(&quot;w&quot;)</code> · <code className="text-cyan-300">print(...)</code>
+          </span>
+          <div className="flex-1" />
+          <span className="text-[10px] text-muted-foreground">define <code className="text-cyan-300">function update(dt, self)</code> + <code className="text-cyan-300">function onStart(self)</code></span>
+        </div>
+      </div>
+    </div>
+  );
+}

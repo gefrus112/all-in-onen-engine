@@ -8,11 +8,14 @@ import * as THREE from "three";
 import type { SceneObject3D, WorldSettings } from "./types";
 import type { PlayerRef } from "./rpg";
 
+export interface ScriptLogFn {
+  (type: "info" | "warn" | "error" | "success", text: string): void;
+}
 type Vec3 = [number, number, number];
 const UP = new THREE.Vector3(0, 1, 0);
 
 // ================= World environment (lighting + sky + fog) =================
-export function WorldEnvironment({ world, hideGrid }: { world: WorldSettings; hideGrid: boolean }) {
+export function WorldEnvironment({ world, hideGrid, baseHalf = [7, 7] }: { world: WorldSettings; hideGrid: boolean; baseHalf?: [number, number] }) {
   const el = (world.sunElevation * Math.PI) / 180;
   const az = (world.sunAzimuth * Math.PI) / 180;
   const sunPos: Vec3 = [Math.cos(el) * Math.cos(az) * 30, Math.sin(el) * 30, Math.cos(el) * Math.sin(az) * 30];
@@ -43,8 +46,9 @@ export function WorldEnvironment({ world, hideGrid }: { world: WorldSettings; hi
       {!hideGrid && (
         <gridHelper args={[80, 80, "#3a3f4a", "#2a2f38"]} position={[0, -0.01, 0]} />
       )}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.02, 0]} receiveShadow>
-        <planeGeometry args={[120, 120]} />
+      <EdgeWater world={world} baseHalf={baseHalf} />
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, world.edgeWater ? -0.28 : -0.02, 0]} receiveShadow>
+        <planeGeometry args={world.edgeWater ? [Math.max(baseHalf[0], baseHalf[1]) * 2 + 5, Math.max(baseHalf[0], baseHalf[1]) * 2 + 5] : [120, 120]} />
         <meshStandardMaterial color={world.lightPreset === "night" || world.lightPreset === "underworld" ? "#10141c" : "#39424f"} transparent opacity={0.35} />
       </mesh>
     </>
@@ -88,13 +92,294 @@ export function ScreenshotRegistrar() {
   return null;
 }
 
+// ================= Edge water — animated ocean around the baseplate =================
+export function EdgeWater({ world, baseHalf = [7, 7] }: { world: WorldSettings; baseHalf?: [number, number] }) {
+  const geoRef = useRef<THREE.PlaneGeometry>(null);
+  const baseRef = useRef<Float32Array | null>(null);
+  const half = Math.max(baseHalf[0], baseHalf[1]);
+
+  useFrame((state) => {
+    const geo = geoRef.current;
+    if (!geo) return;
+    if (!baseRef.current) {
+      baseRef.current = Float32Array.from(geo.attributes.position.array as Float32Array);
+    }
+    const b = baseRef.current;
+    const t = state.clock.elapsedTime;
+    const pos = geo.attributes.position as THREE.BufferAttribute;
+    const arr = pos.array as Float32Array;
+    for (let i = 0; i < arr.length; i += 3) {
+      const x = b[i];
+      const y = b[i + 1];
+      // gentle traveling waves on two axes
+      arr[i + 2] =
+        Math.sin(x * 0.28 + t * 1.15) * 0.16 +
+        Math.sin(y * 0.22 + t * 0.85 + x * 0.1) * 0.13 +
+        Math.sin((x + y) * 0.45 + t * 1.9) * 0.05;
+    }
+    pos.needsUpdate = true;
+    geo.computeVertexNormals();
+  });
+
+  if (!world.edgeWater) return null;
+  const y = world.edgeWaterLevel;
+
+  return (
+    <group position={[0, y, 0]}>
+      {/* main animated ocean */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]} receiveShadow={false}>
+        <planeGeometry ref={geoRef} args={[240, 240, 72, 72]} />
+        <meshStandardMaterial
+          color={world.edgeWaterColor}
+          transparent
+          opacity={0.82}
+          roughness={0.12}
+          metalness={0.25}
+          emissive={world.edgeWaterColor}
+          emissiveIntensity={0.06}
+        />
+      </mesh>
+      {/* bright shoreline ring hugging the baseplate edge */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.012, 0]}>
+        <ringGeometry args={[half + 0.4, half + 1.7, 64]} />
+        <meshBasicMaterial color={"#bfe6ff"} transparent opacity={0.16} side={THREE.DoubleSide} depthWrite={false} />
+      </mesh>
+      {/* soft foam dots drifting on the surface */}
+      {Array.from({ length: 14 }).map((_, i) => {
+        const a = (i / 14) * Math.PI * 2;
+        const r = half + 4 + (i % 4) * 3.2;
+        return (
+          <FoamDot key={i} radius={r} angle={a} speed={0.35 + (i % 5) * 0.12} offset={i * 1.3} color={world.edgeWaterColor} />
+        );
+      })}
+    </group>
+  );
+}
+
+function FoamDot({ radius, angle, speed, offset, color }: { radius: number; angle: number; speed: number; offset: number; color: string }) {
+  const ref = useRef<THREE.Mesh>(null);
+  useFrame((state) => {
+    const m = ref.current;
+    if (!m) return;
+    const t = state.clock.elapsedTime * speed + offset;
+    const wob = Math.sin(t * 0.7) * 1.6;
+    m.position.set(Math.cos(angle + t * 0.05) * (radius + wob), Math.sin(t * 1.4) * 0.05, Math.sin(angle + t * 0.05) * (radius + wob));
+    const s = 0.35 + Math.sin(t * 2.2) * 0.15;
+    m.scale.setScalar(Math.max(0.15, s));
+  });
+  return (
+    <mesh ref={ref} rotation={[-Math.PI / 2, 0, 0]}>
+      <circleGeometry args={[0.5, 12]} />
+      <meshBasicMaterial color={"#dff2ff"} transparent opacity={0.22} depthWrite={false} />
+    </mesh>
+  );
+}
+
+// ================= Script runtime — runs object scripts during play =================
+interface CompiledScript {
+  objId: string;
+  scriptId: string;
+  name: string;
+  onStart: ((self: unknown, engine: unknown) => void) | null;
+  update: ((dt: number, self: unknown) => void) | null;
+  errored: boolean;
+  started: boolean;
+}
+
+interface SelfHandle {
+  obj3d: THREE.Object3D;
+  home: { p: THREE.Vector3; r: THREE.Euler; s: THREE.Vector3 };
+  material: THREE.MeshStandardMaterial | null;
+  matHome: { color: THREE.Color; opacity: number } | null;
+  def: SceneObject3D;
+}
+
+export function ScriptRuntime({ objects, active, keysRef, playerRef, logDebug }: {
+  objects: SceneObject3D[];
+  active: boolean;
+  keysRef: React.MutableRefObject<Record<string, boolean>>;
+  playerRef: React.MutableRefObject<PlayerRef>;
+  logDebug: ScriptLogFn;
+}) {
+  const { scene } = useThree();
+  const handles = useRef<Map<string, SelfHandle>>(new Map());
+  const compiled = useRef<CompiledScript[]>([]);
+  const keyPressed = useRef<Set<string>>(new Set());
+  const clockStart = useRef(0);
+
+  // track key just-pressed
+  useEffect(() => {
+    if (!active) { keyPressed.current.clear(); return; }
+    const down = (e: KeyboardEvent) => keyPressed.current.add(e.key.toLowerCase());
+    window.addEventListener("keydown", down);
+    return () => window.removeEventListener("keydown", down);
+  }, [active]);
+
+  // compile on play start
+  useEffect(() => {
+    if (!active) {
+      // restore everything the scripts touched
+      handles.current.forEach((h) => {
+        h.obj3d.position.copy(h.home.p);
+        h.obj3d.rotation.copy(h.home.r);
+        h.obj3d.scale.copy(h.home.s);
+        if (h.material && h.matHome) {
+          h.material.color.copy(h.matHome.color);
+          h.material.opacity = h.matHome.opacity;
+          h.material.transparent = h.matHome.opacity < 1;
+          h.material.needsUpdate = true;
+        }
+      });
+      handles.current.clear();
+      compiled.current = [];
+      return;
+    }
+
+    const t = setTimeout(() => {
+      // resolve live Object3Ds by userData.aioeId
+      const found = new Map<string, THREE.Object3D>();
+      scene.traverse((o) => {
+        const id = o.userData?.aioeId as string | undefined;
+        if (id && !found.has(id)) found.set(id, o);
+      });
+
+      const list: CompiledScript[] = [];
+      const newHandles = new Map<string, SelfHandle>();
+      objects.forEach((def) => {
+        (def.scripts ?? []).forEach((s) => {
+          if (!s.enabled) return;
+          const obj3d = found.get(def.id);
+          if (!obj3d) return;
+          if (!newHandles.has(def.id)) {
+            let material: THREE.MeshStandardMaterial | null = null;
+            obj3d.traverse((c) => {
+              const m = (c as THREE.Mesh).material as THREE.MeshStandardMaterial | undefined;
+              if (!material && m && (m as THREE.MeshStandardMaterial).color) material = m as THREE.MeshStandardMaterial;
+            });
+            newHandles.set(def.id, {
+              obj3d,
+              home: { p: obj3d.position.clone(), r: obj3d.rotation.clone(), s: obj3d.scale.clone() },
+              material,
+              matHome: material ? { color: material.color.clone(), opacity: material.opacity } : null,
+              def,
+            });
+          }
+          try {
+            // eslint-disable-next-line @typescript-eslint/no-implied-eval, no-new-func
+            const factory = new Function(
+              "self", "engine", "input", "time", "print",
+              `"use strict";
+               let __update = null, __onStart = null;
+               (function () {
+                 ${s.code}
+                 __update = typeof update === "function" ? update : null;
+                 __onStart = typeof onStart === "function" ? onStart : null;
+               })();
+               return { update: __update, onStart: __onStart };`,
+            );
+            list.push({ objId: def.id, scriptId: s.id, name: s.name, onStart: null, update: null, errored: false, started: false, ...({} as Record<string, never>) });
+            // call factory later with live handles (stored below)
+            (list[list.length - 1] as CompiledScript & { factory?: unknown }).factory = factory;
+          } catch (err) {
+            logDebug("error", `Script "${s.name}" failed to compile: ${(err as Error).message}`);
+          }
+        });
+      });
+      handles.current = newHandles;
+      compiled.current = list;
+      clockStart.current = performance.now();
+      logDebug("success", `Script runtime: ${list.length} script(s) running`);
+    }, 60);
+    return () => clearTimeout(t);
+  }, [active]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useFrame((state, delta) => {
+    if (!active || compiled.current.length === 0) return;
+    const dt = Math.min(delta, 0.05);
+    const time = (performance.now() - clockStart.current) / 1000;
+
+    compiled.current.forEach((cs) => {
+      if (cs.errored) return;
+      const h = handles.current.get(cs.objId);
+      if (!h) return;
+      const fac = (cs as CompiledScript & { factory?: (self: unknown, engine: unknown, input: unknown, time: unknown, print: (msg: string) => void) => { update: ((dt: number, self: unknown) => void) | null; onStart: ((self: unknown, engine: unknown) => void) | null } }).factory;
+      if (!fac) return;
+
+      // lazily create the sandbox per script
+      if (!cs.started) {
+        try {
+          const engine = {
+            time,
+            dt,
+            player: playerRef.current.pos,
+            find: (name: string) => {
+              for (const [, hh] of handles.current) if (hh.def.name === name) return makeSelf(hh);
+              return null;
+            },
+          };
+          const input = {
+            key: (k: string) => !!keysRef.current[k.toLowerCase()],
+            keyPressed: (k: string) => keyPressed.current.has(k.toLowerCase()),
+            mouseDown: playerRef.current.moving, // approximation kept for API completeness
+          };
+          const print = (msg: string) => logDebug("info", `[${cs.name}] ${String(msg)}`);
+          const self = makeSelf(h);
+          const api = fac(self, engine, input, { now: time, dt }, print);
+          cs.update = api.update;
+          cs.onStart = api.onStart;
+          cs.started = true;
+          if (cs.onStart) {
+            try { cs.onStart(self, engine); } catch (err) {
+              cs.errored = true;
+              logDebug("error", `Script "${cs.name}" onStart error: ${(err as Error).message}`);
+            }
+          }
+        } catch (err) {
+          cs.errored = true;
+          logDebug("error", `Script "${cs.name}" init error: ${(err as Error).message}`);
+        }
+        return;
+      }
+
+      if (cs.update) {
+        try {
+          cs.update(dt, makeSelf(h));
+        } catch (err) {
+          cs.errored = true;
+          logDebug("error", `Script "${cs.name}" runtime error: ${(err as Error).message}`);
+        }
+      }
+    });
+  });
+
+  return null;
+}
+
+function makeSelf(h: SelfHandle) {
+  return {
+    name: h.def.name,
+    id: h.def.id,
+    tag: h.def.tag ?? "",
+    get position() { return h.obj3d.position; },
+    set position(v: { x: number; y: number; z: number }) { h.obj3d.position.set(v.x, v.y, v.z); },
+    get rotation() { return h.obj3d.rotation; },
+    get scale() { return h.obj3d.scale; },
+    move(x: number, y: number, z: number) { h.obj3d.position.x += x; h.obj3d.position.y += y; h.obj3d.position.z += z; },
+    rotate(x: number, y: number, z: number) { h.obj3d.rotation.x += x; h.obj3d.rotation.y += y; h.obj3d.rotation.z += z; },
+    setColor(hex: string) { if (h.material) { h.material.color.set(hex); h.material.needsUpdate = true; } },
+    setOpacity(o: number) { if (h.material) { const c = Math.max(0.05, Math.min(1, o)); h.material.opacity = c; h.material.transparent = c < 1; h.material.needsUpdate = true; } },
+  };
+}
+
 // ================= Player controller (first-person / third-person / orbit) =================
-export function PlayerController({ isPlaying, cameraMode, playerRef, keysRef, backupRef }: {
+export function PlayerController({ isPlaying, cameraMode, playerRef, keysRef, backupRef, waterLevel, baseHalf }: {
   isPlaying: boolean;
   cameraMode: "orbit" | "first-person" | "third-person";
   playerRef: React.MutableRefObject<PlayerRef>;
   keysRef: React.MutableRefObject<Record<string, boolean>>;
   backupRef: React.MutableRefObject<{ pos: THREE.Vector3; quat: THREE.Quaternion; target: THREE.Vector3 | null } | null>;
+  waterLevel: number | null;
+  baseHalf: [number, number];
 }) {
   const { camera, controls } = useThree() as unknown as { camera: THREE.PerspectiveCamera; controls: { target: THREE.Vector3; enabled: boolean; update: () => void } | null };
 
@@ -129,7 +414,7 @@ export function PlayerController({ isPlaying, cameraMode, playerRef, keysRef, ba
     }
   }, [isPlaying]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  useFrame((_, delta) => {
+  useFrame((state, delta) => {
     if (!isPlaying) return;
     const dt = Math.min(delta, 0.06);
     const p = playerRef.current;
@@ -137,6 +422,7 @@ export function PlayerController({ isPlaying, cameraMode, playerRef, keysRef, ba
     const speed = (k["shift"] ? 9.5 : 5.2) * (cameraMode === "orbit" ? 1 : 1);
 
     if (cameraMode !== "orbit") {
+      const overWater = waterLevel !== null && (Math.abs(p.pos.x) > baseHalf[0] || Math.abs(p.pos.z) > baseHalf[1]);
       const f = new THREE.Vector3(-Math.sin(p.yaw), 0, -Math.cos(p.yaw));
       const r = new THREE.Vector3().crossVectors(f, UP);
       let mx = 0, mz = 0;
@@ -147,13 +433,24 @@ export function PlayerController({ isPlaying, cameraMode, playerRef, keysRef, ba
       const len = Math.hypot(mx, mz);
       p.moving = len > 0.01;
       if (len > 0.01) {
-        p.pos.x += (mx / len) * speed * dt;
-        p.pos.z += (mz / len) * speed * dt;
+        const spd = speed * (overWater ? 0.5 : 1); // swimming is slower
+        p.pos.x += (mx / len) * spd * dt;
+        p.pos.z += (mz / len) * spd * dt;
       }
-      if (k[" "] && p.onGround) { p.vy = 7.6; p.onGround = false; }
-      p.vy -= 22 * dt;
-      p.pos.y += p.vy * dt;
-      if (p.pos.y <= 0) { p.pos.y = 0; p.vy = 0; p.onGround = true; }
+      if (overWater && waterLevel !== null) {
+        // swim: buoyancy floats you at the surface, gentle bobbing
+        const surface = waterLevel - 1.05 + Math.sin(state_clock_bob(p.pos)) * 0.05;
+        p.vy += (surface - p.pos.y) * 10 * dt;   // spring toward surface
+        p.vy *= 0.86;
+        p.pos.y += p.vy * dt;
+        p.onGround = false;
+        if (k[" "]) p.pos.y += 2.2 * dt;         // paddle up
+      } else {
+        if (k[" "] && p.onGround) { p.vy = 7.6; p.onGround = false; }
+        p.vy -= 22 * dt;
+        p.pos.y += p.vy * dt;
+        if (p.pos.y <= 0) { p.pos.y = 0; p.vy = 0; p.onGround = true; }
+      }
 
       if (cameraMode === "first-person") {
         camera.position.set(p.pos.x, p.pos.y + 1.7, p.pos.z);
@@ -181,6 +478,8 @@ export function PlayerController({ isPlaying, cameraMode, playerRef, keysRef, ba
 
   return null;
 }
+
+function state_clock_bob(p: THREE.Vector3) { return p.x * 0.3 + p.z * 0.2; }
 
 // ================= Transform gizmo (wired move/rotate/scale) =================
 export function GizmoProxy({ obj, tool, snap, enabled, onUpdate, onPushUndo }: {

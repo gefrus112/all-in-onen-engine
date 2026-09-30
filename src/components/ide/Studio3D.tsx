@@ -9,22 +9,25 @@ import {
   Hand, Plus, Trash2, Copy, Play, Pause, Square, Search, User, Send, Sun, Github, Home,
   Upload, Settings, Eye, EyeOff, Lock, Unlock, Rocket, Code2, Palette, Bug,
   Boxes, Magnet, Camera as CameraIcon, Focus, Crosshair, Mountain, Layers, Gamepad2,
+  FileCode2, Power, ChevronDown,
 } from "lucide-react";
 import { useStudio } from "../../lib/studio-store";
 import { toast } from "sonner";
+import { playTap, playClick, playPop, playSuccess } from "../../lib/ui-sounds";
 import {
   ASSET_LIBRARY_3D, LIGHT_TYPES, PALETTE_SIZES, DEFAULT_WORLD, LIGHT_PRESETS, uid,
   defaultComponentsFor, type SceneObject3D, type SceneObjType, type LightSubtype,
   type CameraMode, type WorldSettings, type GUIElement, type DebugLogEntry, type PaletteSize,
+  type ScriptBlock, DEFAULT_SCRIPT_TEMPLATE,
 } from "./studio3d/types";
 import { Object3DMesh, Avatar3D } from "./studio3d/meshes";
 import { RpgRuntime, RpgHud, type RpgState, type PlayerRef } from "./studio3d/rpg";
 import { ComponentsPanel, WorldPanel } from "./studio3d/panels";
-import { WelcomeCard, CodePanel, GuiEditor, DebugConsole, TerrainEditor } from "./studio3d/overlays";
+import { WelcomeCard, CodePanel, GuiEditor, DebugConsole, TerrainEditor, ScriptEditor } from "./studio3d/overlays";
 import { TEMPLATE_3D_SCENES } from "./studio3d/templates";
 import {
   WorldEnvironment, PipelineSettings, ScreenshotRegistrar, PlayerController,
-  GizmoProxy, FocusHandler, RigidBodySim, FollowGroup,
+  GizmoProxy, FocusHandler, RigidBodySim, FollowGroup, ScriptRuntime,
 } from "./studio3d/canvas";
 
 export function Studio3D({ onExit }: { onExit: () => void }) {
@@ -37,7 +40,9 @@ export function Studio3D({ onExit }: { onExit: () => void }) {
   // ---------- scene state ----------
   const [objects, setObjects] = useState<SceneObject3D[]>(() => [
     { id: uid(), name: "Floor", type: "plane", position: [0, 0, 0], rotation: [-Math.PI / 2, 0, 0], scale: [14, 14, 1], color: "#4c9a3f", visible: true, locked: false, components: defaultComponentsFor("plane") },
-    { id: uid(), name: "Box 1", type: "box", position: [3, 0.5, 2], rotation: [0, 0, 0], scale: [1, 1, 1], color: "#3b82f6", visible: true, locked: false, components: defaultComponentsFor("box") },
+    { id: uid(), name: "Box 1", type: "box", position: [3, 0.5, 2], rotation: [0, 0, 0], scale: [1, 1, 1], color: "#3b82f6", visible: true, locked: false, components: defaultComponentsFor("box"), scripts: [
+      { id: uid(), name: "SpinScript", enabled: true, code: DEFAULT_SCRIPT_TEMPLATE },
+    ] },
     { id: uid(), name: "Sphere 1", type: "sphere", position: [-3, 0.5, 1], rotation: [0, 0, 0], scale: [1, 1, 1], color: "#ef4444", visible: true, locked: false, components: defaultComponentsFor("sphere") },
     { id: uid(), name: "Castle Tower", type: "castle-tower", position: [-7, 0, -5], rotation: [0, 0, 0], scale: [1, 1, 1], color: "#9aa0ab", visible: true, locked: false, components: defaultComponentsFor("castle-tower") },
     { id: uid(), name: "Sun Light", type: "light", lightSubtype: "directional", position: [5, 8, 5], rotation: [0, 0, 0], scale: [1, 1, 1], color: "#fff5e0", intensity: 1.2, visible: true, locked: false, components: defaultComponentsFor("light") },
@@ -175,6 +180,8 @@ engine.setPlayerController(player);
     setObjects((os) => [...os, newObj]);
     setSelectedId(newObj.id);
     setRightTab("components");
+    setPlusMenuFor(null);
+    playPop();
     toast.success(`Added ${newObj.name}`);
   };
 
@@ -191,6 +198,7 @@ engine.setPlayerController(player);
     setObjects((os) => [...os, newObj]);
     setSelectedId(newObj.id);
     setRightTab("components");
+    playPop();
     toast.success(`Added ${newObj.name}`);
   };
 
@@ -211,6 +219,61 @@ engine.setPlayerController(player);
 
   const toggleVisible = (id: string) => setObjects((os) => os.map((o) => (o.id === id ? { ...o, visible: !o.visible } : o)));
   const toggleLock = (id: string) => setObjects((os) => os.map((o) => (o.id === id ? { ...o, locked: !o.locked } : o)));
+
+  // ---------- script blocks (Roblox-style) ----------
+  const [editingScript, setEditingScript] = useState<{ objId: string; scriptId: string } | null>(null);
+  const [renamingScriptId, setRenamingScriptId] = useState<string | null>(null);
+  const [plusMenuFor, setPlusMenuFor] = useState<string | null>(null); // obj id or "scene"
+
+  const addScript = useCallback((objId: string) => {
+    pushUndo();
+    const script: ScriptBlock = {
+      id: uid(),
+      name: "Script",
+      code: `// Runs every frame during play test\n// API: self · engine · input · print(...)\n\nfunction update(dt, self) {\n  self.rotation.y += dt * 1.5;\n}`,
+      enabled: true,
+    };
+    setObjects((os) => os.map((o) => (o.id === objId ? { ...o, scripts: [...(o.scripts ?? []), script] } : o)));
+    setEditingScript({ objId, scriptId: script.id });
+    toast.success("Script added — it runs on Play");
+    logDebug("success", "Script block added to object");
+  }, [pushUndo, logDebug]);
+
+  const mutateScript = useCallback((scriptId: string, fn: (s: ScriptBlock) => ScriptBlock) => {
+    setObjects((os) => os.map((o) => ({ ...o, scripts: (o.scripts ?? []).map((s) => (s.id === scriptId ? fn(s) : s)) })));
+  }, []);
+
+  const renameScript = useCallback((scriptId: string, name: string) => mutateScript(scriptId, (s) => ({ ...s, name })), [mutateScript]);
+  const setBlockCode = useCallback((scriptId: string, code: string) => mutateScript(scriptId, (s) => ({ ...s, code })), [mutateScript]);
+  const toggleScriptEnabled = useCallback((scriptId: string) => mutateScript(scriptId, (s) => ({ ...s, enabled: !s.enabled })), [mutateScript]);
+
+  const deleteScript = useCallback((objId: string, scriptId: string) => {
+    pushUndo();
+    setObjects((os) => os.map((o) => (o.id === objId ? { ...o, scripts: (o.scripts ?? []).filter((s) => s.id !== scriptId) } : o)));
+    setEditingScript((cur) => (cur?.scriptId === scriptId ? null : cur));
+  }, [pushUndo]);
+
+  const editingTarget = useMemo(() => {
+    if (!editingScript) return null;
+    const obj = objects.find((o) => o.id === editingScript.objId);
+    const script = obj?.scripts?.find((s) => s.id === editingScript.scriptId);
+    return obj && script ? { obj, script } : null;
+  }, [editingScript, objects]);
+
+  const scriptCount = useMemo(() => objects.reduce((n, o) => n + (o.scripts?.length ?? 0), 0), [objects]);
+
+  // baseplate half-extents (largest ground plane) + water level for the controller
+  const baseHalf = useMemo<[number, number]>(() => {
+    let hx = 7, hz = 7;
+    objects.forEach((o) => {
+      if (o.type === "plane" || o.type === "terrain") {
+        hx = Math.max(hx, Math.abs(o.scale[0]) / 2);
+        hz = Math.max(hz, Math.abs(o.type === "terrain" ? o.scale[2] : o.scale[1]) / 2);
+      }
+    });
+    return [hx, hz];
+  }, [objects]);
+  const playWaterLevel = world.edgeWater ? world.edgeWaterLevel : null;
 
   const setWorld = (patch: Partial<WorldSettings>) => setWorldState((w) => ({ ...w, ...patch }));
 
@@ -280,8 +343,11 @@ engine.setPlayerController(player);
     setIsPlaying(true);
     setLockLost(false);
     setRpgState(null);
-    logDebug("success", `Play test started — ${cameraMode} camera · mode: ${gameMode}`);
-    toast.success(gameMode === "rpg" ? "RPG quest started — collect 8 coins!" : `Play test — ${cameraMode}`);
+    playSuccess();
+    logDebug("success", `Play test started — ${cameraMode} camera · mode: ${gameMode}${scriptCount ? ` · ${scriptCount} script(s) running` : ""}`);
+    toast.success(gameMode === "rpg" ? "RPG quest started — collect 8 coins!" : `Play test — ${cameraMode}`, {
+      description: scriptCount ? `${scriptCount} script(s) attached and running` : undefined,
+    });
     if (cameraMode !== "orbit") requestLock();
   };
 
@@ -290,6 +356,7 @@ engine.setPlayerController(player);
     setIsPlaying(false);
     setLockLost(false);
     setRpgState(null);
+    playTap();
     logDebug("info", "Play test stopped — back to editing");
   }, [logDebug]);
 
@@ -541,37 +608,125 @@ engine.setPlayerController(player);
           <div className="flex-1 overflow-y-auto py-1">
             {leftPanel === "explorer" && (
               <>
-                <div className="px-2 py-1 text-[10px] uppercase tracking-wider text-muted-foreground">Scene ({objects.length})</div>
+                <div className="px-2 py-1 flex items-center justify-between">
+                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                    Scene ({objects.length}){scriptCount > 0 && <span className="text-cyan-400/80"> · {scriptCount} script{scriptCount > 1 ? "s" : ""}</span>}
+                  </span>
+                  <div className="relative">
+                    <button
+                      onClick={() => { setPlusMenuFor(plusMenuFor === "scene" ? null : "scene"); playClick(); }}
+                      className="w-4 h-4 rounded flex items-center justify-center bg-white/5 hover:bg-cyan-500/30 hover:text-cyan-300"
+                      title="Add object to scene"
+                    >
+                      <Plus className="w-3 h-3" />
+                    </button>
+                    {plusMenuFor === "scene" && (
+                      <div className="absolute right-0 top-full mt-1 w-40 rounded-lg bg-[#181c24] border border-white/10 shadow-xl z-30 overflow-hidden">
+                        {([["box", "Box"], ["sphere", "Sphere"], ["cylinder", "Cylinder"], ["cone", "Cone"], ["torus", "Torus"]] as const).map(([t, label]) => (
+                          <button key={t} onClick={() => addObject(t)} className="w-full text-left px-3 py-1.5 text-[11px] hover:bg-cyan-500/15 flex items-center gap-2">
+                            <Plus className="w-3 h-3 text-cyan-400" /> {label}
+                          </button>
+                        ))}
+                        <button onClick={() => { addLight("point"); setPlusMenuFor(null); }} className="w-full text-left px-3 py-1.5 text-[11px] hover:bg-cyan-500/15 flex items-center gap-2">
+                          <Lightbulb className="w-3 h-3 text-yellow-400" /> Point Light
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
                 {objects.map((obj) => (
-                  <div key={obj.id}
-                    className={`flex items-center gap-1 px-2 py-1 text-xs cursor-pointer ${selectedId === obj.id ? "bg-cyan-500/20 text-white" : "hover:bg-white/5"}`}
-                    onClick={() => onSelectObj(obj.id)}>
-                    <span className="w-4 flex justify-center">
-                      {obj.rpgKind === "coin" ? <span className="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block" /> :
-                       obj.rpgKind === "slime" ? <span className="w-2.5 h-2.5 rounded-full bg-green-400 inline-block" /> :
-                       obj.rpgKind === "npc" ? <User className="w-3 h-3 text-purple-400" /> :
-                       obj.rpgKind === "chest" ? <Boxes className="w-3 h-3 text-amber-500" /> :
-                       obj.type === "light" ? <Lightbulb className="w-3 h-3 text-yellow-400" /> :
-                       obj.type === "box" ? <BoxIcon className="w-3 h-3 text-blue-400" /> :
-                       obj.type === "sphere" ? <Circle className="w-3 h-3 text-green-400" /> :
-                       obj.type === "cylinder" ? <Cylinder className="w-3 h-3 text-yellow-400" /> :
-                       obj.type === "cone" ? <Cone className="w-3 h-3 text-red-400" /> :
-                       obj.type === "torus" ? <Torus className="w-3 h-3 text-purple-400" /> :
-                       ["castle-tower", "fountain", "treasure-chest", "oak-tree", "cottage", "lamp-post", "npc-villager"].includes(obj.type) ? <Boxes className="w-3 h-3 text-cyan-300" /> :
-                       <Plane className="w-3 h-3 text-cyan-400" />}
-                    </span>
-                    <span className="flex-1 truncate">{obj.name}</span>
-                    {obj.rpgKind && <span className="text-[8px] px-1 rounded bg-white/10 text-white/50 uppercase">{obj.rpgKind}</span>}
-                    <button onClick={(e) => { e.stopPropagation(); toggleVisible(obj.id); }} className="opacity-50 hover:opacity-100">
-                      {obj.visible ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
-                    </button>
-                    <button onClick={(e) => { e.stopPropagation(); toggleLock(obj.id); }} className="opacity-50 hover:opacity-100">
-                      {obj.locked ? <Lock className="w-3 h-3" /> : <Unlock className="w-3 h-3" />}
-                    </button>
-                    <button onClick={(e) => { e.stopPropagation(); duplicateObject(obj.id); }} className="opacity-50 hover:opacity-100"><Copy className="w-3 h-3" /></button>
-                    <button onClick={(e) => { e.stopPropagation(); deleteObject(obj.id); }} className="opacity-50 hover:opacity-100 hover:text-red-400"><Trash2 className="w-3 h-3" /></button>
+                  <div key={obj.id}>
+                    <div
+                      className={`group flex items-center gap-1 px-2 py-1 text-xs cursor-pointer ${selectedId === obj.id ? "bg-cyan-500/20 text-white" : "hover:bg-white/5"}`}
+                      onClick={() => onSelectObj(obj.id)}>
+                      <span className="w-4 flex justify-center">
+                        {obj.rpgKind === "coin" ? <span className="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block" /> :
+                         obj.rpgKind === "slime" ? <span className="w-2.5 h-2.5 rounded-full bg-green-400 inline-block" /> :
+                         obj.rpgKind === "npc" ? <User className="w-3 h-3 text-purple-400" /> :
+                         obj.rpgKind === "chest" ? <Boxes className="w-3 h-3 text-amber-500" /> :
+                         obj.type === "light" ? <Lightbulb className="w-3 h-3 text-yellow-400" /> :
+                         obj.type === "box" ? <BoxIcon className="w-3 h-3 text-blue-400" /> :
+                         obj.type === "sphere" ? <Circle className="w-3 h-3 text-green-400" /> :
+                         obj.type === "cylinder" ? <Cylinder className="w-3 h-3 text-yellow-400" /> :
+                         obj.type === "cone" ? <Cone className="w-3 h-3 text-red-400" /> :
+                         obj.type === "torus" ? <Torus className="w-3 h-3 text-purple-400" /> :
+                         ["castle-tower", "fountain", "treasure-chest", "oak-tree", "cottage", "lamp-post", "npc-villager"].includes(obj.type) ? <Boxes className="w-3 h-3 text-cyan-300" /> :
+                         <Plane className="w-3 h-3 text-cyan-400" />}
+                      </span>
+                      <span className="flex-1 truncate">{obj.name}</span>
+                      {obj.rpgKind && <span className="text-[8px] px-1 rounded bg-white/10 text-white/50 uppercase">{obj.rpgKind}</span>}
+                      {/* Roblox-style + : add a script / child object */}
+                      <div className="relative">
+                        <button
+                          onClick={(e) => { e.stopPropagation(); setPlusMenuFor(plusMenuFor === obj.id ? null : obj.id); playClick(); }}
+                          className="w-4 h-4 rounded items-center justify-center bg-white/5 hover:bg-cyan-500/30 hover:text-cyan-300 hidden group-hover:flex"
+                          title="Add script or object"
+                        >
+                          <Plus className="w-3 h-3" />
+                        </button>
+                        {plusMenuFor === obj.id && (
+                          <div className="absolute left-0 top-full mt-1 w-36 rounded-lg bg-[#181c24] border border-white/10 shadow-xl z-30 overflow-hidden" onClick={(e) => e.stopPropagation()}>
+                            <button onClick={() => { addScript(obj.id); setPlusMenuFor(null); }} className="w-full text-left px-3 py-1.5 text-[11px] hover:bg-cyan-500/15 flex items-center gap-2">
+                              <FileCode2 className="w-3 h-3 text-cyan-400" /> Script
+                            </button>
+                            <div className="px-3 py-1 text-[9px] uppercase tracking-wider text-muted-foreground border-t border-white/5">also add:</div>
+                            <button onClick={() => addObject("box")} className="w-full text-left px-3 py-1.5 text-[11px] hover:bg-cyan-500/15 flex items-center gap-2"><BoxIcon className="w-3 h-3 text-blue-400" /> Box</button>
+                            <button onClick={() => addObject("sphere")} className="w-full text-left px-3 py-1.5 text-[11px] hover:bg-cyan-500/15 flex items-center gap-2"><Circle className="w-3 h-3 text-green-400" /> Sphere</button>
+                            <button onClick={() => { addLight("point"); setPlusMenuFor(null); }} className="w-full text-left px-3 py-1.5 text-[11px] hover:bg-cyan-500/15 flex items-center gap-2"><Lightbulb className="w-3 h-3 text-yellow-400" /> Light</button>
+                          </div>
+                        )}
+                      </div>
+                      <button onClick={(e) => { e.stopPropagation(); toggleVisible(obj.id); }} className="opacity-50 hover:opacity-100">
+                        {obj.visible ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
+                      </button>
+                      <button onClick={(e) => { e.stopPropagation(); toggleLock(obj.id); }} className="opacity-50 hover:opacity-100">
+                        {obj.locked ? <Lock className="w-3 h-3" /> : <Unlock className="w-3 h-3" />}
+                      </button>
+                      <button onClick={(e) => { e.stopPropagation(); duplicateObject(obj.id); }} className="opacity-50 hover:opacity-100"><Copy className="w-3 h-3" /></button>
+                      <button onClick={(e) => { e.stopPropagation(); deleteObject(obj.id); }} className="opacity-50 hover:opacity-100 hover:text-red-400"><Trash2 className="w-3 h-3" /></button>
+                    </div>
+
+                    {/* script blocks nested under the object */}
+                    {(obj.scripts ?? []).map((s) => (
+                      <div key={s.id}
+                        className={`flex items-center gap-1 pl-7 pr-2 py-0.5 text-[11px] cursor-pointer ${editingScript?.scriptId === s.id ? "bg-cyan-500/15 text-cyan-200" : "text-white/70 hover:bg-white/5"}`}
+                        onClick={() => { if (renamingScriptId !== s.id) { setEditingScript({ objId: obj.id, scriptId: s.id }); playClick(); } }}
+                        onDoubleClick={(e) => { e.stopPropagation(); setRenamingScriptId(s.id); }}>
+                        <FileCode2 className={`w-3 h-3 flex-shrink-0 ${s.enabled ? "text-cyan-400" : "text-white/25"}`} />
+                        {renamingScriptId === s.id ? (
+                          <input
+                            autoFocus
+                            defaultValue={s.name}
+                            onBlur={(e) => { renameScript(s.id, e.target.value.trim() || s.name); setRenamingScriptId(null); }}
+                            onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); if (e.key === "Escape") setRenamingScriptId(null); }}
+                            onClick={(e) => e.stopPropagation()}
+                            className="flex-1 min-w-0 bg-black/50 px-1 py-0.5 text-[11px] outline-none border border-cyan-500 rounded"
+                            spellCheck={false}
+                          />
+                        ) : (
+                          <span className="flex-1 truncate" title="Click to edit · double-click to rename">{s.name}</span>
+                        )}
+                        <button
+                          onClick={(e) => { e.stopPropagation(); toggleScriptEnabled(s.id); playTap(); }}
+                          className={`opacity-60 hover:opacity-100 ${s.enabled ? "text-green-400" : "text-white/25"}`}
+                          title={s.enabled ? "Enabled — runs on Play (click to disable)" : "Disabled (click to enable)"}
+                        >
+                          <Power className="w-3 h-3" />
+                        </button>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); deleteScript(obj.id, s.id); }}
+                          className="opacity-50 hover:opacity-100 hover:text-red-400"
+                          title="Delete script"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ))}
                   </div>
                 ))}
+                <div className="px-2 pt-2 pb-1 text-[9px] text-muted-foreground leading-relaxed border-t border-white/5 mt-1">
+                  <span className="text-cyan-400">+ </span>on any object adds a script — scripts run every frame during Play. Click a script to edit it, double-click to rename.
+                </div>
               </>
             )}
 
@@ -649,7 +804,7 @@ engine.setPlayerController(player);
             onClick={() => { if (!isPlaying) setSelectedId(null); }}
           >
             <PipelineSettings world={world} />
-            <WorldEnvironment world={world} hideGrid={!world.showGrid || (isPlaying && gameMode === "rpg")} />
+            <WorldEnvironment world={world} hideGrid={!world.showGrid || (isPlaying && gameMode === "rpg")} baseHalf={baseHalf} />
 
             {staticObjects.map((obj) => (
               <Object3DMesh key={obj.id} obj={obj} selected={selectedId === obj.id && !isPlaying} onSelect={() => onSelectObj(obj.id)} />
@@ -676,7 +831,10 @@ engine.setPlayerController(player);
               playerRef={canvasPlayerRef}
               keysRef={keysRef}
               backupRef={camBackupRef}
+              waterLevel={playWaterLevel}
+              baseHalf={baseHalf}
             />
+            <ScriptRuntime objects={objects} active={isPlaying} keysRef={keysRef} playerRef={canvasPlayerRef} logDebug={logDebug} />
             <GizmoProxy obj={selectedObj} tool={activeTool} snap={snapEnabled} enabled={!isPlaying} onUpdate={updateProp} onPushUndo={pushUndo} />
             <FocusHandler focusCounter={focusCounter} objects={objects} selectedId={selectedId} />
             <RigidBodySim objects={objects} active={isPlaying} />
@@ -839,6 +997,17 @@ engine.setPlayerController(player);
 
       {/* ================= OVERLAYS ================= */}
       {showWelcome && <WelcomeCard onClose={() => setShowWelcome(false)} />}
+
+      {editingTarget && (
+        <ScriptEditor
+          objectName={editingTarget.obj.name}
+          scriptName={editingTarget.script.name}
+          code={editingTarget.script.code}
+          onChange={(v) => setBlockCode(editingTarget.script.id, v)}
+          onRename={(v) => renameScript(editingTarget.script.id, v)}
+          onClose={() => { setEditingScript(null); playTap(); }}
+        />
+      )}
 
       {codePanelOpen && (
         <CodePanel
