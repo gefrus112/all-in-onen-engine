@@ -7,6 +7,10 @@ const nextConfig: NextConfig = {
   output: isGitHubPages ? "export" : "standalone",
   images: isGitHubPages ? { unoptimized: true } : undefined,
   basePath: isGitHubPages ? "/all-in-onen-engine" : "",
+  env: {
+    // Used by plain <img> tags (Next basePath only applies to next/image & next/link)
+    NEXT_PUBLIC_ASSET_BASE: isGitHubPages ? "/all-in-onen-engine" : "",
+  },
   typescript: {
     ignoreBuildErrors: true,
   },

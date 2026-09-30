@@ -11,6 +11,9 @@ import {
 import { useStudio, EngineKind } from "../../lib/studio-store";
 import { toast } from "sonner";
 
+const ASSET_BASE = process.env.NEXT_PUBLIC_ASSET_BASE || "";
+const A = (p: string) => `${ASSET_BASE}${p}`;
+
 const GITHUB_URL = "https://github.com/gefrus112/all-in-onen-engine";
 const LIVE_URL = "https://gefrus112.github.io/all-in-onen-engine/";
 
@@ -24,7 +27,7 @@ const ENGINES: {
     name: "Pygame 2D",
     tagline: "Python in your browser",
     description: "Write Python, see it run live in the browser via Pyodide at 60 FPS. Sprite-based 2D games with full physics, ECS, AI and multiplayer.",
-    iconSrc: "/engine-pygame.svg",
+    iconSrc: A("/engine-pygame.svg"),
     gradient: "linear-gradient(135deg, #3b82f6, #1e40af)",
     glow: "59,130,246",
     tags: ["Python", "Pyodide", "2D", "Sprite-based"],
@@ -43,7 +46,7 @@ const ENGINES: {
     name: "Three.js 3D",
     tagline: "Real 3D in the browser",
     description: "Build 3D games with a live Three.js viewport. Place meshes, lights, cameras. Full Roblox Studio-style editor with explorer, properties and timeline.",
-    iconSrc: "/engine-threejs.svg",
+    iconSrc: A("/engine-threejs.svg"),
     gradient: "linear-gradient(135deg, #8b5cf6, #4c1d95)",
     glow: "139,92,246",
     tags: ["Three.js", "WebGL", "3D", "Real-time"],
@@ -62,7 +65,7 @@ const ENGINES: {
     name: "Zhitlow 3D",
     tagline: "Experimental high-perf 3D",
     description: "Our experimental custom 3D engine with deferred rendering, PBR materials and built-in networking. Optimized for large open-world games.",
-    iconSrc: "/engine-zhitlow.svg",
+    iconSrc: A("/engine-zhitlow.svg"),
     gradient: "linear-gradient(135deg, #06b6d4, #0e7490)",
     glow: "6,182,212",
     tags: ["Experimental", "PBR", "Deferred", "Open-world"],
@@ -297,7 +300,7 @@ const SPRITE_LIST = [
   "/sprites/weapons/sword_iron.png", "/sprites/weapons/bow.png", "/sprites/weapons/staff.png",
   "/sprites/characters/cat_orange.png", "/sprites/characters/npc_villager.png",
   "/sprites/powerups/heart.png", "/sprites/powerups/shield.png",
-];
+].map(A);
 
 const NAV_SECTIONS = [
   { id: "home", label: "Home" },
@@ -557,7 +560,7 @@ export function LandingPage({
       <nav className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${scrolled ? "ae-glass" : ""}`} style={{ padding: scrolled ? "10px 0" : "18px 0" }}>
         <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
           <button onClick={() => scrollTo("home")} className="flex items-center gap-2.5 group">
-            <img src="/logo.svg" alt="All In One Engine" className="w-9 h-9 group-hover:rotate-12 transition-transform duration-300" />
+            <img src={A("/logo.svg")} alt="All In One Engine" className="w-9 h-9 group-hover:rotate-12 transition-transform duration-300" />
             <div className="text-left">
               <div className="font-bold text-[15px] leading-tight tracking-tight">
                 All In One <span className="ae-gradient-text">Engine</span>
@@ -588,16 +591,16 @@ export function LandingPage({
         <div ref={heroRef} className="max-w-6xl mx-auto text-center relative">
           {/* floating pixel sprites */}
           <div className="hidden md:block absolute -left-24 top-10 ae-float opacity-90 pointer-events-none">
-            <img src="/sprites/player/knight.png" alt="" className="w-20 h-20 ae-pixel" style={{ imageRendering: "pixelated" }} />
+            <img src={A("/sprites/player/knight.png")} alt="" className="w-20 h-20 ae-pixel" style={{ imageRendering: "pixelated" }} />
           </div>
           <div className="hidden md:block absolute -right-20 top-24 ae-float-2 opacity-90 pointer-events-none">
-            <img src="/sprites/enemies/slime_purple.png" alt="" className="w-16 h-16 ae-pixel" style={{ imageRendering: "pixelated" }} />
+            <img src={A("/sprites/enemies/slime_purple.png")} alt="" className="w-16 h-16 ae-pixel" style={{ imageRendering: "pixelated" }} />
           </div>
           <div className="hidden lg:block absolute left-10 bottom-24 ae-float-2 opacity-70 pointer-events-none">
-            <img src="/sprites/props/portal.png" alt="" className="w-14 h-14 ae-pixel" style={{ imageRendering: "pixelated" }} />
+            <img src={A("/sprites/props/portal.png")} alt="" className="w-14 h-14 ae-pixel" style={{ imageRendering: "pixelated" }} />
           </div>
           <div className="hidden lg:block absolute right-16 bottom-40 ae-float opacity-70 pointer-events-none">
-            <img src="/sprites/coins/coin_gold.png" alt="" className="w-12 h-12 ae-pixel" style={{ imageRendering: "pixelated" }} />
+            <img src={A("/sprites/coins/coin_gold.png")} alt="" className="w-12 h-12 ae-pixel" style={{ imageRendering: "pixelated" }} />
           </div>
 
           <div className="ae-eyebrow mb-8">
@@ -1069,7 +1072,7 @@ bun run dev   # → http://localhost:3000`}</code></pre>
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="flex items-center gap-2.5">
-              <img src="/logo.svg" alt="All In One Engine" className="w-7 h-7" />
+              <img src={A("/logo.svg")} alt="All In One Engine" className="w-7 h-7" />
               <div>
                 <div className="text-sm font-bold">All In One <span className="ae-gradient-text">Engine</span></div>
                 <div className="text-[10px] text-white/35 font-mono">MIT License · 2D + 3D + Multiplayer</div>
