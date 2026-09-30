@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { useStudio, EngineKind } from "../../lib/studio-store";
 import { toast } from "sonner";
+import { AllyAvatar } from "./AllyAvatar";
 
 const ASSET_BASE = process.env.NEXT_PUBLIC_ASSET_BASE || "";
 const A = (p: string) => `${ASSET_BASE}${p}`;
@@ -34,6 +35,7 @@ const ENGINES: {
     version: "v1.0.0",
     lastUpdate: "2026-09-27",
     updates: [
+      "NEW: Ally-5 avatar + 25-article game-dev knowledge + 256k context",
       "NEW: Ally-5 AI assistant — builds games from a prompt",
       "NEW: Terminal with pip packages + `ally` command",
       "Real sprite loading: load_image() in games",
@@ -1069,16 +1071,22 @@ bun run dev   # → http://localhost:3000`}</code></pre>
       <section className="relative z-10 py-24 px-6">
         <div className="max-w-6xl mx-auto reveal">
           <div className="text-center mb-14">
+            <div className="flex justify-center mb-6">
+              <div className="ally-av-ring" style={{ width: 84, height: 84 }}>
+                <AllyAvatar size={72} />
+              </div>
+            </div>
             <div className="ae-eyebrow mb-5">
               <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
-              New · ships in every Pygame studio
+              New face · new brain · ships in every Pygame studio
             </div>
             <h2 className="text-4xl md:text-6xl font-bold tracking-tight mb-5">
               Meet <span className="ae-gradient-text">Ally-5</span>
             </h2>
             <p className="text-white/50 max-w-2xl mx-auto">
-              A real AI game developer built into the engine. Describe any game in one sentence and Ally-5 writes a complete,
-              playable <span className="text-emerald-300 font-mono text-[13px]">main.py</span> — then runs it. Five models. Zero setup. 100% in your browser.
+              A real AI game developer built into the engine — now with her own smiling face, a 25-article game-dev
+              brain, and deep context for huge code and long chats. Describe any game in one sentence and Ally-5
+              writes a complete, playable <span className="text-emerald-300 font-mono text-[13px]">main.py</span> — then runs it. Five models. Zero setup. 100% in your browser.
             </p>
           </div>
 
@@ -1086,12 +1094,10 @@ bun run dev   # → http://localhost:3000`}</code></pre>
             {/* Mock chat — spans 3 */}
             <div className="lg:col-span-3 ae-card p-0 overflow-hidden">
               <div className="flex items-center gap-2.5 px-4 py-3 border-b border-white/5 bg-white/[0.02]">
-                <div className="w-7 h-7 rounded-full bg-gradient-to-br from-indigo-500 via-emerald-400 to-pink-500 flex items-center justify-center">
-                  <Sparkles className="w-3.5 h-3.5 text-white" />
-                </div>
+                <AllyAvatar size={30} />
                 <div>
                   <div className="text-[13px] font-bold text-white">Ally</div>
-                  <div className="text-[9.5px] font-mono text-white/35 uppercase tracking-widest">Ally-5 Pro · in your engine</div>
+                  <div className="text-[9.5px] font-mono text-white/35 uppercase tracking-widest">Ally-5 Pro · ctx 128k · in your engine</div>
                 </div>
                 <div className="flex-1" />
                 <span className="text-[9.5px] font-mono px-2 py-1 rounded-full border border-emerald-400/30 text-emerald-300">online</span>
@@ -1134,11 +1140,11 @@ class SnakeScene(Scene):
                 <p className="text-[11px] text-white/35 font-mono uppercase tracking-widest mb-4">5 models · one switch</p>
                 <div className="space-y-2.5">
                   {[
-                    ["#4ade80", "Ally-5 Nano", "instant answers"],
-                    ["#22d3ee", "Ally-5 Fast", "quick builds"],
-                    ["#818cf8", "Ally-5 Pro", "balanced · default"],
-                    ["#f472b6", "Ally-5 Max", "deep thinking + juice"],
-                    ["#fbbf24", "Ally-5 Game", "game genesis specialist"],
+                    ["#4ade80", "Ally-5 Nano", "instant answers · ctx 16k"],
+                    ["#22d3ee", "Ally-5 Fast", "quick builds · ctx 64k"],
+                    ["#818cf8", "Ally-5 Pro", "balanced default · ctx 128k"],
+                    ["#f472b6", "Ally-5 Max", "deep thinking · ctx 256k"],
+                    ["#fbbf24", "Ally-5 Game", "game genesis · ctx 200k"],
                   ].map(([c, n, d]) => (
                     <div key={n} className="flex items-center gap-2.5">
                       <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: c as string, boxShadow: `0 0 8px ${c}` }} />
@@ -1153,6 +1159,9 @@ class SnakeScene(Scene):
                 <div className="space-y-2.5">
                   {[
                     "Writes complete games from any prompt",
+                    "Reads huge code — paste it, get a structure map",
+                    "Game-dev brain: 25 articles (collision, game feel, level design…)",
+                    "Remembers you — name, colors, difficulty taste",
                     "Terminal access — `ally make me a pong`",
                     "Explains the engine, line by line",
                     "Diagnoses errors before you hit Run",

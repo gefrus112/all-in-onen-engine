@@ -37,5 +37,6 @@ browser shim mirrors, so code is portable both ways:
 
 ## Ally-5 knowledge base (`ally5-knowledge/`)
 
-- `model-card.json` — the Ally-5 model card: architecture, training data, capabilities
-- `training-corpus.json` — the intent/game-template corpus the model was trained on
+- `model-card.json` — the Ally-5 model card: architecture, training data, context windows, capabilities
+- `training-corpus.json` — the intent/game-template corpus the model was trained on (v5.4: includes memory + context-window specs)
+- `gamedev-knowledge.json` — **the full 25-article game-dev curriculum Ally answers from** (~4,500 words): code patterns (game loop, collision, state machines, entities, vectors, cameras), game feel (juice, screen shake, particles, animation, sound), design theory (difficulty, levels, color, scoring, bosses, RNG), genre recipes (platformer, shooter, top-down, roguelike), the engine API cheat sheet, and shipping topics (debugging, optimization, playtesting). Runtime retrieval is keyword-scored in `src/lib/ally5-knowledge.ts`; this JSON is the downloadable pack.

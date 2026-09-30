@@ -6,7 +6,7 @@
 import { useEffect, useRef, useState } from "react";
 import { TerminalSquare, Trash2 } from "lucide-react";
 import { useStudio } from "../../lib/studio-store";
-import { ALLY_MODELS, respond, ALLY_VERSION } from "../../lib/ally5";
+import { ALLY_MODELS, respond, ALLY_VERSION, fmtCtx } from "../../lib/ally5";
 import { playTap, playSuccess } from "../../lib/ui-sounds";
 
 const ASSET_BASE = process.env.NEXT_PUBLIC_ASSET_BASE || "";
@@ -172,7 +172,7 @@ export function Terminal() {
       }
       case "model":
         push(ALLY_VERSION, "ok");
-        ALLY_MODELS.forEach((m) => push(`  ${m.name.padEnd(14)} ${m.tag} — ${m.desc}`, "out"));
+        ALLY_MODELS.forEach((m) => push(`  ${m.name.padEnd(14)} ctx ${fmtCtx(m.ctx).padEnd(5)} ${m.tag} — ${m.desc}`, "out"));
         break;
       case "neofetch":
         push("        .--.        dev@lapia", "ok");

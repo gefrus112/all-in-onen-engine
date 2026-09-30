@@ -1,28 +1,37 @@
 {
   "model": "Ally-5",
   "family": ["Ally-5 Nano", "Ally-5 Fast", "Ally-5 Pro", "Ally-5 Max", "Ally-5 Game"],
-  "build": "3.3.0",
+  "build": "3.4.0",
   "developer": "All In One Engine",
-  "type": "local game-generation model (intent classifier + parameter extractor + template assembler)",
-  "training_examples": 48213,
+  "type": "local game-generation model (intent classifier + parameter extractor + template assembler + knowledge retriever)",
+  "training_examples": 91730,
+  "mascot": "public/ally5-avatar.svg — the official cute smiling Ally face (animated component: src/components/ide/AllyAvatar.tsx)",
   "training_data": {
     "corpus": "packages/ally5-knowledge/training-corpus.json",
+    "knowledge_base": "packages/ally5-knowledge/gamedev-knowledge.json",
     "sources": [
       "lapia_shim engine API surface",
       "game kernels: snake, pong, shooter, flappy, breakout, coin-collector",
       "toolbox sprite manifest (134 sprites, 15 categories)",
       "console error patterns + fixes",
-      "terminal command transcripts"
+      "terminal command transcripts",
+      "game-dev curriculum: 25 articles across code patterns, game feel, design theory, genre recipes, engine API and shipping (≈4,500 words)"
     ]
   },
   "capabilities": [
     "generate complete playable games from a single sentence",
     "tune difficulty / colors / collectibles of an existing build",
+    "understand large code: paste thousands of lines and get a structure map (classes, methods, hooks, sprites, game-loop wiring)",
+    "answer game-dev questions from a 25-article knowledge base with keyword-scored retrieval",
+    "multi-turn conversation memory: name, preferences, recent topics — persisted in localStorage across reloads",
     "explain the engine API with examples",
     "static-analysis diagnostics on main.py before running",
     "answer from the sprite library catalog",
     "run inside the Terminal via the 'ally' command"
   ],
+  "context_windows": {
+    "Ally-5 Nano": "16k", "Ally-5 Fast": "64k", "Ally-5 Pro": "128k", "Ally-5 Max": "256k", "Ally-5 Game": "200k"
+  },
   "runtime": "100% in-browser (WebAssembly + canvas). No network calls, no API keys, no telemetry.",
   "license": "MIT-Lapia-Showcase-Restriction (see LICENSE)"
 }

@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="128" height="128">
+  <title>Ally-5 mascot — the AI game developer of All In One Engine</title>
+  <defs>
+    <linearGradient id="body" x1="10" y1="14" x2="54" y2="58" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#5eead4"/>
+      <stop offset="0.45" stop-color="#22d3ee"/>
+      <stop offset="1" stop-color="#6366f1"/>
+    </linearGradient>
+    <radialGradient id="shine" cx="0.32" cy="0.24" r="0.75">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.55"/>
+      <stop offset="0.5" stop-color="#ffffff" stop-opacity="0.08"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- antenna + sparkle -->
+  <path d="M32 15 C32 11 30.5 9.5 29 8" stroke="url(#body)" stroke-width="2.4" stroke-linecap="round" fill="none"/>
+  <path d="M29 1.6 L30.4 5.6 L34.4 7 L30.4 8.4 L29 12.4 L27.6 8.4 L23.6 7 L27.6 5.6 Z" fill="#fde68a"/>
+
+  <!-- body -->
+  <circle cx="32" cy="38" r="23" fill="url(#body)"/>
+  <circle cx="32" cy="38" r="23" fill="url(#shine)"/>
+  <path d="M14.5 47 A23 23 0 0 0 49.5 47" stroke="rgba(255,255,255,0.35)" stroke-width="1.6" stroke-linecap="round" fill="none"/>
+
+  <!-- eyes -->
+  <ellipse cx="24" cy="36.5" rx="3.6" ry="5" fill="#0b1020"/>
+  <ellipse cx="41" cy="36.5" rx="3.6" ry="5" fill="#0b1020"/>
+  <circle cx="25.3" cy="34.6" r="1.5" fill="#ffffff"/>
+  <circle cx="42.3" cy="34.6" r="1.5" fill="#ffffff"/>
+  <circle cx="22.8" cy="38.8" r="0.8" fill="#7dd3fc" opacity="0.9"/>
+  <circle cx="39.8" cy="38.8" r="0.8" fill="#7dd3fc" opacity="0.9"/>
+
+  <!-- blush -->
+  <ellipse cx="16.5" cy="42.5" rx="3.4" ry="2" fill="#f472b6" opacity="0.55"/>
+  <ellipse cx="48.5" cy="42.5" rx="3.4" ry="2" fill="#f472b6" opacity="0.55"/>
+
+  <!-- smile -->
+  <path d="M26.5 43.5 Q32.5 49.5 38.5 43.5" stroke="#0b1020" stroke-width="2.4" stroke-linecap="round" fill="none"/>
+  <path d="M30 46.4 Q32.5 48.2 35 46.4" stroke="#f472b6" stroke-width="1.6" stroke-linecap="round" fill="none" opacity="0.85"/>
+</svg>

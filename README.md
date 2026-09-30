@@ -16,7 +16,7 @@ Write **Python** or **JavaScript**, hit **Play**, and see your game run live at 
 [![Python](https://img.shields.io/badge/Python-3.12-3776ab?style=flat-square&logo=python&logoColor=white&labelColor=0a0a12)](https://www.python.org/)
 [![Three.js](https://img.shields.io/badge/Three.js-r186-white?style=flat-square&logo=threedotjs&labelColor=0a0a12)](https://threejs.org/)
 [![Pyodide](https://img.shields.io/badge/Pyodide-0.26-8b5cf6?style=flat-square&labelColor=0a0a12)](https://pyodide.org/)
-[![Ally-5 AI](https://img.shields.io/badge/🤖_Ally--5-AI_Assistant-6366f1?style=flat-square&labelColor=0a0a12)](#-new-in-v33--meet-ally-5-your-built-in-ai-game-developer)
+[![Ally-5 AI](https://img.shields.io/badge/🤖_Ally--5-AI_Assistant-6366f1?style=flat-square&labelColor=0a0a12)](#-new-in-v34--ally-5-gets-a-face-a-brain-and-a-memory)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-f97316?style=flat-square&labelColor=0a0a12)](CONTRIBUTING.md)
 
 **[🌐 Launch the IDE](https://gefrus112.github.io/all-in-onen-engine/)** · **[📖 Wiki](https://github.com/gefrus112/all-in-onen-engine/wiki)** · **[📦 Releases](https://github.com/gefrus112/all-in-onen-engine/releases)** · **[🐛 Report Bug](https://github.com/gefrus112/all-in-onen-engine/issues)**
@@ -33,16 +33,25 @@ Write **Python** or **JavaScript**, hit **Play**, and see your game run live at 
 
 <br />
 
-## 🤖 NEW in v3.3 — Meet Ally-5, your built-in AI game developer
+## 🤖 NEW in v3.4 — Ally-5 gets a face, a brain and a memory
 
-> **The AI Game Assistant is no longer “under development” — it's live in every Pygame studio.**
+> **The AI Game Assistant is no longer "under development" — it's live in every Pygame studio.**
 
-- **Ally-5 AI assistant** — a real game-generation model built into the engine, running **100% in your browser** (no API keys, no accounts, nothing leaves your machine). Describe any game — *“make a neon snake game called Voltage”*, *“build a space shooter”*, *“surprise me”* — and Ally writes a complete, playable `main.py`, then you press Run.
+<div align="center">
+  <img src="public/ally5-avatar.svg" alt="Ally-5 mascot — cute smiling AI avatar" width="96" />
+  <p><sub><b>Ally</b> — the official Ally-5 mascot. She blinks, she floats, she smiles.</sub></p>
+</div>
+
+- **🥰 Her own avatar** — a custom cute smiling mascot (big glossy eyes, blush, antenna sparkle) now represents Ally everywhere: chat header, every message bubble, the model picker, the landing page and this README. It even blinks while you type.
+- **📚 A real game-dev brain** — Ally trained on a **25-article curriculum (~4,500 words)**: collision detection, game loops & delta time, game feel/juice, screen shake, particles, difficulty curves, level design, color theory, boss design, platformer/shooter/top-down/roguelike recipes, optimization and playtesting. Ask *"how do I make a platformer feel good?"* or *"what is coyote time?"* and she teaches from it.
+- **🧠 Reads huge code** — paste thousands of lines (or say *"analyze my code"*) and Ally maps the structure: classes, methods, engine hooks, sprites, imports and whether the game loop is wired correctly — plus diagnostics on top.
+- **💭 Remembers you** — multi-turn conversation memory: your name, favorite colors, difficulty taste, last topics. Persisted in `localStorage`, so she says *"Welcome back"* after a reload. One click on the memory chip forgets everything.
+- **Context windows per model** — every Ally-5 model now advertises its context: **Nano 16k → Fast 64k → Pro 128k → Max 256k → Game 200k**. Bigger models read bigger code.
 - **5-model family** — switch between **Ally-5 Nano** (instant), **Fast** (quick builds), **Pro** (balanced · default), **Max** (deep thinking, extra particles & juice) and **Game** (tuned on game code only).
-- **It tunes your game** — “make it harder”, “add 25 coins”, “make it purple” — Ally rewrites `main.py` with the change applied.
+- **It builds & tunes games** — *"make a neon snake game called Voltage"*, *"build a space shooter"*, *"make it harder"*, *"add 25 coins"*, *"make it purple"* — Ally writes or rewrites a complete, playable `main.py`, 100% in your browser (no API keys, nothing leaves your machine).
 - **Explains & debugs** — one-minute engine tour (Game / Scene / Sprite / Vector2 / Input), plus **static diagnostics** on your code (missing `game.run()`, wrong imports, `pygame.*` usage, hook typos) before you even press Run.
 - **Built-in Terminal** — a real shell for the Pygame engine: `python main.py`, `ls`, `cat`, and **`pip install`** from the repo's own package registry (`lapia-kit`, `sfx-kit`, `particles-kit`…). Ally lives here too: `ally make me a pong`.
-- **Packages on GitHub** — [`packages/`](packages) adds the Lapia engine package registry, desktop engine modules (`sprite_kit`, `sfx_kit`, `level_kit`, `particles_kit`, `ally_engine`) and the **Ally-5 knowledge base** (model card + training corpus).
+- **Packages on GitHub** — [`packages/`](packages) adds the Lapia engine package registry, desktop engine modules (`sprite_kit`, `sfx_kit`, `level_kit`, `particles_kit`, `ally_engine`) and the **Ally-5 knowledge base** (model card + training corpus + the full 25-article game-dev knowledge pack as JSON).
 - **Real sprites in games** — new `load_image()` API: `Sprite(image=load_image("sprites/coins/coin_gold.png"))` loads actual bitmaps from the 134-sprite toolbox (with a magenta checker for missing paths). Fixed asset loading on GitHub Pages (basePath was breaking the toolbox manifest + icons).
 - **🛡 Lapia Shield** — native browser DevTools are blocked site-wide (right-click, F12, view-source shortcuts) and the site now ships its **own working DevTools** (Elements inspector with live picker, Console, Page Source, Network) instead.
 

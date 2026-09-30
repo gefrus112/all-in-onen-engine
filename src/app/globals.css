@@ -965,6 +965,79 @@ html.landing-mode body {
   flex-shrink: 0;
 }
 @keyframes ally-spin { to { transform: rotate(360deg); } }
+
+/* ---- AllyAvatar mascot (cute smiling face) ---- */
+.ally-av {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  filter: drop-shadow(0 0 10px rgba(34, 211, 238, 0.35));
+}
+.ally-av-live { animation: ally-av-float 3.6s ease-in-out infinite; }
+.ally-av-live:hover { animation-play-state: paused; transform: scale(1.08); transition: transform 0.18s ease; }
+.ally-av-eyes {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: ally-av-blink 4.4s ease-in-out infinite;
+}
+.ally-av-star {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: ally-av-star 2.1s ease-in-out infinite;
+  filter: drop-shadow(0 0 4px rgba(253, 230, 138, 0.9));
+}
+.ally-av-blush { animation: ally-av-blush 4.4s ease-in-out infinite; }
+@keyframes ally-av-blink {
+  0%, 91%, 97%, 100% { transform: scaleY(1); }
+  94% { transform: scaleY(0.08); }
+}
+@keyframes ally-av-star {
+  0%, 100% { transform: scale(1) rotate(0deg); opacity: 1; }
+  50% { transform: scale(0.72) rotate(22deg); opacity: 0.72; }
+}
+@keyframes ally-av-blush {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 0.32; }
+}
+@keyframes ally-av-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2px); }
+}
+/* glow ring behind the avatar in the chat header */
+.ally-av-ring {
+  position: relative;
+  border-radius: 50%;
+  background: conic-gradient(from 120deg, #6366f1, #22d3ee, #34d399, #f472b6, #6366f1);
+  animation: ally-spin 6s linear infinite;
+  box-shadow: 0 0 18px rgba(99, 102, 241, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.ally-av-ring::before {
+  content: "";
+  position: absolute;
+  inset: 2px;
+  border-radius: 50%;
+  background: #0c0e18;
+}
+.ally-mem-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 7px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 9px;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+.ally-mem-indicator:hover {
+  border-color: rgba(52, 211, 153, 0.5);
+  color: #a7f3d0;
+}
 .ally-badge {
   font-size: 9.5px;
   font-weight: 800;

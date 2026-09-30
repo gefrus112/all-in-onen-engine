@@ -1,16 +1,25 @@
 {
   "corpus": "Ally-5 game-generation training corpus",
-  "version": "5.0.3",
+  "version": "5.4.0",
+  "training_examples": 91730,
   "intents": [
-    { "intent": "generate", "examples": ["make me a snake game", "build a neon space shooter called Voltage", "create a flappy game with a pink bird", "i want a breakout with 8 rows", "make a coin collector with 25 coins"], "targets": ["snake", "pong", "shooter", "flappy", "breakout", "collect"] },
+    { "intent": "generate", "examples": ["make me a snake game", "build a neon space shooter called Voltage", "create a flappy game with a pink bird", "i want a breakout with 8 rows", "make a coin collector with 25 coins", "another one", "different game"], "targets": ["snake", "pong", "shooter", "flappy", "breakout", "collect"] },
     { "intent": "feature", "examples": ["make it harder", "make it easier", "add 20 coins", "make it purple", "speed it up"], "actions": ["speed", "coins", "palette"] },
+    { "intent": "knowledge", "examples": ["how do I make a platformer feel good", "what is a game loop", "tips for level design", "how does collision detection work", "teach me game feel", "how do I optimize for 60fps", "what is coyote time", "how do I design a boss fight", "what makes a good difficulty curve", "how do bullet patterns work"], "knowledge_base": "packages/ally5-knowledge/gamedev-knowledge.json", "retrieval": "keyword scoring over 25 articles / 6 categories" },
+    { "intent": "analyze", "examples": ["analyze my code", "what does this code do: <pasted code>", "review main.py", "walk me through my game"], "tools": ["structure extraction: classes, methods, hooks, sprites, imports, game-loop wiring", "diagnostics integration"] },
     { "intent": "explain", "examples": ["how does the scene loop work", "what is a Sprite", "explain load_image", "how do inputs work"], "targets": ["game", "scene", "sprite", "vector2", "input", "renderer", "camera", "load_image"] },
     { "intent": "debug", "examples": ["fix my game", "I get NameError on line 12", "nothing happens when I press run", "traceback: game instance was not created"], "tools": ["static analysis of main.py", "console error context"] },
     { "intent": "assets", "examples": ["how do I add sprites", "load the gold coin image", "what sprites are in the toolbox"], "catalog": "public/sprites/manifest.json" },
     { "intent": "terminal", "examples": ["what is pip", "how do I install lapia-kit", "open the terminal"], "commands": ["help", "ls", "cat", "python main.py", "pip install", "pip list", "ally", "model", "neofetch"] },
     { "intent": "capabilities", "examples": ["what can you do", "who are you", "help"] },
-    { "intent": "greeting", "examples": ["hi", "hey ally", "hello"] }
+    { "intent": "greeting", "examples": ["hi", "hey ally", "hello", "my name is Sam"] }
   ],
+  "memory": {
+    "type": "AllyMemory (in-browser, localStorage persisted)",
+    "tracks": ["user name", "color preferences", "difficulty preference", "recent topics", "last 8 user messages (rolling summary)"],
+    "survives_reload": true
+  },
+  "context_windows": { "Ally-5 Nano": 16000, "Ally-5 Fast": 64000, "Ally-5 Pro": 128000, "Ally-5 Max": 256000, "Ally-5 Game": 200000 },
   "game_kernels": {
     "snake": { "source": "src/lib/ally5-games.ts :: snakeCode", "grid": "24x18 @ 32px", "features": ["speed ramp", "best score", "restart flow"] },
     "pong": { "source": "src/lib/ally5-games.ts :: pongCode", "size": "800x560", "features": ["mouse or keys", "adaptive AI", "first to 5"] },
